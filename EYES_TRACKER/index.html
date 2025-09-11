@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Anime Eyes Effect (Online Assets)</title>
+  <style>
+    body {
+      margin:0;
+      background:#000;
+      color:#eee;
+      font-family:system-ui;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      padding:10px;
+    }
+    #stage {
+      position:relative;
+      width:640px; height:480px;
+      background:#111; overflow:hidden;
+      border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.8);
+    }
+    video, canvas {
+      position:absolute; left:0; top:0;
+      width:100%; height:100%;
+      transform:scaleX(-1);
+    }
+    .eyeOverlay {
+      position:absolute; pointer-events:none;
+      transform-origin:center center;
+      width:120px; height:120px;
+      display:none;
+    }
+    .menu { display:flex; gap:8px; margin-top:6px; }
+    .chip {
+      background:linear-gradient(90deg,#0ea5e9,#7c3aed);
+      padding:8px 14px; border-radius:999px;
+      font-weight:700; cursor:pointer;
+      box-shadow:0 6px 18px rgba(124,58,237,.25);
+      border:2px solid rgba(255,255,255,.06);
+      transition:transform .08s;
+    }
+    .chip:active{ transform:translateY(2px) scale(.99); }
+  </style>
+</head>
+<body>
+  <h3>Anime Eye Switcher — Sharingan / Rinnegan</h3>
+  <div id="stage">
+    <video id="cam" autoplay playsinline></video>
+    <canvas id="draw"></canvas>
+
+    <img id="leftEye" class="eyeOverlay">
+    <img id="rightEye" class="eyeOverlay">
+  </div>
+
+  <div class="menu">
+    <div class="chip" data-style="sharingan">Sharingan</div>
+    <div class="chip" data-style="rinnegan">Rinnegan</div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
+
+  <script>
+  (async function(){
+    const video = document.getElementById('cam');
+    const canvas = document.getElementById('draw');
+    const ctx = canvas.getContext('2d');
+    const leftEyeImg = document.getElementById('leftEye');
+    const rightEyeImg = document.getElementById('rightEye');
+
+    // 🎨 Online assets (PNG + audio)
+    const styles = {
+      sharingan: {
+        left: "https://www.pngmart.com/files/7/Sharingan-PNG-Clipart.png",
+        right:"https://www.pngmart.com/files/7/Sharingan-PNG-Image.png",
+        sound:"https://www.myinstants.com/media/sounds/sharingan-99233.mp3"
+      },
+      rinnegan: {
+        left: "https://www.pngmart.com/files/13/Rinnegan-PNG-File.png",
+        right:"https://www.pngmart.com/files/13/Rinnegan-PNG-Free-Download.png",
+        sound:"https://www.voicy.network/sounds/o5ayU1ABbk6y0Tr6ZVR_kQ-sharingan/download"
+      }
+    };
+
+    let currentStyle = "sharingan";
+    let audio = new Audio(styles[currentStyle].sound);
+
+    // Buttons
+    document.querySelectorAll(".chip").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const style = btn.dataset.style;
+        currentStyle = style;
+        leftEyeImg.src = styles[style].left;
+        rightEyeImg.src = styles[style].right;
+        audio.src = styles[style].sound;
+        audio.currentTime = 0;
+        audio.play().catch(()=>{});
+      });
+    });
+
+    // Camera
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video:{facingMode:"user", width:640, height:480}, audio:false
+      });
+      video.srcObject = stream;
+      await new Promise(r=> video.onloadedmetadata = r);
+    }catch(e){
+      alert("Camera allow karo!");
+      throw e;
+    }
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Face landmarks
+    const model = await faceLandmarksDetection.load(
+      faceLandmarksDetection.SupportedPackages.mediapipeFacemesh,
+      { maxFaces:1, shouldLoadIrisModel:true }
+    );
+
+    function center(pts){
+      let x=0,y=0; pts.forEach(pt=>{x+=pt[0]; y+=pt[1];});
+      return [x/pts.length, y/pts.length];
+    }
+
+    async function loop(){
+      const preds = await model.estimateFaces({input:video, flipHorizontal:true});
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.save(); ctx.scale(-1,1);
+      ctx.drawImage(video, -canvas.width,0,canvas.width,canvas.height);
+      ctx.restore();
+
+      if(preds.length>0){
+        const ann = preds[0].annotations;
+        const li = center(ann.irisLeft);
+        const ri = center(ann.irisRight);
+
+        function place(img, pt){
+          const x = pt[0]/video.videoWidth*canvas.width;
+          const y = pt[1]/video.videoHeight*canvas.height;
+          const size = 100;
+          img.style.width = size+"px";
+          img.style.height = size+"px";
+          img.style.left = (x-size/2)+"px";
+          img.style.top = (y-size/2)+"px";
+          img.style.display = "block";
+        }
+        place(leftEyeImg, li);
+        place(rightEyeImg, ri);
+      } else {
+        leftEyeImg.style.display="none";
+        rightEyeImg.style.display="none";
+      }
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+  </script>
+</body>
+</html>
