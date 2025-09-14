@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Glowing Ball in Evolving Polygons</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            background-color: #000;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.8;
+        
+        // Constants
+        const BALL_RADIUS = 12;
+        const INITIAL_SIDES = 3; // Triangle
+        const MAX_SIDES = 12; // Maximum sides to avoid too many vertices
+        const GLOW_INTENSITY = 15;
+        const BALL_SPEED = 3;
+        
+        // Ball properties
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            vx: (Math.random() - 0.5) * BALL_SPEED * 2,
+            vy: (Math.random() - 0.5) * BALL_SPEED * 2,
+            radius: BALL_RADIUS,
+            glow: true
+        };
+        
+        // Polygon properties
+        let sides = INITIAL_SIDES;
+        let polygonVertices = [];
+        let polygonRadius = Math.min(canvas.width, canvas.height) * 0.4;
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height / 2;
+        
+        // Generate polygon vertices
+        function generatePolygonVertices(sides, radius, centerX, centerY) {
+            const vertices = [];
+            for (let i = 0; i < sides; i++) {
+                const angle = (i * 2 * Math.PI) / sides;
+                vertices.push({
+                    x: centerX + radius * Math.cos(angle),
+                    y: centerY + radius * Math.sin(angle)
+                });
+            }
+            return vertices;
+        }
+        
+        // Initialize polygon
+        function initPolygon() {
+            polygonVertices = generatePolygonVertices(sides, polygonRadius, centerX, centerY);
+        }
+        
+        // Check if point is inside polygon using ray casting algorithm
+        function isPointInsidePolygon(x, y, vertices) {
+            let inside = false;
+            for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
+                const xi = vertices[i].x, yi = vertices[i].y;
+                const xj = vertices[j].x, yj = vertices[j].y;
+                
+                const intersect = ((yi > y) !== (yj > y)) && 
+                    (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+        
+        // Find the closest edge and calculate reflection
+        function handleCollision() {
+            let minDistance = Infinity;
+            let closestEdgeIndex = -1;
+            let collisionPoint = {x: 0, y: 0};
+            
+            // Check distance to each edge
+            for (let i = 0; i < polygonVertices.length; i++) {
+                const p1 = polygonVertices[i];
+                const p2 = polygonVertices[(i + 1) % polygonVertices.length];
+                
+                // Calculate distance from ball center to line segment
+                const A = ball.x - p1.x;
+                const B = ball.y - p1.y;
+                const C = p2.x - p1.x;
+                const D = p2.y - p1.y;
+                
+                const dot = A * C + B * D;
+                const lenSq = C * C + D * D;
+                let param = -1;
+                if (lenSq !== 0) param = dot / lenSq;
+                
+                let xx, yy;
+                
+                if (param < 0) {
+                    xx = p1.x;
+                    yy = p1.y;
+                } else if (param > 1) {
+                    xx = p2.x;
+                    yy = p2.y;
+                } else {
+                    xx = p1.x + param * C;
+                    yy = p1.y + param * D;
+                }
+                
+                const dx = ball.x - xx;
+                const dy = ball.y - yy;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < minDistance && distance < ball.radius) {
+                    minDistance = distance;
+                    closestEdgeIndex = i;
+                    collisionPoint = {x: xx, y: yy};
+                }
+            }
+            
+            if (closestEdgeIndex !== -1) {
+                // Move ball out of collision
+                const p1 = polygonVertices[closestEdgeIndex];
+                const p2 = polygonVertices[(closestEdgeIndex + 1) % polygonVertices.length];
+                
+                // Normal vector to edge (perpendicular)
+                const edgeX = p2.x - p1.x;
+                const edgeY = p2.y - p1.y;
+                const normalX = -edgeY;
+                const normalY = edgeX;
+                
+                // Normalize normal
+                const length = Math.sqrt(normalX * normalX + normalY * normalY);
+                const nx = normalX / length;
+                const ny = normalY / length;
+                
+                // Make sure normal points inward
+                const centerToMidpointX = centerX - (p1.x + p2.x) / 2;
+                const centerToMidpointY = centerY - (p1.y + p2.y) / 2;
+                const dotProduct = nx * centerToMidpointX + ny * centerToMidpointY;
+                
+                if (dotProduct < 0) {
+                    nx *= -1;
+                    ny *= -1;
+                }
+                
+                // Reflect velocity
+                const dotProductVel = ball.vx * nx + ball.vy * ny;
+                ball.vx -= 2 * dotProductVel * nx;
+                ball.vy -= 2 * dotProductVel * ny;
+                
+                // Move ball away from edge to prevent sticking
+                const penetration = ball.radius - minDistance;
+                ball.x += nx * penetration * 1.1;
+                ball.y += ny * penetration * 1.1;
+                
+                // Upgrade polygon
+                if (sides < MAX_SIDES) {
+                    sides++;
+                    initPolygon();
+                    
+                    // Ensure ball stays inside new polygon
+                    while (!isPointInsidePolygon(ball.x, ball.y, polygonVertices)) {
+                        ball.x += (Math.random() - 0.5) * 5;
+                        ball.y += (Math.random() - 0.5) * 5;
+                    }
+                }
+                
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Update ball position
+        function updateBall() {
+            // Move ball
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            
+            // Check for collisions with edges
+            handleCollision();
+            
+            // Keep ball within canvas bounds (fallback)
+            if (ball.x < ball.radius) {
+                ball.x = ball.radius;
+                ball.vx *= -1;
+            }
+            if (ball.x > canvas.width - ball.radius) {
+                ball.x = canvas.width - ball.radius;
+                ball.vx *= -1;
+            }
+            if (ball.y < ball.radius) {
+                ball.y = ball.radius;
+                ball.vy *= -1;
+            }
+            if (ball.y > canvas.height - ball.radius) {
+                ball.y = canvas.height - ball.radius;
+                ball.vy *= -1;
+            }
+        }
+        
+        // Draw glowing ball
+        function drawGlowingBall() {
+            // Create glow effect
+            const gradient = ctx.createRadialGradient(
+                ball.x, ball.y, 0,
+                ball.x, ball.y, ball.radius * GLOW_INTENSITY
+            );
+            gradient.addColorStop(0, '#fff');
+            gradient.addColorStop(0.4, '#ff00ff');
+            gradient.addColorStop(0.8, '#00ffff');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius * GLOW_INTENSITY, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Draw ball
+            const ballGradient = ctx.createRadialGradient(
+                ball.x - ball.radius/3, ball.y - ball.radius/3, 0,
+                ball.x, ball.y, ball.radius
+            );
+            ballGradient.addColorStop(0, '#ffffff');
+            ballGradient.addColorStop(0.5, '#ff00ff');
+            ballGradient.addColorStop(1, '#00ffff');
+            
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ballGradient;
+            ctx.fill();
+        }
+        
+        // Draw polygon with neon outline
+        function drawNeonPolygon() {
+            ctx.lineWidth = 3;
+            
+            // Draw glow effect
+            ctx.strokeStyle = '#ffffff';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#ffffff';
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(polygonVertices[0].x, polygonVertices[0].y);
+            for (let i = 1; i < polygonVertices.length; i++) {
+                ctx.lineTo(polygonVertices[i].x, polygonVertices[i].y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            
+            // Draw main polygon
+            ctx.strokeStyle = '#ff00ff';
+            ctx.shadowBlur = 0;
+            ctx.stroke();
+            
+            // Add secondary glow
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 1;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00ffff';
+            ctx.stroke();
+            
+            // Reset shadow
+            ctx.shadowBlur = 0;
+        }
+        
+        // Main animation loop
+        function animate() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw
+            updateBall();
+            drawNeonPolygon();
+            drawGlowingBall();
+            
+            // Request next frame
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        initPolygon();
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth * 0.8;
+            canvas.height = window.innerHeight * 0.8;
+            centerX = canvas.width / 2;
+            centerY = canvas.height / 2;
+            polygonRadius = Math.min(canvas.width, canvas.height) * 0.4;
+            initPolygon();
+        });
+    </script>
+</body>
+</html>
