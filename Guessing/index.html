@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3-Digit Guess Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🔢 3-Digit Guess Game</h1>
+
+    <div class="rules">
+      <h2>📜 Rules</h2>
+      <p><b>A</b> = Correct digit &amp; correct position</p>
+      <p><b>B</b> = Digit present but wrong position</p>
+      <p><b>W</b> = Digit not in number</p>
+      <p>No repeating digits. <b>0 allowed</b> (leading zero OK).</p>
+    </div>
+
+    <div class="mode-select">
+      <button id="playerBtn">🎮 Player Guess</button>
+      <button id="computerBtn">🤖 Computer Guess</button>
+      <button id="resetBtn" class="danger">Reset</button>
+    </div>
+
+    <div id="gameArea"></div>
+  </div>
+
+  <script>
+  (function(){
+    const gameArea = document.getElementById('gameArea');
+    const playerBtn = document.getElementById('playerBtn');
+    const computerBtn = document.getElementById('computerBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let secret = '';
+    let attempts = 0;
+    let possibleSecrets = [];
+    let currentGuess = '';
+    let history = [];
+
+    playerBtn.addEventListener('click', startPlayerMode);
+    computerBtn.addEventListener('click', startComputerMode);
+    resetBtn.addEventListener('click', resetAll);
+
+    // generate all 3-digit combos with unique digits (leading zero allowed)
+    function generateAll3DigitUnique(){
+      const arr = [];
+      for(let d1=0; d1<=9; d1++){
+        for(let d2=0; d2<=9; d2++){
+          for(let d3=0; d3<=9; d3++){
+            if(d1!==d2 && d1!==d3 && d2!==d3){
+              arr.push(''+d1+d2+d3);
+            }
+          }
+        }
+      }
+      return arr;
+    }
+
+    function pickRandom(arr){
+      return arr[Math.floor(Math.random()*arr.length)];
+    }
+
+    // ---------------- Player Guess Mode ----------------
+    function startPlayerMode(){
+      possibleSecrets = generateAll3DigitUnique();
+      secret = pickRandom(possibleSecrets);
+      attempts = 0;
+      history = [];
+      renderPlayerUI();
+      console.log('Secret (debug):', secret); // remove this if you don't want to show secret in console
+    }
+
+    function renderPlayerUI(){
+      gameArea.innerHTML = `
+        <h3>Player Guess Mode — Computer has a secret, you guess</h3>
+        <div class="player-box">
+          <input id="playerGuess" maxlength="3" placeholder="e.g. 809">
+          <button id="playerGuessBtn">Guess</button>
+          <p id="playerFeedback"></p>
+          <ul id="playerHistory" class="history-list"></ul>
+        </div>
+      `;
+      document.getElementById('playerGuessBtn').addEventListener('click', playerMakeGuess);
+    }
+
+    function playerMakeGuess(){
+      const val = document.getElementById('playerGuess').value.trim();
+      if(!/^\d{3}$/.test(val)){
+        alert('Enter exactly 3 digits (0-9).');
+        return;
+      }
+      if(new Set(val.split('')).size !== 3){
+        alert('Digits must be unique (no repeats).');
+        return;
+      }
+      attempts++;
+      const fb = evaluateFeedback(val, secret);
+      history.unshift({guess: val, fb});
+      document.getElementById('playerHistory').innerHTML = history.map(h=>`<li><b>${h.guess}</b> → ${h.fb.join(' ')}</li>`).join('');
+      document.getElementById('playerFeedback').textContent = '';
+      if(val === secret){
+        document.getElementById('playerFeedback').textContent = `🎉 Correct! Secret was ${secret}. Attempts: ${attempts}`;
+      }
+      document.getElementById('playerGuess').value = '';
+    }
+
+    // ---------------- Computer Guess Mode ----------------
+    function startComputerMode(){
+      possibleSecrets = generateAll3DigitUnique();
+      history = [];
+      attempts = 0;
+      // initial guess
+      currentGuess = '123';
+      if(!possibleSecrets.includes(currentGuess)) currentGuess = pickRandom(possibleSecrets);
+      renderComputerUI();
+      showComputerGuess(currentGuess);
+    }
+
+    function renderComputerUI(){
+      gameArea.innerHTML = `
+        <h3>Computer Guess Mode — Think of a secret number (unique digits, 0 allowed). Don't tell it.</h3>
+        <div class="computer-box">
+          <div id="compGuessDisplay" class="comp-guess"></div>
+          <div class="feedback-row">
+            <input id="compFeedback" placeholder="e.g. A B W or ABW">
+            <button id="compSubmit">Submit</button>
+            <button id="compSkip">Skip</button>
+          </div>
+          <p id="compInfo"></p>
+          <ul id="compHistory" class="history-list"></ul>
+        </div>
+      `;
+      document.getElementById('compSubmit').addEventListener('click', ()=> processComputerFeedback(currentGuess));
+      document.getElementById('compSkip').addEventListener('click', ()=> {
+        // pick another guess from remaining possibilities
+        currentGuess = pickRandom(possibleSecrets);
+        showComputerGuess(currentGuess);
+      });
+    }
+
+    function showComputerGuess(guess){
+      currentGuess = guess;
+      attempts++;
+      document.getElementById('compGuessDisplay').innerHTML = `<h2>Computer guesses: <span class="big">${guess}</span></h2>`;
+      document.getElementById('compInfo').textContent = `Attempt #${attempts}. Enter feedback for this guess (A/B/W for each digit).`;
+      setTimeout(()=> document.getElementById('compFeedback').focus(), 50);
+    }
+
+    function parseFeedback(input){
+      if(!input) return null;
+      input = input.toUpperCase();
+      // try compact form like ABW
+      const compact = input.replace(/[^ABW]/g,'');
+      if(compact.length === 3) return compact.split('').map(ch=> ch==='A'?'A': ch==='B'?'B':'W');
+      // try split by spaces/commas
+      const parts = input.replace(/,/g,' ').trim().split(/\s+/).filter(Boolean);
+      if(parts.length === 3 && parts.every(p=>/^[ABW]$/i.test(p))) return parts.map(p=>p.toUpperCase());
+      return null;
+    }
+
+    function processComputerFeedback(guess){
+      const raw = document.getElementById('compFeedback').value.trim();
+      const fb = parseFeedback(raw);
+      if(!fb){
+        alert('Enter feedback as three tokens using A, B or W. Examples: "A B W", "ABW", "A,W,B"');
+        return;
+      }
+      // add to history
+      history.unshift({guess, fb});
+      document.getElementById('compHistory').innerHTML = history.map(h=>`<li><b>${h.guess}</b> → ${h.fb.join(' ')}</li>`).join('');
+      document.getElementById('compFeedback').value = '';
+      // check solved
+      if(fb.join('') === 'AAA'){
+        document.getElementById('compInfo').textContent = `✅ I solved it in ${attempts} attempts! Secret = ${guess}`;
+        return;
+      }
+      // filter possibleSecrets: keep secrets S where feedback(guess, S) equals provided fb
+      possibleSecrets = possibleSecrets.filter(s => evaluateFeedback(guess, s).join(' ') === fb.join(' '));
+      if(possibleSecrets.length === 0){
+        document.getElementById('compInfo').textContent = '⚠️ No possible numbers match this feedback — feedback inconsistent? Press Reset.';
+        return;
+      }
+      // choose next guess (random among possibilities)
+      const next = pickRandom(possibleSecrets);
+      showComputerGuess(next);
+    }
+
+    function evaluateFeedback(guess, secretCandidate){
+      // returns array like ['A','W','B'] where we treat guess as guessed number and secretCandidate as the "true" secret
+      const res = [];
+      for(let i=0;i<3;i++){
+        if(guess[i] === secretCandidate[i]){
+          res.push('A');
+        } else if(secretCandidate.includes(guess[i])){
+          res.push('B');
+        } else {
+          res.push('W');
+        }
+      }
+      return res;
+    }
+
+    function resetAll(){
+      secret = '';
+      attempts = 0;
+      possibleSecrets = [];
+      currentGuess = '';
+      history = [];
+      gameArea.innerHTML = '<p>Select a mode to start.</p>';
+    }
+
+    // initial
+    resetAll();
+
+  })();
+  </script>
+</body>
+</html>
