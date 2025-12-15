@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Support My Education</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+    }
+
+    .card {
+      max-width: 420px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #1a73e8;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #333;
+      font-size: 15px;
+    }
+
+    .qr-box {
+      margin: 20px 0;
+    }
+
+    .qr-box img {
+      width: 220px;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    .upi {
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #666;
+      margin-top: 15px;
+    }
+
+    .footer {
+      font-size: 12px;
+      color: #777;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>Support My Education</h1>
+
+    <p>
+      I am a hardworking student facing financial difficulties.
+      Your support will help me continue my studies.
+    </p>
+
+    <p><b>Goal:</b> ₹1,00,000</p>
+
+    <div class="qr-box">
+      <!-- QR IMAGE YAHAN DAALO -->
+      <img src="qr.png" alt="UPI QR Code">
+      <div class="upi">UPI ID: yourupi@bank</div>
+      <div class="upi">Name: Your Name</div>
+    </div>
+
+    <div class="note">
+      ⚠️ Temporary payment method<br>
+      Secure payment gateway (Razorpay) is under verification.
+    </div>
+
+    <div class="footer">
+      Even ₹100 can make a difference.<br>
+      If you can’t donate, please share.
+    </div>
+  </div>
+
+</body>
+</html>
