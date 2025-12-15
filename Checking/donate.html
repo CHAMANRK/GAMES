@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Support My Education</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:#f2f2f2;
+    }
+    .card{
+      max-width:420px;
+      margin:30px auto;
+      background:#fff;
+      padding:20px;
+      border-radius:12px;
+      text-align:center;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+    h1{ color:#1a73e8; }
+    p{ color:#333; font-size:15px; }
+
+    .btn{
+      background:#0a8f08;
+      color:white;
+      border:none;
+      padding:15px;
+      width:100%;
+      font-size:18px;
+      border-radius:8px;
+      cursor:pointer;
+      margin-top:15px;
+    }
+
+    .qr-section{
+      display:none;
+      margin-top:20px;
+    }
+
+    .qr-section img{
+      width:220px;
+      border:1px solid #ddd;
+      border-radius:10px;
+    }
+
+    .upi{
+      font-weight:bold;
+      margin-top:10px;
+    }
+
+    .note{
+      font-size:13px;
+      color:#666;
+      margin-top:15px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <!-- FIRST PAGE CONTENT -->
+  <div id="intro">
+    <h1>Support My Education</h1>
+    <p>
+      I am a hardworking student facing financial difficulties.
+      Your contribution will help me continue my studies and
+      build a better future.
+    </p>
+
+    <p><b>Goal:</b> ₹1,00,000</p>
+
+    <button class="btn" onclick="showQR()">🤍 Contribute Now</button>
+  </div>
+
+  <!-- QR SECTION (HIDDEN INITIALLY) -->
+  <div id="qr" class="qr-section">
+    <h2>Donate via UPI</h2>
+
+    <img src="qr.png" alt="UPI QR Code">
+
+    <div class="upi">UPI ID: yourupi@bank</div>
+    <div class="upi">Name: Your Name</div>
+
+    <div class="note">
+      Temporary payment method.<br>
+      Secure payment gateway (Razorpay) is under review.
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showQR(){
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("qr").style.display = "block";
+}
+</script>
+
+</body>
+</html>
