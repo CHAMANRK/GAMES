@@ -146,6 +146,9 @@
   }
 
   /* ---------------- ANSWER ---------------- */
+  // prevent double submit
+const btn = document.querySelector('#answerForm button[type="submit"]');
+if (btn) btn.disabled = true;
   function checkAnswer() {
     clearTimer();
 
@@ -167,7 +170,20 @@
       }
     }
 
-    res.classList.remove('hidden');
+    res.classList.remove('hidden'):
+    // re-enable submit button
+const btn = document.querySelector('#answerForm button[type="submit"]');
+if (btn) btn.disabled = false;
+    // SHOW "NEXT QUESTION" BUTTON
+    // HIDE NEXT BUTTON ON NEW QUESTION
+const nextBtn = document.querySelector('.next-button');
+if (nextBtn) nextBtn.classList.add('hidden');
+
+// CLEAR OLD RESULT
+const res = document.getElementById('quizResult');
+if (res) res.classList.add('hidden');
+const nextBtn = document.querySelector('.next-button');
+if (nextBtn) nextBtn.classList.remove('hidden');
     updateScore();
     return false;
   }
