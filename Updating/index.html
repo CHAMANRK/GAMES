@@ -64,32 +64,52 @@
 <main>
   <!-- Welcome/Home Screen -->
   <section id="welcomeScreen" class="screen active" aria-label="Home screen">
-    <div class="card home-card">
-      <h2 class="main-heading">🌙 Quran Ayat Quiz Game</h2>
-      <p class="subtitle">Apni Quran maloomat ko aazmaayiye! Para, Surah ya Page se quiz kheliye.</p>
-      <!-- MODE SELECTION -->
-      <form id="modeForm" class="mode-group" style="margin-bottom:18px;">
-        <label><input type="radio" name="quizMode" value="practice" checked> 🎯 Practice Mode (unlimited)</label>
-        <label><input type="radio" name="quizMode" value="timed"> ⏱️ Timed Challenge (10 Qs, 30 sec each)</label>
-        <label><input type="radio" name="quizMode" value="survival"> 💥 Survival Mode (wrong = game over)</label>
-      </form>
-      <button class="btn btn-primary" onclick="showSection('paraSelectScreen')" aria-label="Game shuru karein">▶️ Shuru Karein</button>
-      <button class="btn btn-secondary" onclick="toggleSearch()" aria-label="Search dikhayein ya chhupayein" id="toggleSearchBtn">🔎 Search</button>
+  <div class="card home-card">
+    <h2 class="main-heading">🌙 Quran Ayat Quiz Game</h2>
+    <p class="subtitle">
+      Apni Quran maloomat ko aazmaayiye! Para, Surah ya Page se quiz kheliye.
+    </p>
+
+    <!-- MODE SELECTION -->
+    <form id="modeForm" class="mode-group" style="margin-bottom:18px;">
+      <label>
+        <input type="radio" name="quizMode" value="practice" checked>
+        🎯 Practice Mode (unlimited)
+      </label>
+      <label>
+        <input type="radio" name="quizMode" value="timed">
+        ⏱️ Timed Challenge (10 Qs, 30 sec each)
+      </label>
+      <label>
+        <input type="radio" name="quizMode" value="survival">
+        💥 Survival Mode (wrong = game over)
+      </label>
+    </form>
+
+    <!-- ✅ LEVEL SELECTION (CENTERED, FIXED) -->
+    <div class="mode-group" style="margin-bottom:18px;">
+      <label>
+        <input type="radio" name="difficulty" checked onchange="Level.setLevel('easy')">
+        🟢 Easy
+      </label>
+      <label>
+        <input type="radio" name="difficulty" onchange="Level.setLevel('medium')">
+        🟡 Medium
+      </label>
+      <label>
+        <input type="radio" name="difficulty" onchange="Level.setLevel('hard')">
+        🔴 Hard
+      </label>
     </div>
-<div class="mode-group" style="margin-top:10px;">
-  <label>
-    <input type="radio" name="difficulty" checked onchange="Level.setLevel('easy')">
-    🟢 Easy
-  </label>
-  <label>
-    <input type="radio" name="difficulty" onchange="Level.setLevel('medium')">
-    🟡 Medium
-  </label>
-  <label>
-    <input type="radio" name="difficulty" onchange="Level.setLevel('hard')">
-    🔴 Hard
-  </label>
-</div>
+
+    <button class="btn btn-primary" onclick="showSection('paraSelectScreen')">
+      ▶️ Shuru Karein
+    </button>
+
+    <button class="btn btn-secondary" onclick="toggleSearch()" id="toggleSearchBtn">
+      🔎 Search
+    </button>
+  </div>
     <!-- SEARCH SECTION: hidden by default, toggled by button -->
     <div class="search-section card" id="searchContainer" style="display:none;">
       <form aria-label="Quran Search" onsubmit="searchAyats(); return false;">
