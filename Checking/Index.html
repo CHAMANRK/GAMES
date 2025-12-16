@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Life Saver Charity Donation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* BASIC RESET */
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+}
+
+/* CARD */
+.card{
+  max-width:460px;
+  margin:20px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.12);
+}
+
+/* HEADINGS */
+h1{
+  text-align:center;
+  color:#c62828;
+  margin-bottom:10px;
+}
+h2{
+  text-align:center;
+  color:#333;
+}
+
+/* STORY */
+.story{
+  font-size:15px;
+  color:#333;
+  line-height:1.5;
+}
+
+/* BUTTON */
+.btn{
+  background:#0a8f08;
+  color:#fff;
+  border:none;
+  padding:15px;
+  width:100%;
+  font-size:18px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:15px;
+}
+
+/* COUNTDOWN */
+.count-down-main{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:20px 0;
+}
+
+.timer{
+  text-align:center;
+}
+
+.timer > div{
+  background:#eef2ff;
+  padding:10px 12px;
+  border-radius:8px;
+}
+
+.countdown-element{
+  font-size:28px;
+  font-weight:bold;
+  color:#4f46e5;
+  letter-spacing:4px;
+}
+
+.timer p{
+  margin-top:6px;
+  font-size:13px;
+  color:#111;
+}
+
+/* QR SECTION */
+.qr-section{
+  display:none;
+  text-align:center;
+}
+
+.qr-section img{
+  width:220px;
+  border:1px solid #ddd;
+  border-radius:10px;
+}
+
+.upi{
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.note{
+  font-size:13px;
+  color:#666;
+  margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<!-- LANDING PAGE -->
+<div id="intro">
+
+  <h1>Life Saver Charity Donation</h1>
+
+  <p style="text-align:center;font-weight:bold;">
+    Many lives are going to end in
+  </p>
+
+  <!-- COUNTDOWN TIMER -->
+  <div class="count-down-main">
+
+    <div class="timer">
+      <div>
+        <h3 class="countdown-element days">00</h3>
+      </div>
+      <p>days</p>
+    </div>
+
+    <div class="timer">
+      <div>
+        <h3 class="countdown-element hours">00</h3>
+      </div>
+      <p>hours</p>
+    </div>
+
+    <div class="timer">
+      <div>
+        <h3 class="countdown-element minutes">00</h3>
+      </div>
+      <p>minutes</p>
+    </div>
+
+    <div class="timer">
+      <div>
+        <h3 class="countdown-element seconds">00</h3>
+      </div>
+      <p>seconds</p>
+    </div>
+
+  </div>
+
+  <!-- STORY -->
+  <div class="story">
+    I am suffering from a serious and life-threatening disease
+    called <b>Acute Leukemia (Blood Cancer)</b>.
+    The medical expenses are extremely high and beyond my reach.
+    <br><br>
+
+    I tried raising funds through platforms like Ketto and others,
+    but unfortunately it was not successful.
+    I do not have parents or a guardian to support me financially.
+    <br><br>
+
+    My elder brother <b>Rehan</b> suggested that I create my own
+    donation page to reach kind-hearted people directly.
+    With his help, I created this page as my last hope.
+    <br><br>
+
+    Even a small contribution can help save my life.
+  </div>
+
+  <button class="btn" onclick="showQR()">🤍 Contribute Now</button>
+
+</div>
+
+<!-- QR PAGE -->
+<div id="qr" class="qr-section">
+
+  <h2>Donate via UPI</h2>
+
+  <!-- QR IMAGE -->
+  <img src="./qr.png" alt="UPI QR Code"
+       onerror="this.style.display='none'">
+
+  <div class="upi">UPI ID: yourupi@bank</div>
+  <div class="upi">Name: Your Name</div>
+
+  <div class="note">
+    Temporary payment method.<br>
+    Secure payment gateway (Razorpay) is under verification.
+  </div>
+
+</div>
+
+</div>
+
+<!-- JAVASCRIPT -->
+<script>
+/* SHOW QR */
+function showQR(){
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("qr").style.display = "block";
+}
+
+/* COUNTDOWN TIMER */
+const targetDate = new Date("2025-12-26T00:00:00").getTime();
+
+const daysEl = document.querySelector(".countdown-element.days");
+const hoursEl = document.querySelector(".countdown-element.hours");
+const minutesEl = document.querySelector(".countdown-element.minutes");
+const secondsEl = document.querySelector(".countdown-element.seconds");
+
+function updateCountdown(){
+  const now = new Date().getTime();
+  const diff = targetDate - now;
+
+  if(diff <= 0){
+    daysEl.textContent = "00";
+    hoursEl.textContent = "00";
+    minutesEl.textContent = "00";
+    secondsEl.textContent = "00";
+    return;
+  }
+
+  const d = Math.floor(diff / (1000*60*60*24));
+  const h = Math.floor((diff / (1000*60*60)) % 24);
+  const m = Math.floor((diff / (1000*60)) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  daysEl.textContent = String(d).padStart(2,"0");
+  hoursEl.textContent = String(h).padStart(2,"0");
+  minutesEl.textContent = String(m).padStart(2,"0");
+  secondsEl.textContent = String(s).padStart(2,"0");
+}
+
+updateCountdown();
+setInterval(updateCountdown,1000);
+</script>
+
+</body>
+</html>
