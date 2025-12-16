@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Life Saver Charity Donation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+}
+.card{
+  max-width:440px;
+  margin:25px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  text-align:center;
+  box-shadow:0 4px 14px rgba(0,0,0,0.12);
+}
+h1{
+  color:#c62828;
+  margin-bottom:10px;
+}
+.story{
+  font-size:15px;
+  color:#333;
+  text-align:left;
+}
+.timer-box{
+  background:#000;
+  color:#ff5252;
+  padding:15px;
+  border-radius:10px;
+  margin:20px 0;
+}
+.timer-title{
+  color:#fff;
+  font-size:14px;
+  margin-bottom:5px;
+}
+#countdown{
+  font-size:26px;
+  font-weight:bold;
+  letter-spacing:1px;
+}
+.btn{
+  background:#0a8f08;
+  color:white;
+  border:none;
+  padding:15px;
+  width:100%;
+  font-size:18px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:15px;
+}
+.qr-section{
+  display:none;
+  margin-top:20px;
+}
+.qr-section img{
+  width:220px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+.upi{
+  font-weight:bold;
+  margin-top:10px;
+}
+.note{
+  font-size:13px;
+  color:#666;
+  margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <!-- LANDING CONTENT -->
+  <div id="intro">
+    <h1>Life Saver Charity Donation</h1>
+
+    <div class="timer-box">
+      <div class="timer-title">
+        Many lives are going to end in
+      </div>
+      <div id="countdown">Loading...</div>
+    </div>
+
+    <div class="story">
+      I am currently suffering from a serious and life-threatening
+      disease called <b>Acute Leukemia (Blood Cancer)</b>.
+      The treatment cost is extremely high and beyond my capacity.
+      <br><br>
+
+      I tried to raise funds through platforms like Ketto and other
+      fundraisers, but unfortunately, it did not succeed.
+      I do not have parents or a legal guardian to support me.
+      <br><br>
+
+      My elder brother <b>Rehan</b> stood by me during this difficult time.
+      He suggested creating this donation page so I could directly
+      reach kind-hearted people.
+      With his help, I created this page as my last hope.
+      <br><br>
+
+      Every contribution, even a small one, can help save my life.
+    </div>
+
+    <button class="btn" onclick="showQR()">🤍 Contribute Now</button>
+  </div>
+
+  <!-- QR DONATION SECTION -->
+  <div id="qr" class="qr-section">
+    <h2>Donate via UPI</h2>
+
+    <img src="qr.png" alt="UPI QR Code">
+
+    <div class="upi">UPI ID: yourupi@bank</div>
+    <div class="upi">Name: Your Name</div>
+
+    <div class="note">
+      Temporary payment method.<br>
+      Secure payment gateway (Razorpay) is under verification.
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* SHOW QR */
+function showQR(){
+  document.getElementById("intro").style.display = "none";
+  document.getElementById("qr").style.display = "block";
+}
+
+/* COUNTDOWN TIMER */
+const targetDate = new Date("December 26, 2025 00:00:00").getTime();
+
+setInterval(() => {
+  const now = new Date().getTime();
+  const diff = targetDate - now;
+
+  if (diff <= 0) {
+    document.getElementById("countdown").innerHTML = "TIME EXPIRED";
+    return;
+  }
+
+  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const m = Math.floor((diff / (1000 * 60)) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  document.getElementById("countdown").innerHTML =
+    `d${String(d).padStart(2,'0')}:h${String(h).padStart(2,'0')}:m${String(m).padStart(2,'0')}:s${String(s).padStart(2,'0')}`;
+}, 1000);
+</script>
+
+</body>
+</html>
