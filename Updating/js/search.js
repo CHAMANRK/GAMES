@@ -1,6 +1,5 @@
-// search.js - Full Fixed Code
 (function (w, d) {
-  // 1. Arabic diacritics (harakat) hatane wala function
+  // 1. Arabic diacritics hatane wala function
   function removeDiacritics(text) {
     if (!text) return '';
     // Ye regex saari zabar, zair, pesh aur tashkeel ko hata deta hai
@@ -9,7 +8,7 @@
 
   function searchAyats() {
     const inputRaw = (d.getElementById('searchInput') && d.getElementById('searchInput').value) || '';
-    // User ke input se tashkeel hatana aur lowercase karna
+    // Input se tashkeel hatana aur normalize karna
     const input = removeDiacritics(inputRaw.toLowerCase().trim());
     const resultsDiv = d.getElementById('searchResults');
 
@@ -18,15 +17,15 @@
       return;
     }
 
-    // Quran Data fetch karna
-    const qdata = (w.QuranData && w.QuranData.getAll()) || (w.quranData) || [];
+    // Quran Data fetch karna (script.js ya global variable se)
+    const qdata = (w.quranData) || (w.QuranData && w.QuranData.getAll()) || [];
     
-    // Filter logic: Jo bina tashkeel ke match kare
-    const results = qdata.filter(a =>
-      removeDiacritics((a.text || '').toLowerCase()).includes(input) ||
-      removeDiacritics((a.surah_name || '').toLowerCase()).includes(input) ||
-      String(a.page) === input
-    );
+    // 2. Filter Logic: Jo bina tashkeel ke poori phrase match kare
+    const results = qdata.filter(a => {
+      const plainText = removeDiacritics((a.text || '').toLowerCase());
+      const plainSurah = removeDiacritics((a.surah_name || '').toLowerCase());
+      return plainText.includes(input) || plainSurah.includes(input) || String(a.page) === input;
+    });
 
     if (!resultsDiv) return;
 
@@ -35,32 +34,23 @@
       return;
     }
 
-    // 2. Fixed Highlighting Logic
-    const html = results.map(r => {
-      // Puraane highlightExactWord function ki jagah ye naya logic:
-      // Hum ek regex banayenge jo text ke beech mein tashkeel ko ignore karke match kare
-      // Filhaal simple highlight ke liye hum text replace use kar rahe hain:
-      
-      const regex = new RegExp(`(${input.split(' ').join('|')})`, 'gi');
-      
-      // Agar aapko exact phrase highlight karni hai bina diacritics ke:
-      const highlightedText = r.text; // Text ko as-is dikhayenge
-      const highlightedSurah = r.surah_name;
-
+    // 3. Display Results (Bina highlight error ke)
+    resultsDiv.innerHTML = results.map(r => {
       return `
-        <div class="search-result" onclick="window.open('https://quran.com/page/${r.page}','_blank');">
-          <div style="direction: rtl; font-size: 1.2em; margin-bottom: 5px;">${r.text}</div>
-          <hr>
-          <b>Surah:</b> ${r.surah_name} | <b>Page:</b> ${r.page} | <b>Para:</b> ${((r.page - 1) / 20 | 0) + 1}
-          <span style="color:#aad;float:right;font-size:0.9em;">🔗 Open page</span>
+        <div class="search-result" style="border-bottom:1px solid #eee; padding:10px; cursor:pointer;" 
+             onclick="window.open('https://quran.com/page/${r.page}','_blank');">
+          <div style="direction: rtl; font-size: 1.3em; font-family: 'Amiri', serif; margin-bottom: 8px;">
+            ${r.text}
+          </div>
+          <div style="font-size: 0.9em; color: #555;">
+            <b>Surah:</b> ${r.surah_name} | <b>Page:</b> ${r.page} | <b>Para:</b> ${((r.page - 1) / 20 | 0) + 1}
+            <span style="color:#007bff; float:right;">🔗 Open page</span>
+          </div>
         </div>
       `;
     }).join("");
-
-    resultsDiv.innerHTML = html;
   }
 
-  // Functions ko global window object mein dalna
   w.removeDiacritics = removeDiacritics;
   w.searchAyats = searchAyats;
 
@@ -76,5 +66,4 @@
       });
     }
   });
-
 })(window, document);
