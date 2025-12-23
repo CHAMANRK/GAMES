@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Urban Brew Cafe</title>
+
+  <!-- BASIC SEO -->
+  <meta name="description" content="Urban Brew Cafe – Fresh coffee, snacks and fast food. Order on WhatsApp.">
+  <meta name="keywords" content="Cafe, Restaurant, Coffee, Fast Food">
+
+  <style>
+    :root{
+      --primary:#6f4e37;
+      --secondary:#f5f0eb;
+      --dark:#2b2b2b;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+    body{background:#fff;color:#333}
+
+    header{
+      position:sticky;top:0;z-index:10;
+      background:var(--secondary);
+      display:flex;justify-content:space-between;
+      padding:15px 20px;
+    }
+    header h1{color:var(--primary)}
+    nav a{
+      margin-left:15px;
+      text-decoration:none;
+      color:#333;
+      font-weight:bold;
+    }
+
+    .hero{
+      background:url('https://images.unsplash.com/photo-1509042239860-f550ce710b93') center/cover;
+      color:white;
+      padding:80px 20px;
+      text-align:center;
+    }
+    .hero h2{font-size:36px}
+    .hero p{margin:15px 0;font-size:18px}
+    .btn{
+      background:var(--primary);
+      color:white;
+      padding:12px 20px;
+      text-decoration:none;
+      border-radius:5px;
+      margin:5px;
+      display:inline-block;
+    }
+
+    section{padding:50px 20px;max-width:1000px;margin:auto}
+    h3{text-align:center;margin-bottom:20px;color:var(--primary)}
+
+    .menu-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:15px;
+    }
+    .menu-item{
+      background:var(--secondary);
+      padding:15px;
+      border-radius:6px;
+    }
+
+    .gallery{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:10px;
+    }
+    .gallery img{width:100%;border-radius:8px}
+
+    iframe{width:100%;height:300px;border:0;border-radius:8px}
+
+    footer{
+      background:var(--dark);
+      color:white;
+      text-align:center;
+      padding:20px;
+    }
+
+    .whatsapp{
+      position:fixed;
+      bottom:20px;right:20px;
+      background:#25D366;
+      color:white;
+      padding:14px;
+      border-radius:50%;
+      text-decoration:none;
+      font-size:20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Urban Brew Cafe</h1>
+  <nav>
+    <a href="#about">About</a>
+    <a href="#menu">Menu</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h2>Fresh Coffee & Tasty Snacks</h2>
+  <p>Best cafe experience in your city</p>
+  <a href="tel:9999999999" class="btn">Call Now</a>
+  <a href="#map" class="btn">Get Directions</a>
+</div>
+
+<section id="about">
+  <h3>About Us</h3>
+  <p style="text-align:center">
+    Urban Brew Cafe serves fresh coffee, snacks and fast food in a cozy environment.
+  </p>
+</section>
+
+<section id="menu">
+  <h3>Our Menu</h3>
+  <div class="menu-grid">
+    <div class="menu-item">Cold Coffee – ₹120</div>
+    <div class="menu-item">Cappuccino – ₹150</div>
+    <div class="menu-item">Veg Sandwich – ₹100</div>
+    <div class="menu-item">French Fries – ₹90</div>
+    <div class="menu-item">Pizza – ₹199</div>
+    <div class="menu-item">Brownie – ₹80</div>
+  </div>
+</section>
+
+<section id="gallery">
+  <h3>Gallery</h3>
+  <div class="gallery">
+    <img src="https://images.unsplash.com/photo-1521305916504-4a1121188589">
+    <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2">
+    <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085">
+  </div>
+</section>
+
+<section id="map">
+  <h3>Location</h3>
+  <iframe src="https://www.google.com/maps?q=india&output=embed"></iframe>
+</section>
+
+<section id="contact">
+  <h3>Contact</h3>
+  <p style="text-align:center">
+    📍 City, State <br>
+    📞 9800409085 <br>
+    ⏰ 10 AM – 11 PM
+  </p>
+</section>
+
+<footer>
+  © 2025 Urban Brew Cafe
+</footer>
+
+<a class="whatsapp" href="https://wa.me/+919800409085">💬</a>
+
+</body>
+</html>
