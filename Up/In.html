@@ -282,48 +282,67 @@ Mango, Jamshedpur, Jharkhand<br><br>
 </div>
 
 <script>
+// Checkbox change hone par qty box dikhana
 document.querySelectorAll('.item').forEach(c=>{
   c.addEventListener('change',()=>{
     let q=c.parentElement.parentElement.querySelector('.qty');
     q.style.visibility=c.checked?'visible':'hidden';
-    q.querySelector('input').value=1;
+    // Reset value to 1 when checked
+    q.querySelector('input').value=1; 
     calc();
   })
 });
 
+// Quantity badhane/ghatane ka function
 function qty(btn,n){
   let i=btn.parentElement.querySelector('input');
   let v=parseInt(i.value)+n;
-  if(v>=1){i.value=v;calc();}
+  if(v>=1){
+    i.value=v;
+    calc();
+  }
 }
 
+// Live Total Calculation
 function calc(){
   let t=0;
   document.querySelectorAll('.item:checked').forEach(c=>{
     let p=parseInt(c.dataset.price);
-    let q=parseInt(c.parentElement.parentElement.querySelector('input').value);
+    // FIX: Added '.qty input' to select specific input
+    let q=parseInt(c.parentElement.parentElement.querySelector('.qty input').value); 
     t+=p*q;
   });
   document.getElementById('total').innerText=t;
 }
 
+// WhatsApp Order Function
 function order(){
   let items=document.querySelectorAll('.item:checked');
-  if(!items.length){alert('Select item');return;}
-  let msg='*New Order*%0A';
+  if(items.length===0){alert('Please select at least one item');return;}
+  
+  let msg='*New Order Request*%0A%0A';
   let total=0;
+  
   items.forEach(i=>{
     let name=i.closest('.menu-item-card').dataset.name;
     let v=i.dataset.variant;
     let p=parseInt(i.dataset.price);
-    let q=parseInt(i.parentElement.parentElement.querySelector('input').value);
-    total+=p*q;
-    msg+=`• ${name} (${v}) x ${q} = ₹${p*q}%0A`;
+    // FIX: Added '.qty input' here too
+    let q=parseInt(i.parentElement.parentElement.querySelector('.qty input').value);
+    
+    let subtotal = p*q;
+    total+=subtotal;
+    
+    msg+=`• ${name} (${v}) x ${q} = ₹${subtotal}%0A`;
   });
+  
   msg+=`%0A*Total: ₹${total}*`;
-  window.open(`https://wa.me/+919800409085?text=${msg}`);
+  
+  // Apna number yahan check kar lena
+  window.open(`https://wa.me/+919800409085?text=${msg}`, '_blank');
 }
 </script>
+  
 
 </body>
 </html>
