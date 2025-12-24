@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Name | Home</title>
+    <meta name="description" content="Best food in town. Order online or visit us.">
+
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary-color: #c0392b; /* Deep Red */
+            --secondary-color: #e67e22; /* Orange */
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --white: #ffffff;
+            --bg-light: #fff8f0; /* Creamy White */
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--white);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- HEADER & NAVIGATION --- */
+        header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Mobile Nav: Horizontal Scroll */
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 10px; padding: 15px 0; }
+            nav { 
+                width: 100%; 
+                overflow-x: auto; 
+                padding: 5px 20px; 
+                gap: 15px; 
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            /* Hide scrollbar */
+            nav::-webkit-scrollbar { display: none; }
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            position: relative;
+            height: 70vh;
+            min-height: 400px;
+            background-color: #333; /* Fallback */
+            background-image: url('images/hero.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+            padding: 20px;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Dark Overlay */
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--primary-color);
+        }
+
+        .btn:hover { transform: scale(1.05); }
+
+        /* --- GENERAL SECTION STYLES --- */
+        section {
+            padding: 60px 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: var(--secondary-color);
+            margin: 10px auto 0;
+        }
+
+        /* --- ABOUT --- */
+        .about-text {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+        }
+
+        /* --- MENU SECTION --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .menu-category h3 {
+            background-color: var(--bg-light);
+            padding: 10px;
+            border-left: 4px solid var(--secondary-color);
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .menu-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .item-price {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* --- GALLERY GRID --- */
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .gallery-img:hover {
+            transform: scale(1.02);
+        }
+
+        /* --- LOCATION (MAP) --- */
+        .map-wrapper {
+            width: 100%;
+            height: 400px;
+            background: #eee;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* --- CONTACT & FOOTER --- */
+        .contact-info {
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .contact-item {
+            margin-bottom: 15px;
+        }
+
+        footer {
+            background-color: #222;
+            color: #aaa;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+
+        /* --- FLOATING WHATSAPP BUTTON --- */
+        .float-wa {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 25px;
+            right: 25px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px #999;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .float-wa:hover {
+            transform: scale(1.1);
+        }
+
+        /* SVG Icon styling */
+        .icon { width: 24px; height: 24px; fill: currentColor; vertical-align: middle; margin-right: 5px; }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2rem; }
+            .section { padding: 40px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">RESTAURANT NAME</div>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#menu">Menu</a>
+            <a href="#gallery">Gallery</a>
+            <a href="#location">Location</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Authentic Flavors, <br> Unforgettable Taste</h1>
+            <p>Experience the best culinary delights in town.</p>
+            <div class="btn-group">
+                <a href="tel:+911234567890" class="btn btn-primary">Call Now</a>
+                <a href="https://wa.me/911234567890" class="btn btn-secondary">Order on WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
+    <section id="about">
+        <h2 class="section-title">About Us</h2>
+        <div class="about-text">
+            <p>
+                Welcome to <strong>Restaurant Name</strong>. We are dedicated to serving you the finest quality food with fresh ingredients and authentic spices. Whether you are craving spicy curries, aromatic biryanis, or crispy snacks, we have something for everyone. Come and enjoy a great meal with family and friends!
+            </p>
+        </div>
+    </section>
+
+    <section id="menu">
+        <h2 class="section-title">Our Menu</h2>
+        
+        <div class="menu-grid">
+            <div class="menu-column">
+                
+                <div class="menu-category">
+                    <h3>Starters</h3>
+                    <ul class="menu-list">
+                        <li><span class="item-name">Paneer Tikka</span> <span class="item-price">₹180</span></li>
+                        <li><span class="item-name">Chicken Lollipop</span> <span class="item-price">₹200</span></li>
+                        <li><span class="item-name">Crispy Corn</span> <span class="item-price">₹150</span></li>
+                        <li><span class="item-name">Chicken 65</span> <span class="item-price">₹210</span></li>
+                    </ul>
+                </div>
+
+                <div class="menu-category">
+                    <h3>Main Course (Veg)</h3>
+                    <ul class="menu-list">
+                        <li><span class="item-name">Paneer Butter Masala</span> <span class="item-price">₹220</span></li>
+                        <li><span class="item-name">Mix Veg Curry</span> <span class="item-price">₹180</span></li>
+                        <li><span class="item-name">Dal Makhani</span> <span class="item-price">₹190</span></li>
+                    </ul>
+                </div>
+
+                <div class="menu-category">
+                    <h3>Main Course (Non-Veg)</h3>
+                    <ul class="menu-list">
+                        <li><span class="item-name">Butter Chicken</span> <span class="item-price">₹250</span></li>
+                        <li><span class="item-name">Chicken Kadai</span> <span class="item-price">₹240</span></li>
+                        <li><span class="item-name">Mutton Rogan Josh</span> <span class="item-price">₹350</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="menu-column">
+                
+                <div class="menu-category">
+                    <h3>Biryani & Rice</h3>
+                    <ul class="menu-list">
+                        <li><span class="item-name">Chicken Dum Biryani</span> <span class="item-price">₹240</span></li>
+                        <li><span class="item-name">Mutton Biryani</span> <span class="item-price">₹320</span></li>
+                        <li><span class="item-name">Veg Pulao</span> <span class="item-price">₹160</span></li>
+                        <li><span class="item-name">Jeera Rice</span> <span class="item-price">₹120</span></li>
+                    </ul>
+                </div>
+
+                <div class="menu-category">
+                    <h3>Breads</h3>
+                    <ul class="menu-list">
+                        <li><span class="item-name">Tandoori Roti</span> <span class="item-price">₹25</span></li>
+                        <li><span class="item-name">Butter Naan</span> <span class="item-price">₹40</span></li>
+                        <li><span class="item-name">Garlic Naan</span> <span class="item-price">₹50</span></li>
+                    </ul>
+                </div>
+
+                <div class="menu-category">
+                    <h3>Chinese</h3>
+                    <ul class="menu-list">
+                        <li><span class="item-name">Veg Hakka Noodles</span> <span class="item-price">₹140</span></li>
+                        <li><span class="item-name">Chicken Fried Rice</span> <span class="item-price">₹180</span></li>
+                        <li><span class="item-name">Chilli Chicken</span> <span class="item-price">₹200</span></li>
+                    </ul>
+                </div>
+                
+                <div class="menu-category">
+                    <h3>Desserts & Beverages</h3>
+                    <ul class="menu-list">
+                        <li><span class="item-name">Gulab Jamun (2pcs)</span> <span class="item-price">₹60</span></li>
+                        <li><span class="item-name">Cold Drink</span> <span class="item-price">₹40</span></li>
+                        <li><span class="item-name">Lassi</span> <span class="item-price">₹80</span></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery">
+        <h2 class="section-title">Food Gallery</h2>
+        <div class="gallery-container">
+            <img src="images/gallery-1.jpg" alt="Dish 1" class="gallery-img">
+            <img src="images/gallery-2.jpg" alt="Dish 2" class="gallery-img">
+            <img src="images/gallery-3.jpg" alt="Dish 3" class="gallery-img">
+            <img src="images/gallery-4.jpg" alt="Dish 4" class="gallery-img">
+            <img src="images/gallery-5.jpg" alt="Dish 5" class="gallery-img">
+            <img src="images/gallery-6.jpg" alt="Dish 6" class="gallery-img">
+        </div>
+    </section>
+
+    <section id="location">
+        <h2 class="section-title">Find Us</h2>
+        <div class="map-wrapper">
+            <iframe 
+                src="https://maps.google.com/maps?q=Your+Restaurant+Name&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                allowfullscreen="" 
+                loading="lazy">
+            </iframe>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title">Contact Us</h2>
+        <div class="contact-info">
+            <div class="contact-item">
+                <strong>ADDRESS</strong><br>
+                123, Food Street, Main Market, City Name - 000000
+            </div>
+            <div class="contact-item">
+                <strong>PHONE</strong><br>
+                <a href="tel:+911234567890">+91 12345 67890</a>
+            </div>
+            <div class="contact-item">
+                <strong>OPENING HOURS</strong><br>
+                Monday - Sunday: 11:00 AM - 11:00 PM
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <h3>Restaurant Name</h3>
+        <p>© 2024 All Rights Reserved.</p>
+    </footer>
+
+    <a href="https://wa.me/911234567890?text=Hi,%20I%20would%20like%20to%20order" class="float-wa" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+        </svg>
+    </a>
+
+</body>
+                                                                        </html>
+                                                                        
