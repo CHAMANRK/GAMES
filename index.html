@@ -46,19 +46,19 @@
         /* BIG HEADING */
         .main-title {
             font-family: 'Bungee Shade', cursive;
-            font-size: clamp(30px, 8vw, 55px);
+            font-size: clamp(32px, 9vw, 60px);
             color: #fff;
             text-align: center;
             margin-bottom: 30px;
             line-height: 1.1;
-            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--secondary);
+            text-shadow: 0 0 15px var(--primary), 0 0 30px var(--secondary);
             animation: float 3s ease-in-out infinite;
             z-index: 5;
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(-1deg); }
-            50% { transform: translateY(-10px) rotate(1deg); }
+            50% { transform: translateY(-15px) rotate(1deg); }
         }
 
         /* GLASS CONTAINER */
@@ -67,12 +67,12 @@
             z-index: 5;
             width: 90%;
             max-width: 380px;
-            padding: 30px 20px;
+            padding: 35px 20px;
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
         }
 
         .menu-list {
@@ -80,7 +80,7 @@
         }
 
         .menu-list li {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .menu-list a {
@@ -93,48 +93,31 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             font-size: 15px;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             transition: 0.3s all cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid transparent;
+            border: 1px solid rgba(255,255,255,0.1);
             position: relative;
-            overflow: hidden;
         }
 
         .menu-list a span {
             margin-right: 15px;
-            font-size: 20px;
-            filter: drop-shadow(0 0 5px #fff);
+            font-size: 22px;
         }
 
-        /* HOVER EFFECTS */
-        .menu-list a:hover {
-            background: rgba(0, 245, 255, 0.1);
+        /* HOVER & TOUCH EFFECTS */
+        .menu-list a:hover, .menu-list a:active {
+            background: rgba(0, 245, 255, 0.15);
             border-color: var(--primary);
-            transform: scale(1.05) translateX(5px);
-            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+            transform: scale(1.05) translateX(8px);
+            box-shadow: 0 0 25px rgba(0, 245, 255, 0.5);
             color: var(--primary);
-        }
-
-        /* Glowing Dot for Active Feel */
-        .menu-list a::before {
-            content: '';
-            position: absolute;
-            left: 10px;
-            width: 4px;
-            height: 0;
-            background: var(--primary);
-            transition: 0.3s;
-        }
-
-        .menu-list a:hover::before {
-            height: 60%;
         }
 
         .footer {
             margin-top: 25px;
             font-family: 'Rajdhani', sans-serif;
             font-size: 12px;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.4);
             text-align: center;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -150,12 +133,12 @@
 
     <div class="container">
         <ul class="menu-list">
-            <li><a href="Quran_Quiz/index.html"><span>📖</span> Quran Quiz</a></li>
-            <li><a href="Future_Game/index.html"><span>🚀</span> Future Game 1</a></li>
-            <li><a href="Checking/Index.html"><span>🤖</span> AI Tester</a></li>
-            <li><a href="Updating/index.html"><span>🛠️</span> Updating</a></li>
-            <li><a href="Up/In.html"><span>☕</span> Cafe</a></li>
-            <li><a href="HOTEL/In.html"><span>🏨</span> Hotel</a></li>
+            <li><a href="Quran_Quiz/index.html" onclick="playBeep()"><span>📖</span> Quran Quiz</a></li>
+            <li><a href="Future_Game/index.html" onclick="playBeep()"><span>🚀</span> Future Game 1</a></li>
+            <li><a href="Checking/Index.html" onclick="playBeep()"><span>🤖</span> AI Tester</a></li>
+            <li><a href="Updating/index.html" onclick="playBeep()"><span>🛠️</span> Updating</a></li>
+            <li><a href="Up/In.html" onclick="playBeep()"><span>☕</span> Cafe</a></li>
+            <li><a href="HOTEL/In.html" onclick="playBeep()"><span>🏨</span> Hotel</a></li>
         </ul>
 
         <div class="footer">
@@ -164,12 +147,28 @@
         </div>
     </div>
 
+    <audio id="beepSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
-        document.querySelectorAll('a').forEach(button => {
-            button.addEventListener('click', () => {
-                // Yahan aap apna click sound add kar sakte hain
-                console.log("Game Loading...");
-            });
+        const sound = document.getElementById('beepSound');
+
+        function playBeep() {
+            // Sound ko reset kar ke play karta hai taaki fast clicks pe bhi chale
+            sound.currentTime = 0;
+            sound.play();
+        }
+
+        // Animation for buttons on load
+        document.querySelectorAll('.menu-list li').forEach((li, index) => {
+            li.style.opacity = '0';
+            li.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                li.style.transition = '0.5s ease-out';
+                li.style.opacity = '1';
+                li.style.transform = 'translateY(0)';
+            }, index * 100);
         });
     </script>
 
