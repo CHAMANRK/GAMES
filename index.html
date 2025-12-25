@@ -1,22 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Najeef Game Menu</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Najeef Game Menu</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Orbitron',sans-serif;
+}
+
+body{
+  height:100vh;
+  background:
+    radial-gradient(circle at top, #00f5ff22, transparent 40%),
+    radial-gradient(circle at bottom, #7f00ff22, transparent 40%),
+    #050505;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+}
+
+/* MAIN CONTAINER */
+.container{
+  width:320px;
+  padding:30px 25px;
+  border-radius:20px;
+  background:rgba(0,0,0,0.55);
+  backdrop-filter:blur(12px);
+  border:1px solid #00f5ff55;
+  box-shadow:0 0 40px #00f5ff33;
+  text-align:center;
+}
+
+/* TITLE */
+h1{
+  font-size:22px;
+  margin-bottom:25px;
+  color:#00f5ff;
+  text-shadow:0 0 12px #00f5ff;
+}
+
+/* MENU */
+.menu-list{
+  list-style:none;
+}
+
+.menu-list li{
+  margin:14px 0;
+}
+
+/* BUTTONS */
+.menu-list a{
+  display:block;
+  padding:14px;
+  border-radius:14px;
+  text-decoration:none;
+  color:#000;
+  background:linear-gradient(135deg,#00f5ff,#7f00ff);
+  box-shadow:0 0 15px #00f5ff88;
+  transition:0.3s ease;
+  font-size:14px;
+  letter-spacing:1px;
+}
+
+/* HOVER EFFECT */
+.menu-list a:hover{
+  transform:translateY(-4px) scale(1.03);
+  box-shadow:0 0 30px #7f00ffcc;
+}
+
+/* FOOTER */
+.footer{
+  margin-top:18px;
+  font-size:10px;
+  opacity:0.6;
+}
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>🎮 Najeef Game World</h1>
-    <ul class="menu-list">
-      <li><a href="Quran_Quiz/index.html">1. Quran Quiz</a></li>
-      <li><a href="Future_Game/index.html">2. Future Game 1</a></li>
-       <li><a href="Checking/Index.html">3.Ai Tester</a></li>
-      <li><a href="Updating/index.html">4.UPDATING</a></li>
-      <li><a href="Up/In.html">4.Cafe</a></li
-      <li><a href="HOTEL/In.html">4.HOTEL</a></li>                               
+
+<div class="container">
+  <h1>🎮 Najeef Game World</h1>
+
+  <ul class="menu-list">
+    <li><a href="Quran_Quiz/index.html">📖 Quran Quiz</a></li>
+    <li><a href="Future_Game/index.html">🚀 Future Game 1</a></li>
+    <li><a href="Checking/Index.html">🤖 AI Tester</a></li>
+    <li><a href="Updating/index.html">🛠 Updating</a></li>
+    <li><a href="Up/In.html">☕ Cafe</a></li>
+    <li><a href="HOTEL/In.html">🏨 Hotel</a></li>
   </ul>
-  </div>
+
+  <div class="footer">Powered by Najiful85.xyz</div>
+</div>
+
 </body>
 </html>
