@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>🌙 Najiful Quran Game | Premium Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@700&family=Orbitron:wght@600&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-content">
+    <div class="header-branding">
+      <h1 class="app-title">Najiful Quran Game</h1>
+    </div>
+    <button class="header-contact-btn" onclick="showSection('contactScreen')">📩</button>
+  </div>
+</header>
+
+<main>
+  <section id="welcomeScreen" class="screen active">
+    <div class="card home-card">
+      <div class="icon-header">📖</div>
+      <h2 class="main-heading">Ayat Quiz Challenge</h2>
+      <p class="subtitle">Quran-e-Pak ki maloomat ko futuristic andaaz mein aazmaayiye.</p>
+      
+      <form id="modeForm" class="mode-group">
+        <label><input type="radio" name="quizMode" value="practice" checked> <span>🎯 Practice Mode</span></label>
+        <label><input type="radio" name="quizMode" value="timed"> <span>⏱️ Timed Challenge</span></label>
+        <label><input type="radio" name="quizMode" value="survival"> <span>💥 Survival Mode</span></label>
+      </form>
+
+      <div class="difficulty-wrapper">
+        <label class="diff-btn easy"><input type="radio" name="difficulty" checked onchange="Level.setLevel('easy')"> Easy</label>
+        <label class="diff-btn medium"><input type="radio" name="difficulty" onchange="Level.setLevel('medium')"> Medium</label>
+        <label class="diff-btn hard"><input type="radio" name="difficulty" onchange="Level.setLevel('hard')"> Hard</label>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="showSection('paraSelectScreen')">▶️ Shuru Karein</button>
+        <button class="btn btn-secondary" onclick="toggleSearch()" id="toggleSearchBtn">🔎 Search Ayat</button>
+      </div>
+    </div>
+
+    <div class="search-section card" id="searchContainer" style="display:none;">
+      <form onsubmit="searchAyats(); return false;">
+        <input id="searchInput" type="text" placeholder="Ayat ya Surah search karein...">
+        <button type="submit" class="btn-search">Search</button>
+      </form>
+      <div id="searchResults"></div>
+    </div>
+  </section>
+
+  <section id="paraSelectScreen" class="screen">
+    <div class="card grid-card">
+      <h2 class="main-heading">Para Select Karein</h2>
+      <form onsubmit="startGame(); return false;">
+        <div class="input-grid">
+          <div class="input-group">
+            <label>From Para (1–30):</label>
+            <input id="fromPara" type="number" min="1" max="30" placeholder="e.g. 1">
+          </div>
+          <div class="input-group">
+            <label>To Para (1–30):</label>
+            <input id="toPara" type="number" min="1" max="30" placeholder="e.g. 30">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit Selection</button>
+      </form>
+      <button class="btn btn-outline" onclick="showSection('welcomeScreen')">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <section id="quizScreen" class="screen">
+    <div class="card quiz-card">
+      <div class="quiz-header">
+        <div id="quizProgress">Question 1</div>
+        <div id="timer">30s</div>
+      </div>
+      
+      <div id="ayatText" class="ayat">Loading Ayat...</div>
+      
+      <div class="hint-container">
+        <button id="hintBtn" class="btn-hint" onclick="showHint()">💡 Hint</button>
+        <span id="hintInfo"></span>
+      </div>
+
+      <form id="answerForm" onsubmit="return checkAnswer();">
+        <div class="input-grid">
+          <div class="input-group">
+            <label>Para Number</label>
+            <input id="user_para" type="number" required placeholder="0">
+          </div>
+          <div class="input-group">
+            <label>Page in Para</label>
+            <input id="user_page_in_para" type="number" placeholder="0">
+          </div>
+        </div>
+        <button class="btn btn-check" type="submit">CHECK ANSWER</button>
+      </form>
+
+      <div id="quizResult" class="result hidden"></div>
+      <button class="btn btn-next next-button hidden" onclick="nextQuestion()">Agla Sawal ➡️</button>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <p>© 2025 | Powered by <span>Najiful85.xyz</span></p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/level.js"></script>
+<script src="js/search.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
