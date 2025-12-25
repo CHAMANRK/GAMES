@@ -1,0 +1,262 @@
+/* ================= ROOT ================= */
+:root{
+  --bg:#05070f;
+  --card-bg:rgba(255,255,255,0.05);
+  --neon-blue:#00f7ff;
+  --neon-pink:#ff2fdc;
+  --neon-green:#39ff14;
+  --text:#eaeaff;
+  --danger:#ff4d4d;
+}
+
+/* ================= RESET ================= */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+body{
+  background:
+    radial-gradient(circle at top,#0c1030,#05070f 70%);
+  color:var(--text);
+  min-height:100vh;
+  overflow:hidden;
+}
+
+/* ================= SCREENS ================= */
+.screen{
+  display:none;
+  min-height:100vh;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.screen.active{
+  display:flex;
+}
+
+/* ================= SPLASH ================= */
+.splash-inner{
+  text-align:center;
+}
+.neon-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:3.2rem;
+  letter-spacing:4px;
+  color:var(--neon-blue);
+  text-shadow:
+    0 0 10px var(--neon-blue),
+    0 0 30px var(--neon-blue);
+}
+.neon-sub{
+  margin-top:10px;
+  color:var(--neon-pink);
+  letter-spacing:3px;
+}
+
+/* Loading bar */
+.loading-bar{
+  width:220px;
+  height:6px;
+  background:#111;
+  margin:25px auto;
+  overflow:hidden;
+  border-radius:5px;
+}
+.loading-bar span{
+  display:block;
+  height:100%;
+  width:40%;
+  background:linear-gradient(90deg,var(--neon-blue),var(--neon-pink));
+  animation:load 1.5s infinite;
+}
+@keyframes load{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(300%)}
+}
+
+/* ================= CARDS ================= */
+.neon-card{
+  background:var(--card-bg);
+  border-radius:18px;
+  padding:30px 22px;
+  width:100%;
+  max-width:420px;
+  backdrop-filter:blur(15px);
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    0 0 25px rgba(0,247,255,.25),
+    inset 0 0 20px rgba(255,255,255,.04);
+  animation:fadeUp .6s ease;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:none}
+}
+.screen-title{
+  text-align:center;
+  margin-bottom:22px;
+  font-family:'Orbitron',sans-serif;
+  letter-spacing:2px;
+}
+
+/* ================= BUTTONS ================= */
+.btn{
+  border:none;
+  cursor:pointer;
+  padding:14px 22px;
+  border-radius:14px;
+  color:#fff;
+  margin-top:15px;
+  font-weight:500;
+  letter-spacing:1px;
+  background:linear-gradient(135deg,var(--neon-blue),var(--neon-pink));
+  box-shadow:0 0 15px rgba(0,247,255,.6);
+  transition:.3s;
+}
+.btn:hover{
+  transform:scale(1.07);
+  box-shadow:
+    0 0 25px var(--neon-blue),
+    0 0 40px var(--neon-pink);
+}
+.btn-enter{margin-top:15px}
+.btn-back{
+  background:transparent;
+  border:1px solid var(--neon-blue);
+}
+.btn-start{
+  background:linear-gradient(135deg,var(--neon-green),var(--neon-blue));
+}
+
+/* ================= MODE ================= */
+.mode-cards{
+  display:grid;
+  gap:14px;
+}
+.mode-card{
+  padding:16px;
+  border-radius:14px;
+  text-align:center;
+  cursor:pointer;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.12);
+  transition:.3s;
+}
+.mode-card:hover{
+  box-shadow:0 0 18px var(--neon-pink);
+}
+.mode-card.active{
+  border-color:var(--neon-blue);
+  box-shadow:0 0 20px var(--neon-blue);
+}
+
+/* ================= DIFFICULTY ================= */
+.difficulty-cards{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+}
+.difficulty-card{
+  flex:1;
+  text-align:center;
+  padding:18px 0;
+  border-radius:14px;
+  cursor:pointer;
+  background:#0c0f24;
+  transition:.3s;
+}
+.difficulty-card:hover{
+  transform:scale(1.08);
+}
+.difficulty-card.active{
+  background:linear-gradient(135deg,var(--neon-blue),var(--neon-pink));
+  box-shadow:0 0 20px var(--neon-blue);
+}
+
+/* ================= PARA ================= */
+.para-select{
+  display:flex;
+  gap:12px;
+}
+.para-select input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  background:#080b1f;
+  border:1px solid rgba(255,255,255,.15);
+  color:#fff;
+  text-align:center;
+}
+
+/* ================= QUIZ ================= */
+.quiz-top{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+.timer{
+  color:var(--danger);
+  font-weight:700;
+  text-shadow:0 0 10px var(--danger);
+}
+.ayat-box{
+  font-family:'Scheherazade New',serif;
+  font-size:1.5rem;
+  background:rgba(0,0,0,.35);
+  padding:18px;
+  border-radius:14px;
+  margin-bottom:15px;
+  text-align:center;
+}
+.hint-zone{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.btn-hint{
+  background:transparent;
+  border:1px dashed var(--neon-blue);
+  color:var(--neon-blue);
+  padding:8px 14px;
+  border-radius:10px;
+}
+
+/* ================= FORM ================= */
+#answerForm input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  margin-top:10px;
+  background:#080b1f;
+  border:1px solid rgba(255,255,255,.15);
+  color:#fff;
+}
+.btn-check{
+  width:100%;
+  margin-top:14px;
+}
+
+/* ================= RESULT ================= */
+.result-box{
+  text-align:center;
+  margin-top:12px;
+}
+.hidden{display:none}
+
+/* ================= FOOTER ================= */
+.game-footer{
+  position:fixed;
+  bottom:8px;
+  width:100%;
+  text-align:center;
+  font-size:.75rem;
+  opacity:.5;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:480px){
+  .neon-title{font-size:2.4rem}
+  .neon-card{padding:24px 18px}
+}
