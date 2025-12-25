@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Najiful Quran Game | Neon Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@700&family=Orbitron:wght@600&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ================= ROOT & RESET ================= */
+    :root{
+      --bg:#05070f;
+      --card-bg:rgba(255,255,255,0.05);
+      --neon-blue:#00f7ff;
+      --neon-pink:#ff2fdc;
+      --neon-green:#39ff14;
+      --text:#eaeaff;
+      --danger:#ff4d4d;
+    }
+    *{ margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+    
+    body{
+      background: radial-gradient(circle at top,#0c1030,#05070f 70%);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    /* ================= SCREENS ================= */
+    .screen {
+      display: none; /* Default hidden */
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      flex-direction: column;
+    }
+    .screen.active {
+      display: flex; /* Only active screen shows */
+    }
+
+    /* ================= SPLASH ================= */
+    .neon-title {
+      font-family:'Orbitron',sans-serif;
+      font-size:3.2rem;
+      letter-spacing:4px;
+      color:var(--neon-blue);
+      text-shadow: 0 0 10px var(--neon-blue), 0 0 30px var(--neon-blue);
+      text-align: center;
+    }
+    .neon-sub { margin-top:10px; color:var(--neon-pink); letter-spacing:3px; text-align: center; }
+
+    .loading-bar {
+      width:220px; height:6px; background:#111; margin:25px auto; overflow:hidden; border-radius:5px;
+    }
+    .loading-bar span {
+      display:block; height:100%; width:40%;
+      background:linear-gradient(90deg,var(--neon-blue),var(--neon-pink));
+      animation:load 1.5s infinite;
+    }
+    @keyframes load { 0%{transform:translateX(-100%)} 100%{transform:translateX(300%)} }
+
+    /* ================= CARDS & UI ================= */
+    .neon-card {
+      background:var(--card-bg); border-radius:18px; padding:30px 22px;
+      width:100%; max-width:420px; backdrop-filter:blur(15px);
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 0 25px rgba(0,247,255,.25);
+      animation:fadeUp .6s ease;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:none} }
+
+    .btn {
+      border:none; cursor:pointer; padding:14px 22px; border-radius:14px;
+      color:#fff; margin-top:15px; font-weight:500; width: 100%;
+      background:linear-gradient(135deg,var(--neon-blue),var(--neon-pink));
+      box-shadow:0 0 15px rgba(0,247,255,.6); transition:.3s;
+    }
+    .btn:hover { transform:scale(1.05); filter: brightness(1.2); }
+
+    .mode-card, .difficulty-card {
+      padding:15px; border-radius:12px; background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.1); margin-bottom:10px; cursor:pointer;
+    }
+    .mode-card.active, .difficulty-card.active {
+      border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue);
+    }
+
+    .para-select input, #answerForm input {
+      width:100%; padding:12px; margin: 10px 0; border-radius:10px;
+      background:#080b1f; border:1px solid #333; color:#fff;
+    }
+
+    .ayat-box {
+      font-family:'Scheherazade New', serif; font-size:1.8rem;
+      background:rgba(0,0,0,0.4); padding:20px; border-radius:15px;
+      text-align:center; margin-bottom:20px; min-height: 80px;
+    }
+
+    .game-footer { position:fixed; bottom:10px; width:100%; text-align:center; font-size:12px; opacity:0.5; }
+  </style>
+</head>
+<body>
+
+<section id="splashScreen" class="screen active">
+  <h1 class="neon-title">NAJIFUL</h1>
+  <p class="neon-sub">QURAN GAME ARENA</p>
+  <div class="loading-bar"><span></span></div>
+  <button class="btn" onclick="showScreen('modeScreen')">▶ ENTER ARENA</button>
+</section>
+
+<section id="modeScreen" class="screen">
+  <div class="neon-card">
+    <h2 style="text-align:center; margin-bottom:20px;">SELECT MODE</h2>
+    <div class="mode-card active" onclick="selectItem(this, 'mode')">🎯 PRACTICE</div>
+    <div class="mode-card" onclick="selectItem(this, 'mode')">⏱ TIMED</div>
+    <div class="mode-card" onclick="selectItem(this, 'mode')">💀 SURVIVAL</div>
+    <button class="btn" onclick="showScreen('difficultyScreen')">NEXT ➜</button>
+  </div>
+</section>
+
+<section id="difficultyScreen" class="screen">
+  <div class="neon-card">
+    <h2 style="text-align:center; margin-bottom:20px;">DIFFICULTY</h2>
+    <div class="difficulty-card active" onclick="selectItem(this, 'diff')">EASY</div>
+    <div class="difficulty-card" onclick="selectItem(this, 'diff')">MEDIUM</div>
+    <div class="difficulty-card" onclick="selectItem(this, 'diff')">HARD</div>
+    <button class="btn" onclick="showScreen('paraScreen')">NEXT ➜</button>
+  </div>
+</section>
+
+<section id="paraScreen" class="screen">
+  <div class="neon-card">
+    <h2 style="text-align:center; margin-bottom:20px;">SELECT PARA</h2>
+    <div class="para-select">
+      <input type="number" id="fromPara" placeholder="From Para (1-30)" min="1" max="30">
+      <input type="number" id="toPara" placeholder="To Para (1-30)" min="1" max="30">
+    </div>
+    <button class="btn" onclick="startGame()">🚀 START GAME</button>
+  </div>
+</section>
+
+<section id="quizScreen" class="screen">
+  <div class="neon-card">
+    <div style="display:flex; justify-content: space-between; margin-bottom:10px;">
+      <span>Q: 1/10</span>
+      <span style="color:red; font-weight:bold;">00:30</span>
+    </div>
+    <div class="ayat-box">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    <form id="answerForm" onsubmit="event.preventDefault();">
+      <input type="number" placeholder="Enter Para Number">
+      <button class="btn" onclick="checkAnswer()">CHECK ANSWER</button>
+    </form>
+  </div>
+</section>
+
+<footer class="game-footer">
+  <p>© 2025 • Najiful85.xyz</p>
+</footer>
+
+<script>
+  // Screen Switcher Function
+  function showScreen(screenId) {
+    // Sabhi screens ko hide karo
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(s => s.classList.remove('active'));
+
+    // Sirf target screen ko show karo
+    const target = document.getElementById(screenId);
+    if(target) {
+      target.classList.add('active');
+    }
+  }
+
+  // Handle selection (Blue border effect)
+  function selectItem(element, type) {
+    const selector = type === 'mode' ? '.mode-card' : '.difficulty-card';
+    document.querySelectorAll(selector).forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+  }
+
+  function startGame() {
+    const from = document.getElementById('fromPara').value;
+    const to = document.getElementById('toPara').value;
+    if(!from || !to) {
+      alert("Please enter Para range");
+      return;
+    }
+    showScreen('quizScreen');
+  }
+
+  function checkAnswer() {
+    alert("Functionality coming soon! This is the UI Demo.");
+    showScreen('splashScreen');
+  }
+</script>
+
+</body>
+</html>
