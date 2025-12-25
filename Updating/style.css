@@ -244,6 +244,23 @@ body{
   margin-top:12px;
 }
 .hidden{display:none}
+/* ================= SOUND ================= */
+#soundToggle {
+    position: fixed; top: 20px; right: 20px; z-index: 1000;
+    font-size: 24px; cursor: pointer; filter: drop-shadow(0 0 5px var(--neon-blue));
+}
+
+/* Streak Effects */
+.fire-glow { box-shadow: 0 0 40px #ff4500, inset 0 0 20px #ff4500 !important; border-color: #ff4500 !important; }
+.speed-glow { box-shadow: 0 0 40px #00f7ff, inset 0 0 20px #00f7ff !important; border-color: #00f7ff !important; }
+.legendary-glow { box-shadow: 0 0 50px #ffd700, inset 0 0 25px #ffd700 !important; border-color: #ffd700 !important; }
+
+#streakBadge {
+    position: absolute; top: -50px; font-weight: bold; font-family: 'Orbitron';
+    text-shadow: 0 0 10px white; transition: 0.3s;
+}
+
+.ayat-box { font-size: 2rem; line-height: 3.5rem; }
 
 /* ================= FOOTER ================= */
 .game-footer{
