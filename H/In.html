@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Surprise for Hamid</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  overflow:hidden;
+}
+
+/* floating circles */
+.circle{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  animation: float 10s infinite ease-in-out;
+}
+.circle:nth-child(1){
+  width:200px;height:200px;
+  top:10%;left:10%;
+}
+.circle:nth-child(2){
+  width:300px;height:300px;
+  bottom:10%;right:15%;
+  animation-duration:14s;
+}
+.circle:nth-child(3){
+  width:150px;height:150px;
+  top:60%;left:70%;
+  animation-duration:12s;
+}
+
+@keyframes float{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-40px)}
+  100%{transform:translateY(0)}
+}
+
+/* card */
+.card{
+  position:relative;
+  width:90%;
+  max-width:420px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  border-radius:20px;
+  padding:30px;
+  text-align:center;
+  box-shadow:0 20px 40px rgba(0,0,0,0.3);
+  animation: pop 1s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(0.8);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+h1{
+  font-size:2.2rem;
+  margin-bottom:10px;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow{
+  from{text-shadow:0 0 10px #00f2ff}
+  to{text-shadow:0 0 25px #00f2ff}
+}
+
+p{
+  font-size:1.05rem;
+  line-height:1.6;
+  margin:15px 0;
+}
+
+.badge{
+  display:inline-block;
+  margin-top:15px;
+  padding:8px 18px;
+  border-radius:50px;
+  background:#00f2ff;
+  color:#000;
+  font-weight:600;
+  font-size:0.9rem;
+}
+
+/* footer */
+.footer{
+  margin-top:20px;
+  font-size:0.8rem;
+  opacity:0.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="circle"></div>
+<div class="circle"></div>
+<div class="circle"></div>
+
+<div class="card">
+  <h1>Hey Hamid 👋</h1>
+
+  <p>
+    Ye page sirf tere liye banaya gaya hai 😎<br>
+    Kyunki tu normal dost nahi…  
+    <b>limited edition legend</b> hai 🔥
+  </p>
+
+  <p>
+    Zindagi me chill bhi zaroori hai,<br>
+    Aur tu chill ka full package hai 😂
+  </p>
+
+  <span class="badge">Friendship Level: PRO 💯</span>
+
+  <div class="footer">
+    Made with ❤️ just for Hamid
+  </div>
+</div>
+
+</body>
+</html>
