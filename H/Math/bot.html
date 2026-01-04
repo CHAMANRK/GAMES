@@ -59,16 +59,41 @@
             loadingInd.style.display = 'block';
 
             // 3. AI se poocho
+            // --- UPDATED GEMINI API FUNCTION (Debugging Wala) ---
+        async function askGemini(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
+            const data = {
+                contents: [{
+                    parts: [{ 
+                        text: `You are a helpful Math Teacher. User Question: "${prompt}". Keep it short and simple.` 
+                    }]
+                }]
+            };
+
             try {
-                let reply = await askGemini(input);
-                loadingInd.style.display = 'none';
-                addMsg(reply, 'bot-msg');
-                speak(reply);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                // Check for Google API Errors
+                if (!response.ok) {
+                    // Agar error hai to screen par dikhao
+                    throw new Error(result.error.message || "API Error");
+                }
+
+                return result.candidates[0].content.parts[0].text;
+
             } catch (error) {
-                loadingInd.style.display = 'none';
-                addMsg("⚠️ Error: Check your internet connection.", 'bot-msg');
+                // Asli error user ko dikhao
+                return "⚠️ Error Details: " + error.message;
             }
         }
+            
 
         function addMsg(text, className) {
             let div = document.createElement('div');
