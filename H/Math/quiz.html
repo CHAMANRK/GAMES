@@ -88,15 +88,51 @@
                 const rawText = data.candidates[0].content.parts[0].text;
                 
                 // Parse AI Response (Split by |)
+                        // --- UPDATED AI QUESTION FUNCTION (Debugging Wala) ---
+        async function generateAIQuestion() {
+            // UI Reset
+            document.getElementById('question').innerText = "AI is thinking...";
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('answer').value = '';
+            document.getElementById('msg').innerText = '';
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
+            const prompt = `Generate a random math question for level ${currentLevel}. 
+            Format: Question | Answer. Example: 2+2? | 4`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+
+                // Error Check
+                if (!response.ok) {
+                    throw new Error(data.error.message || "Unknown API Error");
+                }
+
+                const rawText = data.candidates[0].content.parts[0].text;
+                
                 const parts = rawText.split('|');
-                if(parts.length < 2) throw new Error("Format Error");
+                if(parts.length < 2) throw new Error("AI Format Wrong: " + rawText);
 
                 const qText = parts[0].trim();
-                exactAnswer = parts[1].trim(); // Save answer secretly
+                exactAnswer = parts[1].trim(); 
 
-                // Show Question
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('question').innerText = qText;
+                
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loader').classList.add('hidden');
+                // Screen par error dikhao
+                document.getElementById('question').innerHTML = "<span style='color:red; font-size:16px;'>Error: " + e.message + "</span>";
+            }
+        }
                 
                 // Text to Speech
                 let speakMsg = new SpeechSynthesisUtterance(qText);
