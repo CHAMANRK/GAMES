@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math AI Bot</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🤖 AI Teacher & Solver</h2>
+        
+        <div class="chat-box" id="chat">
+            <div class="msg bot-msg">Hello! I am your Math AI. Ask me to solve a problem or ask for a formula.</div>
+            <div class="msg bot-msg">Try typing: "Solve 2x + 5 = 15" or "Area of circle formula"</div>
+        </div>
+
+        <input type="text" id="userInput" placeholder="Type here..." onkeypress="handleEnter(event)">
+        <button class="btn-submit" onclick="sendMessage()">Send</button>
+        <button class="btn-home" onclick="location.href='index.html'">⬅ Back to Home</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat');
+
+        function handleEnter(e) {
+            if(e.key === 'Enter') sendMessage();
+        }
+
+        function sendMessage() {
+            let input = document.getElementById('userInput').value;
+            if(!input) return;
+
+            // 1. Show User Message
+            addMsg(input, 'user-msg');
+            document.getElementById('userInput').value = '';
+
+            // 2. Process AI Response (Simulated Logic)
+            setTimeout(() => {
+                let response = processLogic(input.toLowerCase());
+                addMsg(response, 'bot-msg');
+                speak(response); // Bot speaks the answer!
+            }, 800);
+        }
+
+        function addMsg(text, className) {
+            let div = document.createElement('div');
+            div.className = `msg ${className}`;
+            div.innerText = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function speak(text) {
+            // Only speak short responses
+            if(text.length < 100) {
+                let msg = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        // --- THE BRAIN OF THE BOT (No API Cost) ---
+        function processLogic(text) {
+            // 1. Formula Asking
+            if(text.includes('formula')) {
+                if(text.includes('circle')) return "The area of a circle is πr² (Pi * radius squared).";
+                if(text.includes('rectangle')) return "Area = Length × Width.";
+                if(text.includes('speed')) return "Speed = Distance / Time.";
+                if(text.includes('pythagoras')) return "a² + b² = c² (For right angled triangles).";
+                return "I know formulas for Circle, Rectangle, Speed, and Pythagoras. Which one do you need?";
+            }
+            
+            // 2. Greetings
+            if(text.includes('hello') || text.includes('hi')) return "Hello student! Ready to solve some math?";
+            
+            // 3. Solving Equations (using Math.js)
+            try {
+                // Check if it's an equation solver request
+                if(text.includes('solve')) {
+                    // Very basic equation handling logic simulation
+                    // Real solving needs complex parsing, but let's try basic math
+                    let cleanMath = text.replace('solve', '').trim();
+                    // If it contains '=', we handle it differently (Simplification here)
+                    return "For equations, try to isolate X. I can currently calculate expressions like '5 * 10 + 2'. Try that!";
+                }
+                
+                // Calculate basic expressions (e.g. "50 * 2")
+                let result = math.evaluate(text);
+                return "The answer is: " + result;
+            } catch (e) {
+                return "I didn't understand that. Try typing standard math like '5 + 5' or ask for a 'formula'.";
+            }
+        }
+    </script>
+</body>
+</html>
