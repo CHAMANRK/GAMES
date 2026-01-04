@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Teacher</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.js"></script>
+    <style>
+        /* Improved Chat UI */
+        .chat-container {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: #f0f2f5; /* WhatsApp like color */
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid #ddd;
+        }
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 20px; font-size: 15px; line-height: 1.4; position: relative; }
+        .bot-msg { 
+            background: #fff; 
+            color: #333; 
+            align-self: flex-start; 
+            border-bottom-left-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .user-msg { 
+            background: #0084ff; /* Messenger Blue */
+            color: white; 
+            align-self: flex-end; 
+            border-bottom-right-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .avatar { font-size: 12px; color: #888; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="container chat-container">
+        <div style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:10px; margin-bottom:10px;">
+            <h2 style="margin:0;">🤖 Math Genius AI</h2>
+            <small style="color:#ddd;">Online | Ready to help</small>
+        </div>
+        
+        <div class="chat-box" id="chat">
+            <div class="msg bot-msg">👋 Hello! I am your personal Math Teacher.<br>Ask me formulas or give me questions like <b>"25 * 10"</b>.</div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="userInput" placeholder="Type a math problem..." style="margin:0; text-align:left; padding-left:15px;" onkeypress="handleEnter(event)">
+            <button class="btn-submit" onclick="sendMessage()" style="width:60px; margin:0; border-radius:50%;">➤</button>
+        </div>
+        
+        <button class="btn-home" style="margin-top:10px; padding:10px;" onclick="location.href='index.html'">Back to Menu</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat');
+
+        function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
+
+        function sendMessage() {
+            let input = document.getElementById('userInput').value.trim();
+            if(!input) return;
+
+            addMsg(input, 'user-msg');
+            document.getElementById('userInput').value = '';
+
+            // Simulated Typing Delay (Makes it feel real)
+            setTimeout(() => {
+                let response = getSmartResponse(input.toLowerCase());
+                addMsg(response, 'bot-msg');
+                speak(response);
+            }, 600);
+        }
+
+        function addMsg(text, className) {
+            let div = document.createElement('div');
+            div.className = `msg ${className}`;
+            div.innerHTML = text; // innerHTML allows bold text
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function speak(text) {
+            // Remove HTML tags for speaking
+            let cleanText = text.replace(/<[^>]*>?/gm, '');
+            if(cleanText.length < 150) {
+                let msg = new SpeechSynthesisUtterance(cleanText);
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        // --- SMART BOT LOGIC ---
+        function getSmartResponse(text) {
+            // 1. Social Talk (Chatting)
+            if(text.match(/^(hi|hello|hey)/)) return "Hello! Ready to do some math? ➕➖";
+            if(text.includes('name')) return "I am Math Genius Bot v2.0!";
+            if(text.includes('how are you')) return "I am just code, but I feel calculated! 🤖";
+            if(text.includes('thank')) return "You're welcome! Keep practicing.";
+            if(text.includes('bye')) return "Goodbye! Come back soon.";
+
+            // 2. Formulas (Knowledge Base)
+            if(text.includes('formula')) {
+                if(text.includes('circle')) return "Area = <b>πr²</b> <br>Circumference = <b>2πr</b>";
+                if(text.includes('rectangle')) return "Area = <b>Length × Width</b>";
+                if(text.includes('triangle')) return "Area = <b>½ × Base × Height</b>";
+                if(text.includes('force')) return "Physics! Force = <b>Mass × Acceleration (F=ma)</b>";
+                return "I know formulas for Circle, Rectangle, Triangle, and Physics. Ask specifically!";
+            }
+
+            // 3. Solving Math
+            try {
+                // If text has 'solve', remove it
+                let mathText = text.replace('solve', '').replace('calculate', '');
+                
+                // Handle "X" equations manually for display
+                if(mathText.includes('=')) {
+                     return "For algebra (x + y = z), please solve it in the Quiz Mode 'Hard' level. Here, I calculate numbers like <b>'50/2'</b> or <b>'sqrt(16)'</b>.";
+                }
+
+                let result = math.evaluate(mathText);
+                // Format long decimals
+                if (!Number.isInteger(result)) result = result.toFixed(2);
+                
+                return `The answer is: <b>${result}</b>`;
+            } catch (e) {
+                return "I didn't understand. Try simple math like <b>'10 + 10'</b> or ask <b>'Circle formula'</b>.";
+            }
+        }
+    </script>
+</body>
+</html>
