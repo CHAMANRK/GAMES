@@ -4,7 +4,18 @@
   <meta charset="UTF-8" />
   <title>Najiful Quran Game | Neon Arena</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+  (function () {
+    const PASSWORD = "7244782";
+    let userPass = prompt("🔐 Enter Password to Access Najiful Quran Game:");
 
+    if (userPass !== PASSWORD) {
+      alert("❌ Wrong Password! Access Denied.");
+      document.body.innerHTML = "";
+      throw new Error("Unauthorized Access");
+    }
+  })();
+</script>
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@700&family=Orbitron:wght@600&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
 
