@@ -4,24 +4,82 @@
   <meta charset="UTF-8" />
   <title>Najiful Quran Game | Neon Arena</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script>
-  (function () {
-    const PASSWORD = "7244782";
-    let userPass = prompt("🔐 Enter Password to Access Najiful Quran Game:");
 
-    if (userPass !== PASSWORD) {
-      alert("❌ Wrong Password! Access Denied.");
-      document.body.innerHTML = "";
-      throw new Error("Unauthorized Access");
-    }
-  })();
-</script>
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@700&family=Orbitron:wght@600&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ===== LOCK SCREEN ===== */
+    .lock-screen{
+      position:fixed;
+      inset:0;
+      background:#05050a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:999999;
+    }
+    .lock-box{
+      background:rgba(0,0,0,.85);
+      border:2px solid #0ff;
+      box-shadow:0 0 40px #0ff;
+      border-radius:22px;
+      padding:35px;
+      text-align:center;
+      font-family:'Orbitron',sans-serif;
+      min-width:260px;
+    }
+    .lock-box h2{
+      color:#0ff;
+      margin-bottom:18px;
+      letter-spacing:1px;
+    }
+    .lock-box input{
+      width:100%;
+      padding:12px;
+      border-radius:25px;
+      border:none;
+      outline:none;
+      text-align:center;
+      font-size:1em;
+      margin-bottom:12px;
+    }
+    .lock-box button{
+      padding:10px 34px;
+      border:none;
+      border-radius:25px;
+      background:#0ff;
+      color:#000;
+      font-weight:bold;
+      cursor:pointer;
+      transition:transform .2s;
+    }
+    .lock-box button:hover{
+      transform:scale(1.08);
+    }
+    .lock-error{
+      margin-top:12px;
+      background:#ff0033;
+      color:#fff;
+      padding:6px 12px;
+      border-radius:10px;
+      display:none;
+    }
+  </style>
 </head>
+
 <body>
+
+<!-- 🔐 LOCK SCREEN -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-box">
+    <h2>🔐 ENTER PASSWORD</h2>
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="off">
+    <button id="unlockBtn">UNLOCK</button>
+    <div class="lock-error" id="lockError">❌ Wrong Password</div>
+  </div>
+</div>
 
 <div id="soundToggle" onclick="Quiz.toggleSound()">🔊</div>
 
@@ -120,5 +178,33 @@
 <footer class="game-footer">© 2025 • Najiful85.xyz</footer>
 
 <script src="js/app.js"></script>
+
+<!-- 🔐 LOCK SCRIPT -->
+<script>
+  const PASSWORD = "7244782";
+  const lockScreen = document.getElementById("lockScreen");
+  const passwordInput = document.getElementById("passwordInput");
+  const unlockBtn = document.getElementById("unlockBtn");
+  const lockError = document.getElementById("lockError");
+
+  function unlockGame(){
+    if(passwordInput.value === PASSWORD){
+      lockScreen.style.opacity = "0";
+      setTimeout(()=> lockScreen.remove(), 300);
+    }else{
+      lockError.style.display = "block";
+      passwordInput.value = "";
+    }
+  }
+
+  unlockBtn.addEventListener("click", unlockGame);
+  passwordInput.addEventListener("keypress", e=>{
+    if(e.key === "Enter") unlockGame();
+  });
+  passwordInput.addEventListener("input", ()=>{
+    lockError.style.display = "none";
+  });
+</script>
+
 </body>
 </html>
