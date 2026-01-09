@@ -517,6 +517,37 @@
     </audio>
 
     <script>
+        let deferredPrompt;
+const installContainer = document.getElementById('installContainer');
+const btnInstall = document.getElementById('btnInstall');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Browser ko default prompt dikhane se roko
+  e.preventDefault();
+  // Event ko save karlo taaki baad me trigger kar saken
+  deferredPrompt = e;
+  // Hamara custom install button dikhao
+  installContainer.style.display = 'block';
+
+  btnInstall.addEventListener('click', () => {
+    // Install prompt dikhao
+    deferredPrompt.prompt();
+    // User ka decision check karo
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User ne app install kar li! 🎉');
+      }
+      installContainer.style.display = 'none';
+      deferredPrompt = null;
+    });
+  });
+});
+
+// Agar app pehle se installed hai to button chupa do
+window.addEventListener('appinstalled', () => {
+  installContainer.style.display = 'none';
+  console.log('Chaman Hub installed successfully.');
+});
         function playClick() {
             var audio = document.getElementById("clickSound");
             audio.currentTime = 0;
