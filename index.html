@@ -516,60 +516,67 @@
         <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
     </audio>
 
-    <script>
-        let deferredPrompt;
-const installContainer = document.getElementById('installContainer');
-const btnInstall = document.getElementById('btnInstall');
+<script>
+    // --- 1. PWA INSTALL LOGIC ---
+    let deferredPrompt;
+    const installContainer = document.getElementById('installContainer');
+    const btnInstall = document.getElementById('btnInstall');
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Browser ko default prompt dikhane se roko
-  e.preventDefault();
-  // Event ko save karlo taaki baad me trigger kar saken
-  deferredPrompt = e;
-  // Hamara custom install button dikhao
-  installContainer.style.display = 'block';
+    // Service Worker Register karna zaroori hai PWA ke liye
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+        .then(() => console.log("Chaman Hub Service Worker Registered!"))
+        .catch(err => console.log("SW Registration Failed:", err));
+    }
 
-  btnInstall.addEventListener('click', () => {
-    // Install prompt dikhao
-    deferredPrompt.prompt();
-    // User ka decision check karo
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User ne app install kar li! 🎉');
-      }
-      installContainer.style.display = 'none';
-      deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Button dikhao jab install ke liye ready ho
+        if(installContainer) installContainer.style.display = 'block';
+
+        btnInstall.addEventListener('click', () => {
+            playClick(); // Install pe bhi click sound bajega!
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User ne app install kar li! 🎉');
+                }
+                installContainer.style.display = 'none';
+                deferredPrompt = null;
+            });
+        });
     });
-  });
-});
 
-// Agar app pehle se installed hai to button chupa do
-window.addEventListener('appinstalled', () => {
-  installContainer.style.display = 'none';
-  console.log('Chaman Hub installed successfully.');
-});
-        function playClick() {
-            var audio = document.getElementById("clickSound");
+    window.addEventListener('appinstalled', () => {
+        if(installContainer) installContainer.style.display = 'none';
+        console.log('Chaman Hub installed successfully.');
+    });
+
+    // --- 2. UI & SOUND LOGIC ---
+    function playClick() {
+        var audio = document.getElementById("clickSound");
+        if(audio) {
             audio.currentTime = 0;
             audio.play().catch(e => console.log('Audio play failed:', e));
         }
+    }
 
-        function openInfo() {
-            playClick();
-            document.getElementById('infoModal').style.display = 'flex';
+    function openInfo() {
+        playClick();
+        document.getElementById('infoModal').style.display = 'flex';
+    }
+
+    function closeInfo() {
+        document.getElementById('infoModal').style.display = 'none';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeInfo();
         }
-
-        function closeInfo() {
-            document.getElementById('infoModal').style.display = 'none';
-        }
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeInfo();
-            }
-        });
-    </script>
-
+    });
+</script>
+    
 </body>
 </html>
