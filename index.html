@@ -1,294 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/png" href="logo-192.png">
-    <link rel="manifest" href="manifest.json">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chaman Hub | Najeef Official</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap');
+<link rel="icon" type="image/png" href="logo-192.png">
+<link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chaman Hub | Najiful Official</title>
 
-        :root {
-            --primary: #00f5ff;
-            --secondary: #7f00ff;
-            --bg-dark: #020205;
-            --glass: rgba(255, 255, 255, 0.05);
-            
-            /* Brand Colors for Lights */
-            --wa-color: #25D366;  /* WhatsApp Green */
-            --ig-color: #d62976;  /* Instagram Pinkish-Purple */
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap');
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+:root{
+--primary:#00f5ff;
+--secondary:#7f00ff;
+--glass:rgba(255,255,255,0.05);
+--wa:#25D366;
+--ig:#d62976;
+}
 
-        body {
-            min-height: 100vh;
-            background: radial-gradient(circle at center, #10102a 0%, #050505 100%);
-            font-family: 'Rajdhani', sans-serif;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            padding-bottom: 200px; /* Footer ke liye jagah */
-        }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-        /* --- ANIMATIONS (Upar Niche Hilne Wala Code) --- */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
+body{
+min-height:100vh;
+background:radial-gradient(circle,#10102a,#050505);
+font-family:'Rajdhani',sans-serif;
+color:#fff;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding-bottom:200px;
+overflow-x:hidden;
+}
 
-        @keyframes float-slow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
+/* ANIMATIONS */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+@keyframes floatSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-        /* HEADER */
-        header {
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            z-index: 10;
-        }
+/* HEADER */
+header{
+width:100%;
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+backdrop-filter:blur(10px);
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
 
-        .brand-logo {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            color: var(--primary);
-            letter-spacing: 2px;
-            animation: float-slow 4s ease-in-out infinite; /* Logo bhi thoda hilega */
-        }
+.brand-logo{
+font-family:'Orbitron',sans-serif;
+color:var(--primary);
+letter-spacing:2px;
+animation:floatSlow 4s infinite;
+}
 
-        /* MAIN CONTENT */
-        .main-title {
-            font-family: 'Bungee Shade', cursive;
-            font-size: clamp(30px, 10vw, 60px);
-            margin-top: 50px;
-            text-shadow: 0 0 20px var(--primary);
-            text-align: center;
-            /* Ye line title ko upar niche hilayegi */
-            animation: float 3s ease-in-out infinite;
-        }
+/* INFO BUTTON */
+.info-btn{
+width:28px;height:28px;
+border-radius:50%;
+border:1px solid var(--primary);
+color:var(--primary);
+display:flex;align-items:center;justify-content:center;
+cursor:pointer;font-weight:bold;
+}
 
-        .container {
-            width: 90%;
-            max-width: 400px;
-            margin-top: 30px;
-            padding: 25px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            /* Container bhi thoda alag speed se hilega */
-            animation: float-slow 5s ease-in-out infinite;
-        }
+/* TITLE */
+.main-title{
+font-family:'Bungee Shade',cursive;
+font-size:clamp(30px,10vw,60px);
+margin-top:50px;
+text-shadow:0 0 20px var(--primary);
+animation:float 3s infinite;
+}
 
-        .menu-list { list-style: none; }
-        .menu-list li { margin-bottom: 15px; }
-        
-        .menu-list a {
-            font-family: 'Orbitron', sans-serif;
-            display: flex;
-            align-items: center;
-            padding: 14px 18px;
-            text-decoration: none;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            transition: 0.3s;
-            border: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-            overflow: hidden;
-        }
+/* CONTAINER */
+.container{
+width:90%;max-width:400px;
+margin-top:30px;
+padding:25px;
+background:var(--glass);
+backdrop-filter:blur(20px);
+border-radius:20px;
+border:1px solid rgba(0,245,255,.2);
+animation:floatSlow 5s infinite;
+}
 
-        /* Button Hover Effect */
-        .menu-list a:hover {
-            background: linear-gradient(90deg, var(--secondary), var(--primary));
-            transform: scale(1.05);
-            box-shadow: 0 0 20px var(--primary);
-            border-color: transparent;
-        }
+.menu-list{list-style:none}
+.menu-list li{margin-bottom:15px}
 
-        .menu-list span { margin-right: 15px; font-size: 20px; }
+.menu-list a{
+display:flex;
+align-items:center;
+gap:10px;
+padding:14px 18px;
+text-decoration:none;
+color:#fff;
+background:rgba(255,255,255,0.03);
+border-radius:12px;
+border:1px solid rgba(255,255,255,.05);
+font-family:'Orbitron',sans-serif;
+transition:.3s;
+}
 
-        /* --- SOCIAL LIGHT BUTTONS (FIXED AT BOTTOM) --- */
-        .social-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 180px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 30px;
-            padding-bottom: 20px;
-            /* Fade effect background taaki buttons clear dikhe */
-            background: linear-gradient(to top, #020205 20%, transparent 100%);
-            z-index: 100;
-        }
+.menu-list a:hover{
+background:linear-gradient(90deg,var(--secondary),var(--primary));
+transform:scale(1.05);
+box-shadow:0 0 20px var(--primary);
+}
 
-        .light-button {
-            position: relative;
-            width: 80px;
-            height: 150px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
+/* STATUS */
+.status{
+margin-left:auto;
+font-size:10px;
+padding:3px 6px;
+border-radius:6px;
+}
+.online{background:#00c853}
+.maintenance{background:#d50000}
 
-        .button-holder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 70px;
-            width: 70px;
-            background-color: #0a0a0a;
-            border-radius: 12px;
-            transition: 300ms;
-            outline: #111 2px solid;
-            outline-offset: 8px;
-            z-index: 5;
-            cursor: pointer;
-        }
+/* FOOTER TEXT */
+.footer-text{
+margin-top:15px;
+font-size:10px;
+letter-spacing:2px;
+opacity:.4;
+text-align:center;
+}
 
-        .button-holder svg {
-            height: 30px;
-            fill: #555; /* Default Dark Icon */
-            transition: 300ms;
-        }
+/* INFO MODAL */
+.info-modal{
+position:fixed;inset:0;
+background:rgba(0,0,0,.6);
+backdrop-filter:blur(8px);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:999;
+}
 
-        /* LIGHT BEAM STRUCTURE */
-        .light-holder {
-            position: absolute;
-            top: 0;
-            height: 150px;
-            width: 80px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            pointer-events: none;
-        }
+.info-box{
+background:#0b0b1a;
+border:1px solid var(--primary);
+border-radius:16px;
+padding:20px;
+width:85%;max-width:360px;
+text-align:center;
+}
 
-        .dot {
-            position: absolute;
-            top: 0;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            opacity: 0;
-            transition: 300ms;
-        }
+.info-box h3{color:var(--primary)}
+.info-box button{
+margin-top:15px;
+padding:8px 16px;
+border:none;border-radius:10px;
+background:var(--primary);
+cursor:pointer;
+}
 
-        .light {
-            position: absolute;
-            top: 0;
-            width: 100px;
-            height: 120px;
-            clip-path: polygon(50% 0%, 20% 100%, 80% 100%);
-            opacity: 0;
-            transition: 300ms;
-        }
+/* SOCIAL FOOTER (ORIGINAL) */
+.social-footer{
+position:fixed;
+bottom:0;left:0;
+width:100%;height:180px;
+display:flex;
+justify-content:center;
+align-items:flex-end;
+gap:30px;
+padding-bottom:20px;
+background:linear-gradient(to top,#020205 20%,transparent);
+z-index:100;
+}
 
-        /* --- WHATSAPP SPECIFIC COLORS (Green) --- */
-        .whatsapp:hover .button-holder {
-            outline-color: var(--wa-color);
-            background: #0f0f0f;
-            box-shadow: 0 0 15px rgba(37, 211, 102, 0.2);
-        }
-        .whatsapp:hover svg { fill: var(--wa-color); }
-        .whatsapp .dot { background-color: var(--wa-color); box-shadow: 0 0 15px var(--wa-color); }
-        .whatsapp .light { background: linear-gradient(180deg, rgba(37, 211, 102, 0.5) 0%, rgba(37, 211, 102, 0) 80%); }
+.light-button{position:relative;width:80px;height:150px}
+.button-holder{
+height:70px;width:70px;
+background:#0a0a0a;
+border-radius:12px;
+display:flex;align-items:center;justify-content:center;
+outline:#111 2px solid;
+outline-offset:8px;
+transition:.3s;
+cursor:pointer;
+}
+.button-holder svg{height:30px;fill:#555;transition:.3s}
 
-        /* --- INSTAGRAM SPECIFIC COLORS (Pink/Purple) --- */
-        .instagram:hover .button-holder {
-            outline-color: var(--ig-color);
-            background: #0f0f0f;
-            box-shadow: 0 0 15px rgba(214, 41, 118, 0.2);
-        }
-        .instagram:hover svg { fill: var(--ig-color); }
-        .instagram .dot { background-color: var(--ig-color); box-shadow: 0 0 15px var(--ig-color); }
-        .instagram .light { background: linear-gradient(180deg, rgba(214, 41, 118, 0.6) 0%, rgba(214, 41, 118, 0) 80%); }
+.light-holder{position:absolute;top:0;width:80px;height:150px;pointer-events:none}
+.dot{
+position:absolute;top:0;
+width:8px;height:8px;border-radius:50%;
+opacity:0;transition:.3s;
+}
+.light{
+position:absolute;top:0;
+width:100px;height:120px;
+clip-path:polygon(50% 0%,20% 100%,80% 100%);
+opacity:0;transition:.3s;
+}
 
-        /* Universal Hover State */
-        .light-button:hover .dot, .light-button:hover .light { opacity: 1; }
-        .light-button:active .button-holder { transform: scale(0.95); }
+/* WHATSAPP */
+.whatsapp:hover .button-holder{outline-color:var(--wa)}
+.whatsapp:hover svg{fill:var(--wa)}
+.whatsapp .dot{background:var(--wa);box-shadow:0 0 15px var(--wa)}
+.whatsapp .light{background:linear-gradient(180deg,rgba(37,211,102,.5),transparent)}
 
-    </style>
+/* INSTAGRAM */
+.instagram:hover .button-holder{outline-color:var(--ig)}
+.instagram:hover svg{fill:var(--ig)}
+.instagram .dot{background:var(--ig);box-shadow:0 0 15px var(--ig)}
+.instagram .light{background:linear-gradient(180deg,rgba(214,41,118,.6),transparent)}
+
+.light-button:hover .dot,
+.light-button:hover .light{opacity:1}
+
+/* AUDIO */
+audio{display:none}
+</style>
 </head>
+
 <body>
 
-    <header>
-        <div class="brand-logo">NAJIFUL85</div>
-        <div style="color: var(--primary); font-size: 0.8rem;">v3.0 ULTRA</div>
-    </header>
+<header>
+<div class="brand-logo">NAJIFUL85</div>
+<div class="info-btn" onclick="openInfo()">!</div>
+</header>
 
-    <h1 class="main-title">CHAMAN HUB</h1>
+<h1 class="main-title">CHAMAN HUB</h1>
 
-    <div class="container">
-        <ul class="menu-list">
-            <li><a href="I.html" onclick="playClick()"><span>📖</span> Quran Quiz</a></li>
-            <li><a href="Future_Game/index.html" onclick="playClick()"><span>🎮</span> Play Games</a></li>
-            <li><a href="H/In.html" onclick="playClick()"><span>🤖</span> AI Tester</a></li>
-            <li><a href="Updating/index.html" onclick="playClick()"><span>🤖</span> UPDATING</a></li>
-         </ul>
-        <div style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.3); font-size: 10px; letter-spacing: 2px;">
-            SYSTEM SECURE
-        </div>
-    </div>
+<div class="container">
+<ul class="menu-list">
 
-    <div class="social-footer">
-        
-        <div class="light-button whatsapp" onclick="playClick()">
-            <a href="https://wa.me/+919800409085" target="_blank" style="text-decoration: none;">
-                <div class="button-holder">
-                    <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.2-3.2-5.5-.3-8.5 2.5-11.2 2.5-2.5 5.5-6.5 8.3-9.7 2.8-3.3 3.7-5.5 5.5-9.3 1.9-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.8 23.5 9.2 31.5 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.5 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
-                </div>
-            </a>
-            <div class="light-holder">
-                <div class="dot"></div>
-                <div class="light"></div>
-            </div>
-        </div>
+<li><a href="I.html" onclick="playClick()">📖 Quran Quiz
+<span class="status online">Server Online</span></a></li>
 
-        <div class="light-button instagram" onclick="playClick()">
-            <a href="https://www.instagram.com/with_chaman/?sub_confirmation=1" target="_blank" style="text-decoration: none;">
-                <div class="button-holder">
-                    <svg viewBox="0 0 448 512"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg>
-                </div>
-            </a>
-            <div class="light-holder">
-                <div class="dot"></div>
-                <div class="light"></div>
-            </div>
-        </div>
+<li><a href="Future_Game/index.html" onclick="playClick()">🎮 Play Games
+<span class="status online">Server Online</span></a></li>
 
-    </div>
+<li><a href="H/In.html" onclick="playClick()">🤖 AI Tester
+<span class="status online">Server Online</span></a></li>
 
-    <audio id="clickSound" preload="auto">
-        <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
-    </audio>
+<li><a href="Updating/index.html" onclick="playClick()">⚙️ UPDATING
+<span class="status maintenance">Maintenance</span></a></li>
 
-    <script>
-        function playClick() {
-            var audio = document.getElementById("clickSound");
-            audio.currentTime = 0; // Sound ko rewind karega taaki fast click pe bhi baje
-            audio.play();
-        }
-    </script>
+</ul>
+<div class="footer-text">SYSTEM SECURE</div>
+</div>
+
+<!-- INFO MODAL -->
+<div id="infoModal" class="info-modal">
+<div class="info-box">
+<h3>ℹ️ CHAMAN HUB INFO</h3>
+<p>Yahan tum baad me info edit kar sakte ho</p>
+<button onclick="closeInfo()">Close</button>
+</div>
+</div>
+
+<!-- SOCIAL FOOTER -->
+<div class="social-footer">
+
+<div class="light-button whatsapp">
+<a href="https://wa.me/+919800409085" target="_blank">
+<div class="button-holder">
+<svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32..."/></svg>
+</div></a>
+<div class="light-holder"><div class="dot"></div><div class="light"></div></div>
+</div>
+
+<div class="light-button instagram">
+<a href="https://www.instagram.com/with_chaman/" target="_blank">
+<div class="button-holder">
+<svg viewBox="0 0 448 512"><path d="M224.1 141c-63.6 0-114.9 51.3..."/></svg>
+</div></a>
+<div class="light-holder"><div class="dot"></div><div class="light"></div></div>
+</div>
+
+</div>
+
+<audio id="clickSound">
+<source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3">
+</audio>
+
+<script>
+function playClick(){
+let a=document.getElementById("clickSound");
+a.currentTime=0;a.play();
+}
+function openInfo(){playClick();infoModal.style.display="flex"}
+function closeInfo(){infoModal.style.display="none"}
+</script>
 
 </body>
 </html>
