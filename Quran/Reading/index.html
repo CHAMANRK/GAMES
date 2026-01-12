@@ -4,22 +4,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Quran Kareem - Najiful85</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary: #2e7d32; /* Deep Green */
+            --bg: #f4f7f6;
+            --text: #333;
+            --card: #ffffff;
+            --overlay-bg: rgba(0, 0, 0, 0.85);
+            --img-filter: none;
+        }
+
+        body.night-mode {
+            --primary: #1b5e20;
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card: #1e1e1e;
+            --overlay-bg: rgba(0, 0, 0, 0.95);
+            --img-filter: invert(1) hue-rotate(180deg) brightness(0.8);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-bottom: 80px; /* Space for bottom nav */
+            transition: background 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* --- OVERLAY (Khush Amdeed Screen) --- */
+        .overlay {
+            display: flex; /* Centering fix */
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            inset: 0;
+            background: var(--overlay-bg);
+            z-index: 2000; /* Sabse upar */
+        }
+
+        .overlay-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            width: 85%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .overlay-card h2 { margin-top: 0; color: var(--primary); }
+        .overlay-card select { 
+            width: 100%; padding: 12px; margin: 10px 0; 
+            border-radius: 8px; border: 1px solid #ccc; font-size: 16px;
+            background: var(--bg); color: var(--text);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.5); z-index: 998;
+        }
+
+        .sidebar {
+            height: 100%; width: 0; position: fixed; z-index: 999;
+            top: 0; left: 0; background: var(--card);
+            overflow-y: auto; transition: 0.3s;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        .sidebar-header {
+            padding: 15px 20px;
+            background: var(--primary);
+            color: white;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .close-btn { font-size: 30px; cursor: pointer; }
+
+        .sidebar-content { padding: 20px; }
+        .sidebar-content label { display: block; margin-top: 15px; font-weight: bold; }
+        .sidebar-content select, .sidebar-content input {
+            width: 100%; padding: 10px; margin-top: 5px;
+            border: 1px solid #ccc; border-radius: 5px;
+            background: var(--bg); color: var(--text);
+        }
+
+        /* --- TOP BAR --- */
+        .top-bar {
+            background: var(--card);
+            padding: 10px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #page-info { font-weight: bold; font-size: 1.1rem; }
+
+        /* --- QURAN IMAGE CONTAINER --- */
+        .quran-container {
+            display: flex; justify-content: center; padding: 10px;
+            min-height: 60vh;
+        }
+        .quran-frame {
+            width: 100%; max-width: 600px;
+            transition: transform 0.2s;
+        }
+        .quran-frame.zoomed { transform: scale(1.5); cursor: zoom-out; }
+        
+        #quran-img {
+            width: 100%; height: auto;
+            border-radius: 5px;
+            filter: var(--img-filter);
+            transition: opacity 0.2s;
+            display: block;
+        }
+
+        /* --- BOTTOM NAVIGATION --- */
+        .nav-btns {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: var(--card);
+            display: flex; justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 90;
+        }
+
+        .nav-btn, .btn-primary {
+            background: var(--primary); color: white; border: none;
+            padding: 10px 25px; border-radius: 25px;
+            font-size: 16px; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .nav-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .action-btn { 
+            width: 100%; padding: 10px; background: #444; color: white; 
+            border: none; border-radius: 5px; cursor: pointer; 
+        }
+
+        /* --- BOOKMARKS --- */
+        .bookmarks-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .bookmark-chip {
+            background: var(--primary); color: white;
+            padding: 5px 10px; border-radius: 15px; font-size: 12px; border: none;
+        }
+
+        /* Utility */
+        hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }
+        .menu-icon-btn { font-size: 24px; background: none; border: none; color: var(--text); cursor: pointer; }
+        .bookmark-btn { font-size: 24px; background: none; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
 
-<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
-
-<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-
 <div id="selectionOverlay" class="overlay">
     <div class="overlay-card">
-        <h2>Khush Amdeed</h2>
-        <p>Para aur Page chunein:</p>
-        <select id="init-juz" onchange="populateOverlayPages(this.value)"></select>
-        <select id="init-page"></select> <button class="btn-primary" onclick="startFromOverlay()">Start Reading</button>
+        <h2>🤲 Khush Amdeed</h2>
+        <p>Kahan se shuru karna chahenge?</p>
+        
+        <select id="init-juz" onchange="handleOverlayPara(this.value)">
+            <option value="">-- Para Chunein --</option>
+            </select>
+        
+        <select id="init-page">
+            <option value="1">Page 1</option>
+            </select>
+        
+        <br><br>
+        <button class="btn-primary" onclick="startFromOverlay()">Start Reading</button>
     </div>
 </div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
 
 <div id="mySidebar" class="sidebar">
     <div class="sidebar-header">
@@ -29,40 +185,261 @@
     <div class="sidebar-content">
         <button class="action-btn" onclick="toggleNightMode()">🌙 Toggle Night Mode</button>
         <hr>
-        <label>Para Select:</label>
+        
+        <label>🔍 Surah Search:</label>
+        <input type="text" id="surahSearch" placeholder="Search (e.g., Yasin)..." onkeyup="filterSurahs()">
+        <select id="surah-select" onchange="jumpToPage(this.value)" size="5"></select>
+
+        <hr>
+        <label>📖 Para (Juz):</label>
         <select id="juz-select" onchange="handleParaChange(this.value)"></select>
 
-        <label>Page (1-20):</label>
-        <select id="sub-page-select" onchange="jumpToPage(this.value)"></select>
+        <label>📄 Page (Current Para):</label>
+        <select id="sub-page-select" onchange="jumpToPage(this.value)">
+            <option>-- Select Para First --</option>
+        </select>
 
         <hr>
-        <label>Surah Search:</label>
-        <input type="text" id="surahSearch" placeholder="Search Surah..." onkeyup="filterSurahs()">
-        <select id="surah-select" onchange="jumpToPage(this.value)" size="6"></select>
-
-        <hr>
-        <label>Bookmarks:</label>
+        <label>❤️ Saved Bookmarks:</label>
         <div id="bookmarksList" class="bookmarks-grid"></div>
     </div>
 </div>
 
 <div class="top-bar">
-    <button class="menu-icon-btn" onclick="openNav()">☰ Menu</button>
-    <div id="page-info">1 / 604</div>
+    <button class="menu-icon-btn" onclick="openNav()">☰</button>
+    <div id="page-info">Page 1 / 604</div>
     <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">🤍</button>
+</div>
+
+<div class="progress-container" style="height: 3px; background: #ddd; width: 100%;">
+    <div class="progress-bar" id="progressBar" style="height: 100%; background: var(--primary); width: 0%;"></div>
 </div>
 
 <div class="quran-container">
     <div class="quran-frame" id="imageContainer">
-        <img id="quran-img" src="Images/1.png" alt="Quran Page">
+        <img id="quran-img" src="Images/1.png" alt="Quran Page - Please Ensure 'Images' folder exists" onerror="this.alt='Image not found. Check folder name.'">
     </div>
 </div>
 
 <div class="nav-btns">
-    <button class="nav-btn" id="prev-btn" onclick="changePage(-1)">Peeche</button>
-    <button class="nav-btn" id="next-btn" onclick="changePage(1)">Aage</button>
+    <button class="nav-btn" id="prev-btn" onclick="changePage(-1)">⬅️ Peeche</button>
+    <button class="nav-btn" id="next-btn" onclick="changePage(1)">Aage ➡️</button>
 </div>
 
-<script src="script.js"></script>
+<script>
+    // --- CONFIGURATION ---
+    let currentP = parseInt(localStorage.getItem('quranLastPage')) || 1;
+    const totalP = 604;
+    let bookmarks = JSON.parse(localStorage.getItem('quranBookmarks')) || [];
+    let isNightMode = localStorage.getItem('nightMode') === 'true';
+
+    // 15-Line Mushaf Data
+    const surahMap = {
+        1: ["Al-Fatihah", 1], 2: ["Al-Baqarah", 2], 3: ["Al-Imran", 50], 4: ["An-Nisa", 77],
+        5: ["Al-Ma'idah", 106], 6: ["Al-An'am", 128], 7: ["Al-A'raf", 151], 8: ["Al-Anfal", 177],
+        9: ["At-Tawbah", 187], 10: ["Yunus", 208], 11: ["Hud", 221], 12: ["Yusuf", 235],
+        13: ["Ar-Ra'd", 249], 14: ["Ibrahim", 255], 15: ["Al-Hijr", 262], 16: ["An-Nahl", 267],
+        17: ["Al-Isra", 282], 18: ["Al-Kahf", 293], 19: ["Maryam", 305], 20: ["Ta-Ha", 312],
+        21: ["Al-Anbiya", 322], 22: ["Al-Hajj", 332], 23: ["Al-Mu'minun", 342], 24: ["An-Nur", 350],
+        25: ["Al-Furqan", 359], 26: ["Ash-Shu'ara", 367], 27: ["An-Naml", 377], 28: ["Al-Qasas", 385],
+        29: ["Al-Ankabut", 396], 30: ["Ar-Rum", 404], 31: ["Luqman", 411], 32: ["As-Sajdah", 415],
+        33: ["Al-Ahzab", 418], 34: ["Saba", 428], 35: ["Fatir", 434], 36: ["Ya-Sin", 440],
+        37: ["As-Saffat", 446], 38: ["Sad", 453], 39: ["Az-Zumar", 458], 40: ["Ghafir", 467],
+        41: ["Fussilat", 477], 42: ["Ash-Shura", 483], 43: ["Az-Zukhruf", 489], 44: ["Ad-Dukhan", 496],
+        45: ["Al-Jathiyah", 499], 46: ["Al-Ahqaf", 502], 47: ["Muhammad", 507], 48: ["Al-Fath", 511],
+        49: ["Al-Hujurat", 515], 50: ["Qaf", 518], 51: ["Adh-Dhariyat", 520], 52: ["At-Tur", 523],
+        53: ["An-Najm", 526], 54: ["Al-Qamar", 528], 55: ["Ar-Rahman", 531], 56: ["Al-Waqi'ah", 534],
+        57: ["Al-Hadid", 537], 58: ["Al-Mujadilah", 542], 59: ["Al-Hashr", 545], 60: ["Al-Mumtahanah", 549],
+        61: ["As-Saff", 551], 62: ["Al-Jumu'ah", 553], 63: ["Al-Munafiqun", 554], 64: ["At-Taghabun", 556],
+        65: ["At-Talaq", 558], 66: ["At-Tahrim", 560], 67: ["Al-Mulk", 562], 68: ["Al-Qalam", 564],
+        69: ["Al-Haqqah", 567], 70: ["Al-Ma'arij", 568], 71: ["Nuh", 570], 72: ["Al-Jinn", 572],
+        73: ["Al-Muzzammil", 574], 74: ["Al-Muddaththir", 575], 75: ["Al-Qiyamah", 577], 76: ["Al-Insan", 578],
+        77: ["Al-Mursalat", 580], 78: ["An-Naba", 582], 79: ["An-Nazi'at", 583], 80: ["Abasa", 585],
+        81: ["At-Takwir", 586], 82: ["Al-Infitar", 587], 83: ["Al-Mutaffifin", 587], 84: ["Al-Inshiqaq", 589],
+        85: ["Al-Buruj", 590], 86: ["At-Tariq", 591], 87: ["Al-A'la", 591], 88: ["Al-Ghashiyah", 592],
+        89: ["Al-Fajr", 593], 90: ["Al-Balad", 594], 91: ["Ash-Shams", 595], 92: ["Al-Layl", 595],
+        93: ["Ad-Duha", 596], 94: ["Ash-Sharh", 596], 95: ["At-Tin", 597], 96: ["Al-Alaq", 597],
+        97: ["Al-Qadr", 598], 98: ["Al-Bayyinah", 598], 99: ["Az-Zalzalah", 599], 100: ["Al-Adiyat", 599],
+        101: ["Al-Qari'ah", 600], 102: ["At-Takathur", 600], 103: ["Al-Asr", 601], 104: ["Al-Humazah", 601],
+        105: ["Al-Fil", 601], 106: ["Quraysh", 602], 107: ["Al-Ma'un", 602], 108: ["Al-Kawthar", 602],
+        109: ["Al-Kafirun", 603], 110: ["An-Nasr", 603], 111: ["Al-Masad", 603], 112: ["Al-Ikhlas", 604],
+        113: ["Al-Falaq", 604], 114: ["An-Nas", 604]
+    };
+
+    const juzMap = Array.from({length: 30}, (_, i) => (i * 20) + 2).map((p, i) => i === 0 ? 1 : p);
+
+    // --- NAVIGATION FUNCTIONS ---
+    function changePage(step) {
+        let target = currentP + step;
+        if (target < 1 || target > totalP) return;
+
+        const img = document.getElementById('quran-img');
+        img.style.opacity = '0.5';
+        
+        setTimeout(() => {
+            currentP = target;
+            updateDisplay();
+            img.style.opacity = '1';
+        }, 200);
+    }
+
+    function updateDisplay() {
+        // Image path check:
+        document.getElementById('quran-img').src = `Images/${currentP}.png`;
+        
+        document.getElementById('page-info').innerText = `Page ${currentP} / ${totalP}`;
+        document.getElementById('progressBar').style.width = `${(currentP / totalP) * 100}%`;
+        
+        // Update Bookmark Icon
+        const isBookmarked = bookmarks.includes(currentP);
+        document.getElementById('bookmarkBtn').innerHTML = isBookmarked ? '❤️' : '🤍';
+        
+        // Button States
+        document.getElementById('prev-btn').disabled = (currentP <= 1);
+        document.getElementById('next-btn').disabled = (currentP >= totalP);
+        
+        localStorage.setItem('quranLastPage', currentP);
+        window.scrollTo(0,0);
+    }
+
+    function jumpToPage(p) {
+        if(!p) return;
+        currentP = parseInt(p);
+        updateDisplay();
+        closeNav();
+    }
+
+    // --- SIDEBAR & UI ---
+    function openNav() { 
+        document.getElementById("mySidebar").style.width = "280px"; 
+        document.getElementById("sidebarOverlay").style.display = "block";
+    }
+
+    function closeNav() { 
+        document.getElementById("mySidebar").style.width = "0"; 
+        document.getElementById("sidebarOverlay").style.display = "none";
+    }
+
+    function toggleNightMode() {
+        isNightMode = !isNightMode;
+        if(isNightMode) document.body.classList.add('night-mode');
+        else document.body.classList.remove('night-mode');
+        localStorage.setItem('nightMode', isNightMode);
+    }
+
+    function filterSurahs() {
+        let input = document.getElementById('surahSearch').value.toLowerCase();
+        let select = document.getElementById('surah-select');
+        let options = select.getElementsByTagName('option');
+        
+        for (let i = 0; i < options.length; i++) {
+            let txtValue = options[i].text.toLowerCase();
+            if (txtValue.indexOf(input) > -1) {
+                options[i].style.display = "";
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+    }
+
+    // --- OVERLAY LOGIC ---
+    function handleOverlayPara(startPage) {
+        // Populates the "Page" dropdown inside Overlay
+        const initPage = document.getElementById('init-page');
+        initPage.innerHTML = '';
+        if(!startPage) return;
+
+        for(let i=0; i<20; i++) {
+            let p = parseInt(startPage) + i;
+            if(p > totalP) break;
+            initPage.add(new Option(`Page ${p}`, p));
+        }
+    }
+
+    function handleParaChange(startPage) {
+        // Populates the "Page" dropdown inside Sidebar
+        const sub = document.getElementById('sub-page-select');
+        sub.innerHTML = '<option value="">-- Choose Page --</option>';
+        if(!startPage) return;
+
+        for(let i=0; i<20; i++) {
+            let p = parseInt(startPage) + i;
+            if(p > totalP) break;
+            sub.add(new Option(`Page ${p}`, p));
+        }
+        jumpToPage(startPage); // Jump to start of Para immediately
+    }
+
+    function startFromOverlay() {
+        const p = document.getElementById('init-page').value;
+        if(p) { currentP = parseInt(p); }
+        
+        document.getElementById('selectionOverlay').style.display = 'none';
+        localStorage.setItem('hasVisited', 'true');
+        updateDisplay();
+    }
+
+    // --- BOOKMARKS ---
+    function toggleBookmark() {
+        if (bookmarks.includes(currentP)) {
+            bookmarks = bookmarks.filter(p => p !== currentP);
+        } else {
+            bookmarks.push(currentP);
+        }
+        localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+        updateDisplay();
+        renderBookmarks();
+    }
+
+    function renderBookmarks() {
+        const container = document.getElementById('bookmarksList');
+        if(bookmarks.length === 0) {
+            container.innerHTML = '<span style="font-size:12px; color:#888;">No saved pages.</span>';
+            return;
+        }
+        container.innerHTML = bookmarks.map(p => 
+            `<button class="bookmark-chip" onclick="jumpToPage(${p})">Page ${p}</button>`
+        ).join('');
+    }
+
+    // Zoom Feature (Double Tap)
+    let lastTap = 0;
+    document.getElementById('imageContainer').addEventListener('click', function(e) {
+        let now = new Date().getTime();
+        if(now - lastTap < 300) { this.classList.toggle('zoomed'); }
+        lastTap = now;
+    });
+
+    // --- INITIALIZATION ---
+    window.onload = () => {
+        const jSel = document.getElementById('juz-select');
+        const iJSel = document.getElementById('init-juz');
+        const sSel = document.getElementById('surah-select');
+
+        // Fill Para Selectors
+        juzMap.forEach((p, i) => {
+            let txt = `Para ${i+1}`;
+            jSel.add(new Option(txt, p));
+            iJSel.add(new Option(txt, p));
+        });
+
+        // Fill Surah Selector
+        Object.entries(surahMap).forEach(([id, data]) => {
+            sSel.add(new Option(`${id}. ${data[0]}`, data[1]));
+        });
+
+        // Initialize display
+        if(isNightMode) document.body.classList.add('night-mode');
+        renderBookmarks();
+        
+        // Show/Hide Overlay based on history
+        if(localStorage.getItem('hasVisited')) {
+            document.getElementById('selectionOverlay').style.display = 'none';
+        }
+        
+        updateDisplay();
+    };
+</script>
+
 </body>
 </html>
