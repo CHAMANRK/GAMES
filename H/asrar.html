@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matrix Magic By Gemini</title>
+    <style>
+        /* Screen ko black aur full size karne ke liye style */
+        body { margin: 0; padding: 0; overflow: hidden; background: black; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="c"></canvas>
+
+    <script>
+        // Ye JavaScript logic hai jo animation banata hai
+        var c = document.getElementById("c");
+        var ctx = c.getContext("2d");
+
+        // Screen ko full size karna
+        c.height = window.innerHeight;
+        c.width = window.innerWidth;
+
+        // Girne wale characters (letters)
+        var matrix = "010101 GEMINI CODE MAGIC HACKING SYSTEM @#$%^&*";
+        matrix = matrix.split("");
+
+        var font_size = 14;
+        var columns = c.width / font_size; // Columns ki sankhya
+        var drops = [];
+
+        for(var x = 0; x < columns; x++)
+            drops[x] = 1; 
+
+        function draw() {
+            // Thoda transparent black background taaki trail dikhe
+            ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+            ctx.fillRect(0, 0, c.width, c.height);
+
+            ctx.fillStyle = "#0F0"; // Green Text Color
+            ctx.font = font_size + "px arial";
+
+            for(var i = 0; i < drops.length; i++) {
+                var text = matrix[Math.floor(Math.random() * matrix.length)];
+                ctx.fillText(text, i * font_size, drops[i] * font_size);
+
+                // Barish ko wapas upar bhejna
+                if(drops[i] * font_size > c.height && Math.random() > 0.975)
+                    drops[i] = 0;
+
+                drops[i]++;
+            }
+        }
+        // Animation ki speed (35 milliseconds)
+        setInterval(draw, 35);
+    </script>
+</body>
+</html>

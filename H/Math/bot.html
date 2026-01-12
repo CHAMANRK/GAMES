@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Math Tutor</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chat-container { height: 450px; display: flex; flex-direction: column; }
+        .chat-box { flex-grow: 1; overflow-y: auto; background: #ece5dd; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-radius: 10px; }
+        .msg { padding: 10px 15px; border-radius: 10px; max-width: 80%; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
+        .bot-msg { background: #ffffff; color: #000; align-self: flex-start; border-top-left-radius: 0; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .user-msg { background: #dcf8c6; color: #000; align-self: flex-end; border-top-right-radius: 0; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .typing { font-style: italic; color: #666; font-size: 12px; margin-left: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container chat-container">
+        <div style="text-align:left; padding-bottom:10px; border-bottom:1px solid #ddd; margin-bottom:10px;">
+            <h2 style="margin:0; color:#fff;">🤖 AI Professor</h2>
+            <small style="color:#eee;">Powered by NAJIFUL ISLAM</small>
+        </div>
+        
+        <div class="chat-box" id="chat">
+            <div class="msg bot-msg">👋 Walaikum Assalam! I am your Math Teacher. <br>Ask me to explain formulas, solve equations, or clear doubts.</div>
+        </div>
+        <div id="loading" class="typing">AI is thinking...</div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <input type="text" id="userInput" placeholder="Ask doubt (e.g., Explain Pythagoras)..." onkeypress="handleEnter(event)">
+            <button class="btn-submit" onclick="sendMessage()" style="width:60px; margin:0; border-radius:50%;">➤</button>
+        </div>
+        
+        <button class="btn-home" onclick="location.href='index.html'" style="margin-top:10px;">⬅ Back</button>
+    </div>
+
+    <script>
+        // AAPKI API KEY (Jo code mein thi)
+        const API_KEY = "AIzaSyC6KcojG7D2Uq_lHryo9c3v6wmuDtT9Rm0"; 
+
+        const chatBox = document.getElementById('chat');
+        const loadingInd = document.getElementById('loading');
+
+        function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
+
+        async function sendMessage() {
+            let input = document.getElementById('userInput').value.trim();
+            if(!input) return;
+
+            addMsg(input, 'user-msg');
+            document.getElementById('userInput').value = '';
+            
+            loadingInd.style.display = 'block';
+
+            try {
+                let response = await askGemini(input);
+                loadingInd.style.display = 'none';
+                addMsg(response, 'bot-msg');
+                speak(response);
+            } catch (error) {
+                loadingInd.style.display = 'none';
+                addMsg(error, 'bot-msg');
+            }
+        }
+
+        function addMsg(text, className) {
+            let div = document.createElement('div');
+            div.className = `msg ${className}`;
+            div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function speak(text) {
+            let cleanText = text.replace(/[*#]/g, ''); 
+            if(cleanText.length < 200) {
+                let msg = new SpeechSynthesisUtterance(cleanText);
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
+        // --- GEMINI API FUNCTION (Updated to Flash) ---
+        async function askGemini(prompt) {
+            // Updated Model: gemini-1.5-flash
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
+            const data = {
+                contents: [{
+                    parts: [{ 
+                        text: `You are a helpful Math Teacher. User Question: "${prompt}". Keep the answer short, simple and use bold text for key terms.` 
+                    }]
+                }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error.message || "API Error");
+                }
+
+                return result.candidates[0].content.parts[0].text;
+
+            } catch (error) {
+                return "⚠️ Error: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

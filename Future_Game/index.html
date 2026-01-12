@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>For My Beloved Sahista Parvin 💕</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      color: #fff;
+      background: linear-gradient(135deg, #ff6fa9, #ffe1ec);
+      margin: 0;
+      padding: 20px;
+    }
+    .lock-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #f857a6, #ff5858 80%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.4s;
+    }
+    .lock-box {
+      background: rgba(255,255,255,0.09);
+      box-shadow: 0 6px 40px 0 rgba(255,51,102,0.21);
+      border-radius: 20px;
+      padding: 36px 32px 30px 32px;
+      min-width: 260px;
+      max-width: 90vw;
+    }
+    .lock-box h2 {
+      color: #ff3366;
+      margin-bottom: 18px;
+      font-size: 1.3em;
+      letter-spacing: 1px;
+    }
+    .lock-box input[type="password"] {
+      padding: 12px 18px;
+      border-radius: 25px;
+      border: 1.5px solid #ff6fa9;
+      outline: none;
+      margin-bottom: 10px;
+      font-size: 1.08em;
+      text-align: center;
+      transition: border-color 0.2s;
+      width: 90%;
+      box-sizing: border-box;
+    }
+    .lock-box input[type="password"]:focus {
+      border-color: #ff3366;
+    }
+    .lock-box button {
+      font-size: 1.05em;
+      padding: 10px 28px;
+      background-color: #ff3366;
+      color: #fff;
+      border-radius: 18px;
+      border: none;
+      cursor: pointer;
+      margin-top: 12px;
+      margin-bottom: 4px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .lock-box button:hover {
+      background-color: #ff6699;
+      transform: scale(1.08);
+    }
+    .lock-error {
+      color: #fff;
+      background: rgba(255,51,102,.75);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 1em;
+      margin-top: 10px;
+      margin-bottom: 0;
+      animation: shake 0.3s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0);}
+      20% { transform: translateX(-7px);}
+      40% { transform: translateX(7px);}
+      60% { transform: translateX(-5px);}
+      80% { transform: translateX(5px);}
+      100% { transform: translateX(0);}
+    }
+    /* Hide main content initially */
+    #mainContent { display: none; }
+    /* The rest of your original CSS ... */
+    h1 {
+      font-size: 2.5rem;
+      margin: 20px 0;
+    }
+    img {
+      border-radius: 50%;
+      border: 5px solid #fff;
+      margin: 20px;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      box-shadow: 0px 0px 30px rgba(255,102,153,0.5);
+    }
+    #typedText {
+      font-size: 1.3rem;
+      font-style: italic;
+      min-height: 100px;
+    }
+    #loveBtn {
+      font-size: 1.2rem;
+      padding: 15px 30px;
+      background-color: #ff3366;
+      color: #fff;
+      border-radius: 40px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0px 0px 15px rgba(255,51,102,0.5);
+      margin: 30px 0;
+    }
+    #loveBtn:hover {
+      transform: scale(1.1);
+      background-color: #ff6699;
+    }
+    #loveNote {
+      font-size: 2rem;
+      color: #ff3366;
+      font-weight: bold;
+      opacity: 0;
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -40%);
+      animation: fadeInOut 3s ease-in-out;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -40%) scale(0.5) }
+      30%, 70% { opacity: 1; transform: translate(-50%, -40%) scale(1) }
+      100% { opacity: 0; transform: translate(-50%, -40%) scale(0.5) }
+    }
+    .heart {
+      position: absolute;
+      font-size: 25px;
+      color: #ff3366;
+      animation: float 5s ease-in infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) scale(0.5); opacity: 1; }
+      100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Lock Screen -->
+  <div class="lock-screen" id="lockScreen">
+    <div class="lock-box">
+      <h2>Enter Password to Unlock 💝</h2>
+      <input type="password" id="passwordInput" placeholder="Password (DD/MM/YYYY)" autocomplete="off" />
+      <br>
+      <button id="unlockBtn">Unlock</button>
+      <div id="lockError" class="lock-error" style="display:none;">Wrong password. Please try again.</div>
+    </div>
+  </div>
+  <!-- Main Content -->
+  <div id="mainContent">
+    <h1>💞 Sahista Parvin 💞</h1>
+    <img src="/IMG-20250610-WA0013.jpg" alt="Sahista Parvin" />
+    <div id="typedText"></div>
+    <button id="loveBtn">Tap for Surprise 🌷</button>
+    <div id="loveNote"></div>
+    <audio id="bgMusic" loop>
+      <source src="https://www.fesliyanstudios.com/play-mp3/6969" type="audio/mp3">
+    </audio>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script>
+      // Lock Screen Logic
+      const PASSWORD = "08/05/2008";
+      const lockScreen = document.getElementById("lockScreen");
+      const mainContent = document.getElementById("mainContent");
+      const passwordInput = document.getElementById("passwordInput");
+      const unlockBtn = document.getElementById("unlockBtn");
+      const lockError = document.getElementById("lockError");
+
+      function unlock() {
+        if (passwordInput.value.trim() === PASSWORD) {
+          lockScreen.style.opacity = 0;
+          setTimeout(() => {
+            lockScreen.style.display = "none";
+            mainContent.style.display = "block";
+          }, 400);
+        } else {
+          lockError.style.display = "block";
+          passwordInput.value = "";
+        }
+      }
+
+      unlockBtn.addEventListener("click", unlock);
+      passwordInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") unlock();
+      });
+      passwordInput.focus();
+
+      // Hide error when typing
+      passwordInput.addEventListener("input", () => {
+        lockError.style.display = "none";
+      });
+
+      // --- Rest of your logic ---
+      // Typing effect
+      const text = "Meri pyaari Sahista Parvin, agar maine tumhe naraz kiya ho to dil se maafi chahta hoon.\n" +
+                  "Main tumse behad pyaar karta hoon aur hamesha tumhara saath chahta hoon.\n" +
+                  "Zindagi bhar ke liye! 💕";
+      let index = 0;
+
+      function typing() {
+        if (index < text.length) {
+          document.getElementById("typedText").innerHTML += text[index] === '\n' ? '<br/>' : text[index];
+          index++;
+          setTimeout(typing, 40);
+        }
+      }
+      // Only start typing after unlock
+      function startContent() {
+        index = 0;
+        document.getElementById("typedText").innerHTML = "";
+        typing();
+      }
+      // Wait for unlock
+      const observer = new MutationObserver(() => {
+        if (mainContent.style.display === "block") startContent();
+      });
+      observer.observe(mainContent, { attributes: true, attributeFilter: ['style'] });
+
+      // Button click
+      document.getElementById("loveBtn").addEventListener("click", function() {
+        alert("I Love You, Sahista Parvin! 💕");
+        showLoveNote();
+        launchConfetti();
+        playMusic();
+      });
+
+      // Love Note
+      function showLoveNote() {
+        const note = document.getElementById("loveNote");
+        note.textContent = "I Love You, Sahista Parvin! 💕";
+        note.style.opacity = 1;
+        setTimeout(() => {
+          note.textContent = "";
+        }, 3000);
+      }
+
+      // Music
+      function playMusic() {
+        const music = document.getElementById("bgMusic");
+        music.play();
+      }
+
+      // Confetti
+      function launchConfetti() {
+        const end = Date.now() + 3 * 1000;
+        (function frame() {
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        })();
+      }
+
+      // Floating hearts
+      function createHeart() {
+        const heart = document.createElement("div");
+        heart.classList.add("heart");
+        heart.textContent = "💖";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.animationDuration = (3 + Math.random() * 3) + "s";
+        document.body.appendChild(heart);
+        setTimeout(() => {
+          heart.remove();
+        }, 5000);
+      }
+      setInterval(createHeart, 300);
+    </script>
+  </div>
+</body>
+</html>
