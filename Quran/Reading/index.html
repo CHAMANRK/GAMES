@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran Reading - Najiful85</title>
+    <style>
+        body { background-color: #1a1a1a; color: white; font-family: sans-serif; margin: 0; padding: 10px; text-align: center; }
+        .main-container { max-width: 600px; margin: 0 auto; }
+        
+        /* Selectors Area */
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        select { padding: 12px; border-radius: 8px; font-size: 16px; background: #333; color: white; border: 1px solid #444; }
+        
+        /* Image Display */
+        .quran-frame { background: white; padding: 5px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+        #quran-img { width: 100%; height: auto; display: block; min-height: 400px; }
+
+        /* Navigation Buttons */
+        .nav-btns { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
+        button { flex: 1; padding: 15px; font-size: 18px; border: none; border-radius: 8px; background: #2e7d32; color: white; cursor: pointer; }
+        button:active { background: #1b5e20; }
+        .page-info { margin: 10px 0; font-weight: bold; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <h2>Al-Quranul Kareem (15 Lines)</h2>
+
+    <div class="controls">
+        <select id="juz-select" onchange="jumpToPage(this.value)">
+            <option value="1">Para 1 (Alif Lam Meem)</option>
+            <option value="22">Para 2 (Sayaqool)</option>
+            <option value="42">Para 3 (Tilkal Rusul)</option>
+            <option value="62">Para 4 (Lan Tana Lu)</option>
+            <option value="82">Para 5 (Wal Muhsanat)</option>
+            <option value="102">Para 6 (La Yuhibbullah)</option>
+            <option value="122">Para 7 (Wa Iza Samiu)</option>
+            <option value="142">Para 8 (Wa Lau Annana)</option>
+            <option value="162">Para 9 (Qalal Mala'u)</option>
+            <option value="182">Para 10 (Wa'lamu)</option>
+            <option value="202">Para 11 (Ya'tazirun)</option>
+            <option value="222">Para 12 (Wa Ma Min Daabbah)</option>
+            <option value="242">Para 13 (Wa Ma Ubarri'u)</option>
+            <option value="262">Para 14 (Rubama)</option>
+            <option value="282">Para 15 (Subhanallazi)</option>
+            <option value="302">Para 16 (Qala Alam)</option>
+            <option value="322">Para 17 (Iqtaraba)</option>
+            <option value="342">Para 18 (Qad Aflaha)</option>
+            <option value="362">Para 19 (Wa Qalal Lazina)</option>
+            <option value="382">Para 20 (Amman Khalaqa)</option>
+            <option value="402">Para 21 (Utlu Ma Uhiya)</option>
+            <option value="422">Para 22 (Wa Man Yaqnut)</option>
+            <option value="442">Para 23 (Wa Maliya)</option>
+            <option value="462">Para 24 (Faman Azlamu)</option>
+            <option value="482">Para 25 (Ilaihi Yuraddu)</option>
+            <option value="502">Para 26 (Ha Meem)</option>
+            <option value="522">Para 27 (Qala Fama Khatbukum)</option>
+            <option value="542">Para 28 (Qad Sami'allah)</option>
+            <option value="562">Para 29 (Tabarakallazi)</option>
+            <option value="582">Para 30 (Amma Yatasa'alun)</option>
+        </select>
+
+        <select id="page-select" onchange="jumpToPage(this.value)">
+            </select>
+    </div>
+
+    <div class="quran-frame">
+        <img id="quran-img" src="assets/quran/1.png" alt="Loading Page...">
+    </div>
+
+    <div class="page-info" id="page-info">Page: 1 / 604</div>
+
+    <div class="nav-btns">
+        <button onclick="changePage(1)">Aage (Next)</button>
+        <button onclick="changePage(-1)">Peeche (Prev)</button>
+    </div>
+</div>
+
+<script>
+    let currentP = 1;
+    const totalP = 604;
+    const imgElement = document.getElementById('quran-img');
+    const infoElement = document.getElementById('page-info');
+    const pageSelect = document.getElementById('page-select');
+
+    // Fill Page Selector
+    for(let i=1; i<=totalP; i++) {
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.innerHTML = "Page " + i;
+        pageSelect.appendChild(opt);
+    }
+
+    function updateDisplay() {
+        // Path ko apne GitHub folder ke mutabiq sahi karein
+        imgElement.src = `assets/quran/${currentP}.png`;
+        infoElement.innerHTML = `Page: ${currentP} / ${totalP}`;
+        pageSelect.value = currentP;
+        window.scrollTo(0,0);
+    }
+
+    function changePage(step) {
+        // Quran right-to-left padha jata hai, isliye +1 peeche aur -1 aage ho sakta hai
+        // Aap apne hisab se buttons ko reverse bhi kar sakte hain
+        currentP += step;
+        if(currentP > totalP) currentP = 1;
+        if(currentP < 1) currentP = totalP;
+        updateDisplay();
+    }
+
+    function jumpToPage(val) {
+        currentP = parseInt(val);
+        updateDisplay();
+    }
+</script>
+
+</body>
+</html>
