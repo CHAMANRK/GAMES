@@ -8,25 +8,22 @@
         body { background-color: #1a1a1a; color: white; font-family: sans-serif; margin: 0; padding: 10px; text-align: center; }
         .main-container { max-width: 600px; margin: 0 auto; }
         
-        /* Selectors Area */
         .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         select { padding: 12px; border-radius: 8px; font-size: 16px; background: #333; color: white; border: 1px solid #444; }
         
-        /* Image Display */
-        .quran-frame { background: white; padding: 5px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
-        #quran-img { width: 100%; height: auto; display: block; min-height: 400px; }
+        .quran-frame { background: white; padding: 5px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.5); min-height: 450px; display: flex; align-items: center; justify-content: center; }
+        #quran-img { width: 100%; height: auto; display: block; }
 
-        /* Navigation Buttons */
         .nav-btns { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
-        button { flex: 1; padding: 15px; font-size: 18px; border: none; border-radius: 8px; background: #2e7d32; color: white; cursor: pointer; }
+        button { flex: 1; padding: 15px; font-size: 18px; border: none; border-radius: 8px; background: #2e7d32; color: white; cursor: pointer; font-weight: bold; }
         button:active { background: #1b5e20; }
-        .page-info { margin: 10px 0; font-weight: bold; color: #aaa; }
+        .page-info { margin: 10px 0; font-weight: bold; color: #aaa; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="main-container">
-    <h2>Al-Quranul Kareem (15 Lines)</h2>
+    <h2 style="color: #4caf50;">Al-Quranul Kareem (15 Lines)</h2>
 
     <div class="controls">
         <select id="juz-select" onchange="jumpToPage(this.value)">
@@ -62,24 +59,24 @@
             <option value="582">Para 30 (Amma Yatasa'alun)</option>
         </select>
 
-        <select id="page-select" onchange="jumpToPage(this.value)">
-            </select>
+        <select id="page-select" onchange="jumpToPage(this.value)"></select>
     </div>
 
     <div class="quran-frame">
-        <img id="quran-img" src="assets/quran/1.png" alt="Loading Page...">
+        <img id="quran-img" src="Images/1.png" alt="Loading...">
     </div>
 
     <div class="page-info" id="page-info">Page: 1 / 604</div>
 
     <div class="nav-btns">
-        <button onclick="changePage(1)">Aage (Next)</button>
-        <button onclick="changePage(-1)">Peeche (Prev)</button>
+        <button onclick="changePage(-1)">← Peeche (Prev)</button>
+        <button onclick="changePage(1)">Aage (Next) →</button>
     </div>
 </div>
 
 <script>
-    let currentP = 1;
+    // LocalStorage se last page uthana ya 1 se shuru karna
+    let currentP = parseInt(localStorage.getItem('quranLastPage')) || 1;
     const totalP = 604;
     const imgElement = document.getElementById('quran-img');
     const infoElement = document.getElementById('page-info');
@@ -94,16 +91,16 @@
     }
 
     function updateDisplay() {
-        // Path ko apne GitHub folder ke mutabiq sahi karein
         imgElement.src = `Images/${currentP}.png`;
         infoElement.innerHTML = `Page: ${currentP} / ${totalP}`;
         pageSelect.value = currentP;
+        
+        // Page number browser mein save karna
+        localStorage.setItem('quranLastPage', currentP);
         window.scrollTo(0,0);
     }
 
     function changePage(step) {
-        // Quran right-to-left padha jata hai, isliye +1 peeche aur -1 aage ho sakta hai
-        // Aap apne hisab se buttons ko reverse bhi kar sakte hain
         currentP += step;
         if(currentP > totalP) currentP = 1;
         if(currentP < 1) currentP = totalP;
@@ -114,6 +111,9 @@
         currentP = parseInt(val);
         updateDisplay();
     }
+
+    // Initial load par display update karna
+    window.onload = updateDisplay;
 </script>
 
 </body>
