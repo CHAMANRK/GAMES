@@ -1,0 +1,73 @@
+:root {
+    --primary: #2e7d32;
+    --bg: #f5f5f5;
+    --text: #1a1a1a;
+    --card: #ffffff;
+    --img-filter: none;
+}
+
+body.night-mode {
+    --bg: #000000;
+    --text: #ffffff;
+    --card: #1a1a1a;
+    /* Black text ko white karne ka magic trick: */
+    --img-filter: invert(1) hue-rotate(180deg) brightness(1.1);
+}
+
+body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; transition: 0.3s; }
+
+/* Image Turn Animation */
+#quran-img {
+    width: 100%;
+    filter: var(--img-filter);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+}
+
+/* Jab page badlega to ye class add hogi */
+.page-flip-left { transform: translateX(-100%) rotateY(-20deg); opacity: 0; }
+.page-flip-right { transform: translateX(100%) rotateY(20deg); opacity: 0; }
+
+.quran-frame { 
+    background: white; /* Image background hamesha white rahega, filter use handle karega */
+    overflow: hidden; 
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2); 
+    border-radius: 8px;
+}
+
+/* Overlay Styling */
+.overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
+}
+.overlay-card { background: var(--card); padding: 30px; border-radius: 15px; width: 80%; text-align: center; }
+/* Sidebar scrolling fix */
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 200;
+    top: 0;
+    left: 0;
+    background: var(--card);
+    overflow-y: auto; /* List lambi hone par scroll chalega */
+    overflow-x: hidden;
+    transition: 0.4s;
+    padding-top: 50px;
+}
+
+/* Page Turn Animation Enhancement */
+.quran-frame {
+    perspective: 1000px; /* 3D effect ke liye */
+}
+
+#quran-img {
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+}
+
+/* Baki Styles (Sidebar, Buttons etc.) */
+.top-bar { background: var(--card); padding: 10px; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.nav-btns { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 90;}
+.btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+.sidebar { height: 100%; width: 0; position: fixed; z-index: 200; top: 0; left: 0; background: var(--card); overflow-x: hidden; transition: 0.4s; padding-top: 50px; }
+.sidebar-content { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
