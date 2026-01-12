@@ -8,57 +8,57 @@
 </head>
 <body>
 
-<div class="progress-container">
-    <div class="progress-bar" id="progressBar"></div>
-</div>
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
 
-<!-- Overlay -->
 <div id="selectionOverlay" class="overlay">
     <div class="overlay-card">
         <h2>Khush Amdeed</h2>
-        <p>Padhna shuru karne ke liye Para ya Surah chunein:</p>
+        <p>Padhna shuru karne ke liye chunein:</p>
         <select id="init-juz" onchange="initialStart(this.value)"></select>
         <select id="init-surah" onchange="initialStart(this.value)"></select>
         <button class="btn" onclick="closeOverlay()">Direct Continue</button>
     </div>
 </div>
 
-<!-- Sidebar -->
 <div id="mySidebar" class="sidebar">
     <span class="close-btn" onclick="closeNav()">&times;</span>
     <div class="sidebar-content">
-        <button class="action-btn" onclick="toggleNightMode()">🌙 Toggle Night Mode</button>
+        <h3>Settings & Navigation</h3>
+        <button class="action-btn" onclick="toggleNightMode()">🌙 Night/Day Mode</button>
         <hr>
+        
         <label>Para Select Karein:</label>
-        <select id="juz-select" onchange="jumpToPage(this.value)"></select>
+        <select id="juz-select" onchange="handleParaChange(this.value)"></select>
 
+        <label>Para Page (1-20):</label>
+        <select id="sub-page-select" onchange="jumpToPage(this.value)"></select>
+
+        <hr>
         <label>Surah Search:</label>
-<input type="text" id="surahSearch"
-       placeholder="Surah naam likhein..."
-       onkeyup="searchSurah(this.value)"
-       style="padding:8px;border-radius:8px;border:1px solid #ccc;">
-        <label>Surah Select Karein:</label>
-        <select id="surah-select" onchange="jumpToPage(this.value)"></select>
+        <input type="text" id="surahSearch" placeholder="Surah naam likhein..." onkeyup="filterSurahs()">
+        <select id="surah-select" onchange="jumpToPage(this.value)" size="6"></select>
+
+        <hr>
+        <label>Saved Bookmarks:</label>
+        <div id="bookmarksList" class="bookmarks-grid"></div>
     </div>
 </div>
 
-<!-- Top Bar -->
 <div class="top-bar">
-    <button class="menu-btn" onclick="openNav()">☰</button>
+    <button class="menu-btn" onclick="openNav()">☰ Menu</button>
     <div id="page-info">Page 1 / 604</div>
+    <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">🤍</button>
 </div>
 
-<!-- Quran Image -->
 <div class="quran-container">
-    <div class="quran-frame">
+    <div class="quran-frame" id="imageContainer">
         <img id="quran-img" src="Images/1.png" alt="Quran Page">
     </div>
 </div>
 
-<!-- Navigation -->
 <div class="nav-btns">
-    <button class="btn" onclick="changePage(-1)">Peeche</button>
-    <button class="btn" onclick="changePage(1)">Aage</button>
+    <button class="btn" id="prev-btn" onclick="changePage(-1)">Peeche</button>
+    <button class="btn" id="next-btn" onclick="changePage(1)">Aage</button>
 </div>
 
 <script src="script.js"></script>
