@@ -2,118 +2,389 @@
 <html lang="ur">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quran Reading - Najiful85</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quran Pro - Najiful85</title>
     <style>
-        body { background-color: #1a1a1a; color: white; font-family: sans-serif; margin: 0; padding: 10px; text-align: center; }
-        .main-container { max-width: 600px; margin: 0 auto; }
-        
-        .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        select { padding: 12px; border-radius: 8px; font-size: 16px; background: #333; color: white; border: 1px solid #444; }
-        
-        .quran-frame { background: white; padding: 5px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.5); min-height: 450px; display: flex; align-items: center; justify-content: center; }
-        #quran-img { width: 100%; height: auto; display: block; }
+        :root {
+            --primary: #2e7d32;
+            --secondary: #4caf50;
+            --bg-color: #f0f2f5;
+            --text-color: #222;
+            --panel-bg: #ffffff;
+            --img-filter: none;
+        }
 
-        .nav-btns { display: flex; justify-content: space-between; margin-top: 15px; gap: 10px; }
-        button { flex: 1; padding: 15px; font-size: 18px; border: none; border-radius: 8px; background: #2e7d32; color: white; cursor: pointer; font-weight: bold; }
-        button:active { background: #1b5e20; }
-        .page-info { margin: 10px 0; font-weight: bold; color: #aaa; font-size: 14px; }
+        /* Night Mode Variables */
+        body.night-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --panel-bg: #1e1e1e;
+            /* Sepia Tone Filter for eye comfort */
+            --img-filter: sepia(40%) brightness(80%) contrast(95%);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            z-index: 150;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--secondary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--panel-bg);
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+
+        .menu-btn, .bookmark-btn {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            padding: 5px;
+        }
+        
+        .bookmark-btn.active { color: #e91e63; /* Red Heart */ }
+
+        /* Sidebar Style */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 200;
+            top: 0;
+            left: 0;
+            background-color: var(--panel-bg);
+            overflow-x: hidden;
+            transition: 0.4s;
+            padding-top: 50px;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar select, .sidebar button.action-btn {
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid #555;
+            font-size: 16px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        
+        .bookmarks-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .bookmark-chip {
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Main View & Zoom */
+        .quran-container {
+            max-width: 800px;
+            margin: 15px auto;
+            padding: 0 5px;
+            overflow: hidden; /* Important for zoom */
+        }
+
+        .quran-frame {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Zoom Effect */
+        .quran-frame.zoomed {
+            transform: scale(1.5);
+            cursor: zoom-out;
+        }
+
+        #quran-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 4px;
+            filter: var(--img-filter); /* Night mode filter */
+            transition: filter 0.3s;
+        }
+
+        /* Bottom Controls */
+        .nav-btns {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: var(--panel-bg);
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 90;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn:disabled { background: #999; cursor: not-allowed; opacity: 0.7; }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <h2 style="color: #4caf50;">Al-Quranul Kareem (15 Lines)</h2>
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+</div>
 
-    <div class="controls">
-        <select id="juz-select" onchange="jumpToPage(this.value)">
-            <option value="1">Para 1 (Alif Lam Meem)</option>
-            <option value="22">Para 2 (Sayaqool)</option>
-            <option value="42">Para 3 (Tilkal Rusul)</option>
-            <option value="62">Para 4 (Lan Tana Lu)</option>
-            <option value="82">Para 5 (Wal Muhsanat)</option>
-            <option value="102">Para 6 (La Yuhibbullah)</option>
-            <option value="122">Para 7 (Wa Iza Samiu)</option>
-            <option value="142">Para 8 (Wa Lau Annana)</option>
-            <option value="162">Para 9 (Qalal Mala'u)</option>
-            <option value="182">Para 10 (Wa'lamu)</option>
-            <option value="202">Para 11 (Ya'tazirun)</option>
-            <option value="222">Para 12 (Wa Ma Min Daabbah)</option>
-            <option value="242">Para 13 (Wa Ma Ubarri'u)</option>
-            <option value="262">Para 14 (Rubama)</option>
-            <option value="282">Para 15 (Subhanallazi)</option>
-            <option value="302">Para 16 (Qala Alam)</option>
-            <option value="322">Para 17 (Iqtaraba)</option>
-            <option value="342">Para 18 (Qad Aflaha)</option>
-            <option value="362">Para 19 (Wa Qalal Lazina)</option>
-            <option value="382">Para 20 (Amman Khalaqa)</option>
-            <option value="402">Para 21 (Utlu Ma Uhiya)</option>
-            <option value="422">Para 22 (Wa Man Yaqnut)</option>
-            <option value="442">Para 23 (Wa Maliya)</option>
-            <option value="462">Para 24 (Faman Azlamu)</option>
-            <option value="482">Para 25 (Ilaihi Yuraddu)</option>
-            <option value="502">Para 26 (Ha Meem)</option>
-            <option value="522">Para 27 (Qala Fama Khatbukum)</option>
-            <option value="542">Para 28 (Qad Sami'allah)</option>
-            <option value="562">Para 29 (Tabarakallazi)</option>
-            <option value="582">Para 30 (Amma Yatasa'alun)</option>
+<div id="mySidebar" class="sidebar">
+    <span class="close-btn" onclick="closeNav()">&times;</span>
+    <div class="sidebar-content">
+        <h3 style="color: var(--primary); margin: 0;">Settings & Navigation</h3>
+        
+        <button class="action-btn" onclick="toggleNightMode()">🌙 Toggle Night/Day Mode</button>
+
+        <hr style="border-color: #444; width: 100%;">
+
+        <label>Select Para (Juz):</label>
+        <select id="juz-select" onchange="handleParaChange(this.value)">
+            <option value="">-- Choose Para --</option>
         </select>
 
-        <select id="page-select" onchange="jumpToPage(this.value)"></select>
-    </div>
+        <label>Para Page (1-20):</label>
+        <select id="sub-page-select" onchange="jumpToPage(this.value)">
+            <option value="">-- Select Page --</option>
+        </select>
 
-    <div class="quran-frame">
-        <img id="quran-img" src="Images/1.png" alt="Loading...">
-    </div>
-
-    <div class="page-info" id="page-info">Page: 1 / 604</div>
-
-    <div class="nav-btns">
-        <button onclick="changePage(-1)">← Peeche (Prev)</button>
-        <button onclick="changePage(1)">Aage (Next) →</button>
+        <label>Jump to Surah:</label>
+        <select id="surah-select" onchange="jumpToPage(this.value)">
+            <option value="">-- Select Surah --</option>
+        </select>
+        
+        <hr style="border-color: #444; width: 100%;">
+        <label>Saved Bookmarks:</label>
+        <div class="bookmarks-list" id="bookmarksList">
+            </div>
     </div>
 </div>
 
+<div class="top-bar">
+    <button class="menu-btn" onclick="openNav()">☰</button>
+    <div id="page-info" style="font-weight: bold;">Page 1 / 604</div>
+    <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">🤍</button>
+</div>
+
+<div class="quran-container">
+    <div class="quran-frame" id="imageContainer">
+        <img id="quran-img" src="Images/1.png" alt="Quran Page - Double tap to zoom">
+    </div>
+</div>
+
+<div class="nav-btns">
+    <button class="btn" id="prev-btn" onclick="changePage(-1)">Prev</button>
+    <button class="btn" id="next-btn" onclick="changePage(1)">Next</button>
+</div>
+
 <script>
-    // LocalStorage se last page uthana ya 1 se shuru karna
     let currentP = parseInt(localStorage.getItem('quranLastPage')) || 1;
     const totalP = 604;
-    const imgElement = document.getElementById('quran-img');
-    const infoElement = document.getElementById('page-info');
-    const pageSelect = document.getElementById('page-select');
+    let bookmarks = JSON.parse(localStorage.getItem('quranBookmarks')) || [];
+    let isNightMode = localStorage.getItem('nightMode') === 'true';
+    
+    // Data Mappings
+    const juzMapping = Array.from({length: 30}, (_, i) => (i * 20) + 2).map((p, i) => i === 0 ? 1 : p);
+    // Popular Surahs for quick jump
+    const surahMap = { 1: 1, 2: 2, 18: 293, 36: 440, 55: 531, 56: 534, 67: 562, 78: 582, 114: 604 };
 
-    // Fill Page Selector
-    for(let i=1; i<=totalP; i++) {
-        let opt = document.createElement('option');
-        opt.value = i;
-        opt.innerHTML = "Page " + i;
-        pageSelect.appendChild(opt);
-    }
+    // --- Core Functions ---
+    function openNav() { document.getElementById("mySidebar").style.width = "280px"; }
+    function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
 
     function updateDisplay() {
-        imgElement.src = `Images/${currentP}.png`;
-        infoElement.innerHTML = `Page: ${currentP} / ${totalP}`;
-        pageSelect.value = currentP;
+        // Update Image & Text
+        document.getElementById('quran-img').src = `Images/${currentP}.png`;
+        document.getElementById('page-info').innerText = `Page ${currentP} / ${totalP}`;
         
-        // Page number browser mein save karna
+        // Update Progress Bar
+        const progress = (currentP / totalP) * 100;
+        document.getElementById('progressBar').style.width = `${progress}%`;
+
+        // Update Bookmark Icon status
+        const bookmarkBtn = document.getElementById('bookmarkBtn');
+        if (bookmarks.includes(currentP)) {
+            bookmarkBtn.innerHTML = '❤️'; // Filled Heart
+            bookmarkBtn.classList.add('active');
+        } else {
+            bookmarkBtn.innerHTML = '🤍'; // Empty Heart
+            bookmarkBtn.classList.remove('active');
+        }
+
+        // Glitch Fix & Save State
+        document.getElementById('prev-btn').disabled = (currentP <= 1);
+        document.getElementById('next-btn').disabled = (currentP >= totalP);
         localStorage.setItem('quranLastPage', currentP);
+        
+        // Reset Zoom on page change
+        document.getElementById('imageContainer').classList.remove('zoomed');
+        
+        closeNav();
         window.scrollTo(0,0);
     }
 
     function changePage(step) {
-        currentP += step;
-        if(currentP > totalP) currentP = 1;
-        if(currentP < 1) currentP = totalP;
-        updateDisplay();
+        let target = currentP + step;
+        if(target >= 1 && target <= totalP) {
+            currentP = target;
+            updateDisplay();
+        }
     }
 
     function jumpToPage(val) {
+        if(!val) return;
         currentP = parseInt(val);
         updateDisplay();
     }
 
-    // Initial load par display update karna
-    window.onload = updateDisplay;
+    // --- Feature Functions ---
+
+    // 1. Night Mode Toggle
+    function toggleNightMode() {
+        isNightMode = !isNightMode;
+        document.body.classList.toggle('night-mode', isNightMode);
+        localStorage.setItem('nightMode', isNightMode);
+    }
+
+    // 2. Bookmark System
+    function toggleBookmark() {
+        if (bookmarks.includes(currentP)) {
+            bookmarks = bookmarks.filter(p => p !== currentP); // Remove
+        } else {
+            bookmarks.push(currentP); // Add
+            bookmarks.sort((a, b) => a - b); // Keep sorted
+        }
+        localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+        updateDisplay();
+        renderBookmarksList();
+    }
+
+    function renderBookmarksList() {
+        const listContainer = document.getElementById('bookmarksList');
+        listContainer.innerHTML = '';
+        if (bookmarks.length === 0) {
+            listContainer.innerHTML = '<small style="color:#888">No saved pages yet.</small>';
+            return;
+        }
+        bookmarks.forEach(page => {
+            const chip = document.createElement('div');
+            chip.className = 'bookmark-chip';
+            chip.innerText = `Page ${page}`;
+            chip.onclick = () => jumpToPage(page);
+            listContainer.appendChild(chip);
+        });
+    }
+
+    // 3. Double Tap to Zoom
+    let lastTap = 0;
+    document.getElementById('imageContainer').addEventListener('click', function(e) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+            this.classList.toggle('zoomed');
+            e.preventDefault();
+        }
+        lastTap = currentTime;
+    });
+
+
+    // --- Initialization ---
+    function initSelectors() {
+        const juzSelect = document.getElementById('juz-select');
+        const surahSelect = document.getElementById('surah-select');
+        juzMapping.forEach((startPage, index) => {
+            juzSelect.add(new Option(`Para ${index + 1}`, startPage));
+        });
+        Object.entries(surahMap).forEach(([id, page]) => {
+            surahSelect.add(new Option(`Surah ${id} (Quick Jump)`, page));
+        });
+    }
+
+    function handleParaChange(startPage) {
+        if(!startPage) return;
+        const subSelect = document.getElementById('sub-page-select');
+        subSelect.innerHTML = '<option value="">-- Select Page --</option>';
+        for(let i=0; i<20; i++) {
+            let pageNum = parseInt(startPage) + i;
+            if(pageNum > totalP) break;
+            subSelect.add(new Option(`Page ${i + 1}`, pageNum));
+        }
+        jumpToPage(startPage);
+    }
+
+    window.onload = () => {
+        initSelectors();
+        renderBookmarksList();
+        if (isNightMode) document.body.classList.add('night-mode');
+        updateDisplay();
+    };
 </script>
 
 </body>
