@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quran Kareem - Najiful85</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<div id="selectionOverlay" class="overlay">
+    <div class="overlay-card">
+        <h2>Khush Amdeed</h2>
+        <p>Padhna shuru karne ke liye Para ya Surah chunein:</p>
+        <select id="init-juz" onchange="initialStart(this.value, 'juz')"></select>
+        <select id="init-surah" onchange="initialStart(this.value, 'surah')"></select>
+        <button class="btn" onclick="closeOverlay()">Direct Continue</button>
+    </div>
+</div>
+
+<div id="mySidebar" class="sidebar">
+    <span class="close-btn" onclick="closeNav()">&times;</span>
+    <div class="sidebar-content">
+        <button class="action-btn" onclick="toggleNightMode()">🌙 Toggle Night Mode</button>
+        <hr>
+        <label>Para Select Karein:</label>
+        <select id="juz-select" onchange="handleParaChange(this.value)"></select>
+        <label>Surah Select Karein:</label>
+        <select id="surah-select" onchange="jumpToPage(this.value)"></select>
+        <hr>
+        <label>Saved Bookmarks:</label>
+        <div id="bookmarksList"></div>
+    </div>
+</div>
+
+<div class="top-bar">
+    <button class="menu-btn" onclick="openNav()">☰</button>
+    <div id="page-info">Page 1 / 604</div>
+    <button class="bookmark-btn" id="bookmarkBtn" onclick="toggleBookmark()">🤍</button>
+</div>
+
+<div class="quran-container">
+    <div class="quran-frame" id="imageContainer">
+        <img id="quran-img" src="Images/1.png" alt="Quran Page">
+    </div>
+</div>
+
+<div class="nav-btns">
+    <button class="btn" id="prev-btn" onclick="changePage(-1)">Peeche</button>
+    <button class="btn" id="next-btn" onclick="changePage(1)">Aage</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
