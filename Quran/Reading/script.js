@@ -1,5 +1,6 @@
 let currentP = parseInt(localStorage.getItem('quranLastPage')) || 1;
 const totalP = 604;
+let bookmarks = JSON.parse(localStorage.getItem('quranBookmarks')) || [];
 let isNightMode = localStorage.getItem('nightMode') === 'true';
 
 // Surah Map
@@ -35,84 +36,131 @@ const surahMap = {
     113:["Al-Falaq",604],114:["An-Nas",604]
 };
 
-const juzMap = Array.from({length:30},(_,i)=> i===0?1:(i*20)+2);
+const juzMap = Array.from({length: 30}, (_, i) => (i * 20) + 2).map((p, i) => i === 0 ? 1 : p);
 
-// Navigation
-function changePage(step){
-    let t=currentP+step;
-    if(t<1||t>totalP) return;
-    currentP=t;
+// --- Page Turn Logic ---
+function changePage(step) {
+    let target = currentP + step;
+    if (target < 1 || target > totalP) return; // Glitch fix
+
+    const img = document.getElementById('quran-img');
+    const animation = step > 0 ? 'flip-left' : 'flip-right';
+
+    img.classList.add(animation);
+    setTimeout(() => {
+        currentP = target;
+        updateDisplay();
+        img.classList.remove(animation);
+    }, 400);
+}
+
+function updateDisplay() {
+    document.getElementById('quran-img').src = `Images/${currentP}.png`;
+    document.getElementById('page-info').innerText = `Page ${currentP} / ${totalP}`;
+    document.getElementById('progressBar').style.width = `${(currentP / totalP) * 100}%`;
+    
+    // Heart Icon status
+    document.getElementById('bookmarkBtn').innerHTML = bookmarks.includes(currentP) ? '❤️' : '🤍';
+    
+    // Buttons lock
+    document.getElementById('prev-btn').disabled = (currentP <= 1);
+    document.getElementById('next-btn').disabled = (currentP >= totalP);
+
+    localStorage.setItem('quranLastPage', currentP);
+    closeNav();
+    window.scrollTo(0,0);
+}
+
+// --- Sidebar & Search ---
+function toggleNightMode() {
+    isNightMode = !isNightMode;
+    document.body.classList.toggle('night-mode', isNightMode);
+    localStorage.setItem('nightMode', isNightMode);
+}
+
+function filterSurahs() {
+    let input = document.getElementById('surahSearch').value.toLowerCase();
+    let select = document.getElementById('surah-select');
+    Array.from(select.options).forEach(opt => {
+        opt.style.display = opt.text.toLowerCase().includes(input) ? "block" : "none";
+    });
+}
+
+function openNav() { document.getElementById("mySidebar").style.width = "280px"; }
+function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+
+// --- Bookmarks ---
+function toggleBookmark() {
+    if (bookmarks.includes(currentP)) {
+        bookmarks = bookmarks.filter(p => p !== currentP);
+    } else {
+        bookmarks.push(currentP);
+    }
+    localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
+    updateDisplay();
+    renderBookmarks();
+}
+
+function renderBookmarks() {
+    const container = document.getElementById('bookmarksList');
+    container.innerHTML = bookmarks.map(p => 
+        `<button class="btn" style="padding:5px 10px; font-size:12px;" onclick="jumpToPage(${p})">Page ${p}</button>`
+    ).join('');
+}
+
+// --- Navigation Helpers ---
+function initialStart(val) { if(val) { currentP = parseInt(val); closeOverlay(); } }
+
+function closeOverlay() {
+    localStorage.setItem('hasVisited', 'true');
+    document.getElementById('selectionOverlay').style.display = 'none';
     updateDisplay();
 }
 
-function updateDisplay(){
-    document.getElementById("quran-img").src=`Images/${currentP}.png`;
-    document.getElementById("page-info").innerText=`Page ${currentP} / ${totalP}`;
-    document.getElementById("progressBar").style.width=`${(currentP/totalP)*100}%`;
-    localStorage.setItem("quranLastPage",currentP);
+function jumpToPage(p) { currentP = parseInt(p); updateDisplay(); }
+
+function handleParaChange(start) {
+    const sub = document.getElementById('sub-page-select');
+    sub.innerHTML = '<option value="">-- Choose Page --</option>';
+    for(let i=0; i<20; i++) {
+        let p = parseInt(start) + i;
+        if(p > totalP) break;
+        sub.add(new Option(`Page ${i+1}`, p));
+    }
+    jumpToPage(start);
 }
 
-// Sidebar
-function openNav(){document.getElementById("mySidebar").style.width="280px";}
-function closeNav(){document.getElementById("mySidebar").style.width="0";}
-function jumpToPage(p){if(!p)return;currentP=parseInt(p);updateDisplay();closeNav();}
+// Double Tap to Zoom logic
+let lastTap = 0;
+document.getElementById('imageContainer').addEventListener('click', function(e) {
+    let now = new Date().getTime();
+    if(now - lastTap < 300) { this.classList.toggle('zoomed'); }
+    lastTap = now;
+});
 
-// Night Mode
-function toggleNightMode(){
-    isNightMode=!isNightMode;
-    document.body.classList.toggle("night-mode",isNightMode);
-    localStorage.setItem("nightMode",isNightMode);
-}
+// --- Initialization ---
+window.onload = () => {
+    const jSel = document.getElementById('juz-select');
+    const sSel = document.getElementById('surah-select');
+    const iJSel = document.getElementById('init-juz');
+    const iSSel = document.getElementById('init-surah');
 
-// Overlay
-function closeOverlay(){
-    document.getElementById("selectionOverlay").style.display="none";
-    localStorage.setItem("overlaySeen","true");
-}
-
-function initialStart(p){
-    if(!p) return;
-    currentP=parseInt(p);
-    updateDisplay();
-    closeOverlay();
-}
-
-// Init
-window.onload=()=>{
-    const jSel=document.getElementById("juz-select");
-    const sSel=document.getElementById("surah-select");
-    const ij=document.getElementById("init-juz");
-    const is=document.getElementById("init-surah");
-
-    juzMap.forEach((p,i)=>{
-        jSel.add(new Option(`Para ${i+1}`,p));
-        ij.add(new Option(`Para ${i+1}`,p));
+    // Populate Para
+    juzMap.forEach((p, i) => {
+        let optText = `Para ${i+1}`;
+        jSel.add(new Option(optText, p));
+        iJSel.add(new Option(optText, p));
     });
 
-    Object.entries(surahMap).forEach(([i,d])=>{
-        sSel.add(new Option(`${i}. ${d[0]}`,d[1]));
-        is.add(new Option(`${i}. ${d[0]}`,d[1]));
+    // Populate Surah
+    Object.entries(surahMap).forEach(([id, data]) => {
+        let name = `${id}. ${data[0]}`;
+        sSel.add(new Option(name, data[1]));
+        iSSel.add(new Option(name, data[1]));
     });
 
-    if(isNightMode) document.body.classList.add("night-mode");
-    if(localStorage.getItem("overlaySeen")==="true")
-        document.getElementById("selectionOverlay").style.display="none";
-
+    if(localStorage.getItem('hasVisited')) document.getElementById('selectionOverlay').style.display = 'none';
+    if(isNightMode) document.body.classList.add('night-mode');
+    renderBookmarks();
     updateDisplay();
 };
-function searchSurah(query) {
-    const sSel = document.getElementById("surah-select");
-    sSel.innerHTML = "";
-
-    Object.entries(surahMap).forEach(([id, data]) => {
-        if (data[0].toLowerCase().includes(query.toLowerCase())) {
-            sSel.add(new Option(`${id}. ${data[0]}`, data[1]));
-        }
-    });
-
-    if (query.trim() === "") {
-        Object.entries(surahMap).forEach(([id, data]) => {
-            sSel.add(new Option(`${id}. ${data[0]}`, data[1]));
-        });
-    }
-}
