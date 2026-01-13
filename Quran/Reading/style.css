@@ -1,0 +1,72 @@
+:root {
+    --primary: linear-gradient(135deg, #1b5e20, #2e7d32);
+    --bg: #f4f4f4; --text: #1a1a1a; --card: #ffffff;
+    --filter: none;
+}
+
+body.night-mode {
+    --bg: #121212; --text: #e0e0e0; --card: #1e1e1e;
+    --filter: invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(1.1);
+}
+
+body {
+    background: var(--bg); color: var(--text); font-family: sans-serif;
+    margin: 0; overflow: hidden; /* Important for app-like feel */
+}
+
+/* ZEN MODE: Hide UI */
+body.zen-active .top-bar, 
+body.zen-active .nav-btns, 
+body.zen-active .progress-container { display: none !important; }
+
+/* CONTAINER & ZOOM */
+.quran-container {
+    width: 100%; height: 100vh; overflow: auto; /* Scroll allow when zoomed */
+    display: flex; justify-content: center; align-items: flex-start;
+    padding-top: 60px; /* Space for Top Bar */
+    padding-bottom: 80px; /* Space for Bottom Bar */
+    box-sizing: border-box;
+    touch-action: pan-x pan-y; /* Allow scrolling */
+}
+
+.quran-frame {
+    transition: transform 0.3s ease;
+    transform-origin: center top;
+}
+
+/* ZOOM CLASS (JS Toggles this) */
+.zoomed {
+    transform: scale(2.0);
+    margin-top: 50px;
+}
+
+#pdf-render {
+    width: 100%; max-width: 600px; height: auto;
+    filter: var(--filter); box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* BOTTOM BUTTONS SWAP */
+.nav-btns {
+    position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 100;
+    flex-direction: row-reverse; /* Swap Next/Prev Visually */
+}
+
+/* UI ELEMENTS */
+.top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 50px; background: var(--card); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.menu-icon-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text); }
+.nav-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+.nav-btn:active { transform: scale(0.95); }
+
+/* SIDEBAR & OVERLAY */
+.sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: var(--card); overflow-y: auto; transition: 0.3s; z-index: 300; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
+.sidebar-header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; }
+.sidebar-content { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+.sidebar select, .sidebar input { padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 250; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.overlay-card { background: var(--card); padding: 25px; border-radius: 10px; width: 85%; max-width: 350px; text-align: center; }
+.btn-primary { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; margin-top: 10px; border-radius: 5px; }
+
+.progress-container { position: fixed; top: 50px; width: 100%; height: 3px; z-index: 90; }
+.progress-bar { height: 100%; background: green; width: 0%; transition: 0.3s; }
+.bookmarks-grid { display: flex; flex-wrap: wrap; gap: 5px; }
