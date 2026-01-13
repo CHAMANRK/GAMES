@@ -1,0 +1,64 @@
+:root {
+    --primary: linear-gradient(135deg, #1b5e20, #2e7d32);
+    --bg: #f4f4f4;
+    --text: #1a1a1a;
+    --card: #ffffff;
+    --filter: none;
+}
+
+body.night-mode {
+    --bg: #121212; --text: #e0e0e0; --card: #1e1e1e;
+    --filter: invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(1.1);
+}
+
+body {
+    background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif;
+    margin: 0; transition: 0.3s; overflow-x: hidden; touch-action: pan-y;
+}
+
+/* --- ZEN MODE (Hide Elements) --- */
+body.zen-active .top-bar, 
+body.zen-active .nav-btns, 
+body.zen-active .progress-container {
+    display: none !important;
+}
+/* Zen mode exit hint */
+body.zen-active .quran-frame { padding-bottom: 0; min-height: 100vh; }
+
+/* --- BUTTON SWAP (Feature Added) --- */
+.nav-btns {
+    position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 90;
+    flex-direction: row-reverse; /* Aage right me, Peeche left me dikhega */
+}
+
+/* Sidebar & Overlay */
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 250; }
+.sidebar {
+    height: 100%; width: 0; position: fixed; z-index: 300; top: 0; left: 0;
+    background: var(--card); overflow-y: auto; transition: 0.3s; box-shadow: 2px 0 15px rgba(0,0,0,0.3);
+}
+.sidebar-header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+.sidebar-content { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+.sidebar select, .sidebar input { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; background: var(--bg); color: var(--text); }
+
+/* Overlays */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.overlay-card { background: var(--card); padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; text-align: center; }
+.modal-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+/* Buttons & UI */
+.btn-primary, .nav-btn, .action-btn {
+    background: var(--primary); color: white; border: none; padding: 10px 20px;
+    border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.nav-btn:disabled { background: #888; opacity: 0.6; }
+.top-bar { background: var(--card); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.menu-icon-btn, .bookmark-btn { background: none; border: 1px solid #ccc; padding: 5px 10px; border-radius: 5px; font-size: 18px; color: var(--text); cursor: pointer; }
+
+/* HD Canvas */
+.quran-frame { width: 100%; min-height: 500px; background: #555; display: flex; justify-content: center; align-items: flex-start; padding-bottom: 80px; }
+#pdf-render { width: 100%; height: auto; display: block; margin: 0 auto; filter: var(--filter); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+/* Progress Bar */
+.progress-container { position: fixed; top: 0; width: 100%; height: 4px; z-index: 200; background: rgba(0,0,0,0.1); }
+.progress-bar { height: 100%; background: #4caf50; width: 0%; transition: 0.3s; }
