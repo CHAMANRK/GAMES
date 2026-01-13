@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quran Kareem - Najiful85 </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="downloadModal" class="overlay" style="display:none;">
+    <div class="overlay-card glass-effect">
+        <i class="fa-solid fa-cloud-arrow-down" style="font-size: 40px; color: #2e7d32; margin-bottom:10px;"></i>
+        <h2>Offline Setup</h2>
+        <p>Behtareen speed ke liye 113MB data download karein.</p>
+        
+        <div id="dl-progress" style="display:none; margin:15px 0;">
+            <div class="progress-track">
+                <div id="dl-bar" class="progress-fill"></div>
+            </div>
+            <small id="dl-status">Starting...</small>
+        </div>
+
+        <button class="btn-primary" onclick="startDownload()">Download Now</button>
+        <button class="btn-secondary" onclick="skipDownload()">Skip for Now</button>
+    </div>
+</div>
+
+<button id="zenExitBtn" class="zen-exit-btn" onclick="toggleZenMode()">
+    <i class="fa-solid fa-compress"></i> Exit Zen Mode
+</button>
+
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
+
+<div id="selectionOverlay" class="overlay">
+    <div class="overlay-card glass-effect">
+        <h2>Bismillah</h2>
+        <p>Padhna shuru karein:</p>
+        
+        <label>Para:</label>
+        <select id="init-juz" onchange="populateOverlayPages(this.value)"></select>
+        
+        <label>Page:</label>
+        <select id="init-page"></select>
+        
+        <button class="btn-primary" onclick="startFromOverlay()">Start Reading</button>
+    </div>
+</div>
+
+<div id="mySidebar" class="sidebar">
+    <div class="sidebar-header">
+        <h3>Menu</h3>
+        <span class="close-btn" onclick="closeNav()">&times;</span>
+    </div>
+    <div class="sidebar-content">
+        <button class="action-btn" onclick="toggleNightMode()">
+            <i class="fa-solid fa-moon"></i> Night Mode
+        </button>
+        <hr>
+        
+        <label>Para Select:</label>
+        <select id="juz-select" onchange="handleParaChange(this.value)"></select>
+        
+        <label>Page Select:</label>
+        <select id="sub-page-select" onchange="jumpToPage(this.value)"></select>
+        
+        <hr>
+        <label>Surah Search:</label>
+        <input type="text" id="surahSearch" placeholder="Search Surah..." onkeyup="filterSurahs()">
+        <select id="surah-select" onchange="jumpToPage(this.value)" size="6"></select>
+        
+        <hr>
+        <label>Bookmarks:</label>
+        <div id="bookmarksList" class="bookmarks-grid"></div>
+    </div>
+</div>
+
+<div class="top-bar glass-effect" id="topBar">
+    <button class="icon-btn" onclick="openNav()"><i class="fa-solid fa-bars"></i></button>
+    
+    <div class="info-box">
+        <span id="page-info">Loading...</span>
+    </div>
+    
+    <div class="right-icons">
+        <button class="icon-btn" onclick="toggleZenMode()"><i class="fa-solid fa-expand"></i></button>
+        <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()"><i class="fa-regular fa-heart"></i></button>
+    </div>
+</div>
+
+<div class="quran-container" id="touchArea">
+    <div class="quran-frame" id="zoomWrapper">
+        <canvas id="pdf-render"></canvas>
+    </div>
+</div>
+
+<div class="nav-btns glass-effect" id="bottomNav">
+    <button class="nav-btn" onclick="changePage(-1)"><i class="fa-solid fa-arrow-left"></i> Peeche</button>
+    <button class="nav-btn" onclick="changePage(1)">Aage <i class="fa-solid fa-arrow-right"></i></button>
+</div>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<script src="script.js"></script>
+</body>
+</html>
