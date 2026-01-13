@@ -88,3 +88,28 @@ body {
 .progress-container { position: fixed; top: 0; width: 100%; height: 4px; z-index: 200; background: rgba(0,0,0,0.1); }
 .progress-bar { height: 100%; background: #4caf50; width: 0%; transition: 0.3s; }
 .bookmarks-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+/* --- HD QUALITY & RESPONSIVE CANVAS --- */
+#pdf-render {
+    width: 100%;       /* Image screen ki puri chaudai (width) legi */
+    height: auto;      /* Lambai apne aap adjust hogi */
+    display: block;    /* Extra space hatane ke liye */
+    margin: 0 auto;    /* Center mein rakhne ke liye */
+    filter: var(--filter); /* Night mode filter yahan kaam karega */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Safhe ke niche halki shadow */
+}
+
+.quran-frame {
+    width: 100%;
+    min-height: 500px; /* Loading ke waqt frame khali na dikhe */
+    background: #555;  /* Peeche dark color taaki white page pop kare */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Page upar se shuru ho */
+    padding-bottom: 80px;    /* Buttons ke liye jagah */
+}
+
+/* Night Mode Colors Fix */
+body.night-mode #pdf-render {
+    /* HD Canvas par soft dark mode filter */
+    filter: invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(1.1);
+}
