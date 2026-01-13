@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quran Kareem - Najiful85</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="downloadModal" class="overlay" style="display:none;">
+    <div class="overlay-card">
+        <h2>Offline Mode</h2>
+        <p>Kya aap saare parts abhi download karna chahte hain? (113MB)</p>
+        <div id="dl-progress" style="display:none; margin:10px 0; background:#ddd; height:5px; width:100%;">
+            <div id="dl-bar" style="height:100%; background:green; width:0%;"></div>
+        </div>
+        <p id="dl-status" style="font-size:12px; color:#666;"></p>
+        <button class="btn-primary" onclick="startDownload()">Haan, Download Karein</button>
+        <button class="action-btn" onclick="skipDownload()" style="margin-top:10px; background:#666;">Nahi, Online Padhenge</button>
+    </div>
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
+
+<div id="selectionOverlay" class="overlay">
+    <div class="overlay-card">
+        <h2>Khush Amdeed</h2>
+        <label>1. Para Select:</label>
+        <select id="init-juz" onchange="populateOverlayPages(this.value)"></select>
+        <label>2. Page Select:</label>
+        <select id="init-page"></select>
+        <button class="btn-primary" onclick="startFromOverlay()">Start Reading</button>
+    </div>
+</div>
+
+<div id="mySidebar" class="sidebar">
+    <div class="sidebar-header">
+        <h3>Menu</h3>
+        <span class="close-btn" onclick="closeNav()">&times;</span>
+    </div>
+    <div class="sidebar-content">
+        <button class="action-btn" onclick="toggleNightMode()">🌙 Night/Day Mode</button>
+        <hr>
+        <label>Para Select:</label>
+        <select id="juz-select" onchange="handleParaChange(this.value)"></select>
+        <label>Page Select:</label>
+        <select id="sub-page-select" onchange="jumpToPage(this.value)"></select>
+        <hr>
+        <label>Surah Search:</label>
+        <input type="text" id="surahSearch" placeholder="Search..." onkeyup="filterSurahs()">
+        <select id="surah-select" onchange="jumpToPage(this.value)" size="6"></select>
+        <hr>
+        <label>Bookmarks:</label>
+        <div id="bookmarksList" class="bookmarks-grid"></div>
+    </div>
+</div>
+
+<div class="top-bar" id="topBar">
+    <button class="menu-icon-btn" onclick="openNav()">☰</button>
+    <div class="info-box">
+        <span id="page-info">Loading...</span>
+    </div>
+    <div style="display:flex; gap:15px;">
+        <button class="menu-icon-btn" onclick="toggleZenMode()">👁️</button>
+        <button class="menu-icon-btn" id="bookmarkBtn" onclick="toggleBookmark()">🤍</button>
+    </div>
+</div>
+
+<div class="quran-container" id="touchArea">
+    <div class="quran-frame" id="zoomWrapper">
+        <canvas id="pdf-render"></canvas>
+    </div>
+</div>
+
+<div class="nav-btns" id="bottomNav">
+    <button class="nav-btn" id="prev-btn" onclick="changePage(-1)">Peeche</button>
+    <button class="nav-btn" id="next-btn" onclick="changePage(1)">Aage</button>
+</div>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<script src="script.js"></script>
+</body>
+</html>
