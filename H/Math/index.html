@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Voice Trap Final</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: #222; 
+            font-family: sans-serif; 
+            touch-action: none; /* Mobile zoom rokne ke liye */
+        }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        /* UI Layer */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; pointer-events: none;
+        }
+        
+        /* Heads Up Display (HUD) */
+        #hud {
+            position: absolute; top: 10px; left: 15px;
+            color: white; font-size: 18px; font-weight: bold;
+            z-index: 5; text-shadow: 1px 1px 2px black;
+        }
+
+        /* Buttons */
+        .btn {
+            pointer-events: auto; background: #e74c3c; color: white; border: none;
+            padding: 15px 30px; font-size: 20px; border-radius: 10px;
+            box-shadow: 0 6px 0 #c0392b; margin-top: 10px; cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c0392b; }
+        
+        /* Game Over Screen */
+        #game-over-screen { 
+            display: none; 
+            background: rgba(0,0,0,0.9); 
+            width: 100%; height: 100%; 
+            position: absolute; top:0; left:0; 
+            flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 20; 
+        }
+        
+        /* Mic Visualizer (Side Bar) */
+        #mic-wrapper {
+            position: absolute; bottom: 20px; left: 20px; width: 20px; height: 150px;
+            background: rgba(0,0,0,0.5); border: 2px solid white; border-radius: 5px;
+            display: flex; align-items: flex-end;
+            z-index: 5;
+        }
+        #mic-bar { width: 100%; height: 0%; background: #2ecc71; transition: height 0.05s; }
+
+        h1 { color: white; margin-bottom: 10px; text-shadow: 2px 2px 0 #000; }
+        p { color: #ccc; margin-bottom: 20px; text-align: center; padding: 0 20px;}
+    </style>
+</head>
+<body>
+
+    <div id="hud">
+        LIVES: <span id="lives-txt">3</span>
+    </div>
+
+    <div id="mic-wrapper"><div id="mic-bar"></div></div>
+
+    <div id="ui-layer">
+        <h1 id="title">VOICE TRAP</h1>
+        <p>Talk to Run. Scream to Jump.<br>Wait for Silence to Stop.</p>
+        <button id="start-btn" class="btn">ENABLE MIC & START</button>
+    </div>
+
+    <div id="game-over-screen">
+        <h1 style="color: red;">YOU DIED</h1>
+        <p>Try controlling your volume!</p>
+        <button id="retry-btn" class="btn">TRY AGAIN</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // --- GAME SETTINGS ---
+        const NOISE_GATE = 10;       // Isse kam awaaz ignore hogi (Background noise filter)
+        const WALK_THRESHOLD = 20;   // Chalne ke liye volume
+        const JUMP_THRESHOLD = 60;   // Jump ke liye volume (Badha diya taki galti se jump na ho)
+        
+        const GRAVITY = 0.6;
+        const FRICTION = 0.85;       
+        const MAX_SPEED = 7;         
+        const JUMP_FORCE = -14;      
+
+        // --- VARIABLES ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const micBar = document.getElementById('mic-bar');
+        const uiLayer = document.getElementById('ui-layer');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        
+        let audioContext, analyser, dataArray;
+        let isRunning = false;
+        let cameraX = 0;
+        let lives = 3;
+
+        // Player
+        let player = {
+            x: 50, y: 0, w: 30, h: 30,
+            vx: 0, vy: 0,
+            grounded: false,
+            jumpsLeft: 2,
+            color: '#3498db'
+        };
+
+        // Map Data
+        let blocks = [];
+        const initialLevel = [
+            {t:1, x:0, y:400, w:800, h:50},     // Start Ground (Bohot lamba kar diya safety ke liye)
+            {t:2, x:900, y:350, w:120, h:20},   // Platform 1
+            {t:3, x:1150, y:400, w:150, h:20, trap: true}, // TRAP: Ye girega
+            {t:4, x:1400, y:250, w:50, h:200},  // Pillar
+            {t:1, x:1600, y:400, w:600, h:50},  // Safe Area
+            {t:5, x:2000, y:370, w:30, h:30}    // Spike
+        ];
+
+        // --- RESIZE LOGIC ---
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight; // Mobile browser fix
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- GAME CONTROL ---
+        function resetGame() {
+            // Player Reset
+            player.x = 100;    // Thoda aage spawn
+            player.y = 200;    // Hawa me spawn (taki ground ke andar na phase)
+            player.vx = 0;
+            player.vy = 0;
+            player.jumpsLeft = 2;
+            
+            cameraX = 0;
+            blocks = JSON.parse(JSON.stringify(initialLevel)); // Reset Level Map
+            
+            gameOverScreen.style.display = 'none';
+            document.getElementById('lives-txt').innerText = lives;
+
+            // FIX: 0.5 Second ka delay taki physics load ho jaye
+            setTimeout(() => {
+                isRunning = true;
+                loop();
+            }, 500); 
+        }
+
+        function playerDie() {
+            lives--;
+            document.getElementById('lives-txt').innerText = lives;
+            isRunning = false; // Stop loop temporarily
+
+            if (lives <= 0) {
+                gameOverScreen.style.display = 'flex';
+                lives = 3; // Reset lives for next retry
+            } else {
+                // Quick Respawn
+                setTimeout(() => {
+                    player.x = cameraX + 100; // Screen ke center me respawn
+                    player.y = 100; // Safe height
+                    player.vx = 0; 
+                    player.vy = 0;
+                    isRunning = true;
+                    loop();
+                }, 1000);
+            }
+        }
+
+        // --- AUDIO ENGINE ---
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                uiLayer.style.display = 'none';
+                resetGame(); // Game Start
+            } catch (e) {
+                alert("Mic permission needed to play!");
+            }
+        }
+
+        function getVolume() {
+            if (!analyser) return 0;
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+            let avg = sum / dataArray.length;
+            
+            // Visual Update
+            micBar.style.height = Math.min(avg * 1.5, 100) + "%";
+            if(avg > JUMP_THRESHOLD) micBar.style.background = "red";
+            else if(avg > WALK_THRESHOLD) micBar.style.background = "orange";
+            else micBar.style.background = "#2ecc71";
+            
+            return avg;
+        }
+
+        // --- MAIN LOOP ---
+        function update() {
+            if(!isRunning) return;
+
+            let vol = getVolume();
+            if(vol < NOISE_GATE) vol = 0; // Filter background noise
+
+            // Movement Logic
+            if (vol > WALK_THRESHOLD) {
+                let speed = (vol - WALK_THRESHOLD) * 0.2;
+                if(speed > MAX_SPEED) speed = MAX_SPEED;
+                player.vx = speed;
+            } else {
+                player.vx *= FRICTION;
+            }
+
+            // Jump Logic
+            if (vol > JUMP_THRESHOLD) {
+                if (player.grounded) {
+                    player.vy = JUMP_FORCE;
+                    player.grounded = false;
+                    player.jumpsLeft = 1;
+                } else if (player.jumpsLeft > 0 && player.vy > -5) {
+                    player.vy = JUMP_FORCE;
+                    player.jumpsLeft = 0;
+                }
+            }
+
+            // Physics
+            player.vy += GRAVITY;
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // Camera
+            let targetCamX = player.x - 100;
+            cameraX += (targetCamX - cameraX) * 0.1;
+
+            // Collision
+            player.grounded = false;
+            
+            for (let b of blocks) {
+                // Trap Falling
+                if (b.trap && b.falling) b.y += 5;
+
+                // Collision Box vs Box
+                if (player.x < b.x + b.w && player.x + player.w > b.x &&
+                    player.y < b.y + b.h && player.y + player.h > b.y) {
+                    
+                    if (b.t === 5) { // Spike
+                        playerDie();
+                    }
+                    else if (player.vy > 0 && player.y + player.h - player.vy <= b.y) {
+                        player.y = b.y - player.h;
+                        player.vy = 0;
+                        player.grounded = true;
+                        player.jumpsLeft = 2;
+                        
+                        // Trap Trigger
+                        if (b.trap && !b.falling) setTimeout(() => { b.falling = true; }, 250);
+                    }
+                    else if (player.vx > 0) { // Wall hit
+                        player.x = b.x - player.w;
+                        player.vx = 0;
+                    }
+                }
+            }
+
+            // Fall Death Condition
+            if (player.y > canvas.height + 100) {
+                playerDie();
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = "#222";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-cameraX, 0);
+
+            // Draw Blocks
+            for (let b of blocks) {
+                if (b.t === 5) ctx.fillStyle = "#e74c3c"; // Spike
+                else if (b.trap) ctx.fillStyle = "#95a5a6"; // Trap (Looks normal)
+                else ctx.fillStyle = "#7f8c8d"; // Normal Ground
+                
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                if(b.trap) { ctx.strokeStyle = "orange"; ctx.lineWidth=2; ctx.strokeRect(b.x,b.y,b.w,b.h); }
+            }
+
+            // Draw Player
+            ctx.fillStyle = player.vy < 0 ? "#e74c3c" : (player.vx > 1 ? "#f1c40f" : "#3498db");
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+
+            ctx.restore();
+            if(isRunning) requestAnimationFrame(loop);
+        }
+
+        function loop() {
+            update();
+            draw();
+            if(isRunning) requestAnimationFrame(loop);
+        }
+
+        // Listeners
+        document.getElementById('start-btn').addEventListener('click', () => {
+             if (audioContext && audioContext.state === 'suspended') audioContext.resume();
+            initAudio();
+        });
+        document.getElementById('retry-btn').addEventListener('click', resetGame);
+
+    </script>
+</body>
+</html>
