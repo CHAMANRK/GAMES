@@ -119,17 +119,71 @@
         window.addEventListener('resize', resize);
         resize();
 
-        function resetGame() {
-            player.x = 50;
-            player.y = 200;
-            player.vx = 0;
-            player.vy = 0;
-            player.jumpsLeft = 2;
-            
-            lives = 3;
-            score = 0;
-            cameraX = 0;
-            
+        // --- UPDATE KARNE WALA HISSA ---
+
+function resetGame() {
+    // Player ko thoda hawa mein spawn karein platform ke upar
+    player.x = 50;
+    player.y = 100; 
+    player.vx = 0;
+    player.vy = 0;
+    player.jumpsLeft = 2;
+    
+    lives = 3;
+    score = 0;
+    cameraX = 0;
+    
+    blocks = JSON.parse(JSON.stringify(initialLevel));
+    
+    document.getElementById('lives-txt').innerText = lives;
+    gameOverScreen.style.display = 'none';
+    
+    // Sabse important: 1 second ka delay loop shuru karne se pehle 
+    // taaki physics stable ho jaye
+    setTimeout(() => {
+        isRunning = true;
+        loop();
+    }, 500); 
+}
+
+function update() {
+    if(!isRunning) return;
+
+    let vol = getVolume();
+
+    // Noise Filter: Agar volume bohot kam hai toh zero kar do
+    if(vol < 10) vol = 0; 
+
+    // Horizontal Movement
+    if (vol > WALK_THRESHOLD) {
+        player.vx += 0.5; // Dhire dhire speed badhegi
+        if(player.vx > MAX_SPEED) player.vx = MAX_SPEED;
+    } else {
+        player.vx *= FRICTION;
+    }
+
+    // Jump Logic (Sensitivity Check)
+    if (vol > JUMP_THRESHOLD) {
+        if (player.grounded) {
+            player.vy = JUMP_FORCE;
+            player.grounded = false;
+        }
+    }
+
+    player.vy += GRAVITY;
+    player.x += player.vx;
+    player.y += player.vy;
+
+    // Death Condition: Sirf tab mare jab player screen ke niche jaye
+    // Aur check karein ki player waqai gir raha hai
+    if (player.y > canvas.height + 50) {
+        playerDie();
+    }
+
+    // Collision Logic (Same rahegi)
+    // ... (rest of the collision code)
+}
+        
             // Deep copy level data to reset traps
             blocks = JSON.parse(JSON.stringify(initialLevel));
             
