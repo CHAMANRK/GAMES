@@ -303,3 +303,16 @@ function filterSurahs() {
 function openNav() { document.getElementById("mySidebar").style.width = "300px"; document.getElementById("sidebarOverlay").style.display="block";}
 function closeNav() { document.getElementById("mySidebar").style.width = "0"; document.getElementById("sidebarOverlay").style.display="none";}
   
+// --- VOLUME BUTTON NAVIGATION ---
+window.addEventListener('keydown', function(e) {
+    // Volume Up key
+    if (e.key === "VolumeUp" || e.keyCode === 175) {
+        e.preventDefault(); // Volume slider ko rokne ke liye
+        changePage(1);      // Agla page
+    }
+    // Volume Down key
+    if (e.key === "VolumeDown" || e.keyCode === 174) {
+        e.preventDefault(); // Volume slider ko rokne ke liye
+        changePage(-1);     // Pichla page
+    }
+}, false);
