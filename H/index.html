@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Critical Warning!</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00FF00;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        #warning {
+            color: red;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 2px solid red;
+            padding: 20px;
+            margin-bottom: 20px;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .terminal {
+            width: 80%;
+            max-width: 600px;
+            text-align: left;
+            background: rgba(0, 20, 0, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px #00FF00;
+        }
+
+        .line {
+            margin: 5px 0;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+            animation: typing 2s steps(40, end) forwards;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #222;
+            margin-top: 10px;
+            border: 1px solid #00FF00;
+            position: relative;
+        }
+
+        .fill {
+            height: 100%;
+            background: #00FF00;
+            width: 0%;
+            animation: load 10s linear forwards;
+        }
+
+        @keyframes load {
+            0% { width: 0%; }
+            20% { width: 10%; }
+            50% { width: 45%; }
+            80% { width: 90%; }
+            100% { width: 100%; }
+        }
+
+        .status {
+            margin-top: 10px;
+            color: yellow;
+        }
+
+        #final-msg {
+            display: none;
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="warning">⚠️ YOUR PHONE IS HACKED  ⚠️</div>
+
+    <div id="warning">⚠️ CRITICAL SYSTEM BREACH ⚠️</div>
+
+    <div class="terminal">
+        <div class="line" style="animation-delay: 0.5s;">> Initializing Exploit... DONE</div>
+        <div class="line" style="animation-delay: 2s;">> Bypassing Firewall... 100%</div>
+        <div class="line" style="animation-delay: 4s;">> Accessing Private Gallery... FOUND</div>
+        <div class="line" style="animation-delay: 6s;">> Copying WhatsApp Databases... IN PROGRESS</div>
+        <div class="line" style="animation-delay: 8s;">> Uploading data to remote server: 192.168.1.105</div>
+        
+        <div class="progress-bar">
+            <div class="fill"></div>
+        </div>
+        <div class="status" id="status-text">Uploading Files: 0%</div>
+    </div>
+
+    <div id="final-msg">DATA BREACH COMPLETE! <br> ALL FILES DELETED 💀</div>
+
+    <script>
+        // Progress bar ka percentage update karne ke liye
+        let statusText = document.getElementById('status-text');
+        let finalMsg = document.getElementById('final-msg');
+        let count = 0;
+
+        let interval = setInterval(() => {
+            count++;
+            statusText.innerText = "Uploading Files: " + count + "%";
+            if (count >= 100) {
+                clearInterval(interval);
+                finalMsg.style.display = "block";
+            }
+        }, 100); // 10 seconds total time (100ms * 100)
+    </script>
+
+</body>
+</html>
