@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>🌙 Najiful Quran Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts: Scheherazade New for headings -->
+  <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .mode-group label {
+      display: block;
+      margin-bottom: 16px;
+      margin-top: 10px;
+      font-size: 1.12em;
+      cursor: pointer;
+    }
+    .mode-group input[type="radio"] {
+      margin-right: 10px;
+      transform: scale(1.16);
+      vertical-align: middle;
+    }
+    #hintBtn:disabled { background: #aaa; cursor: not-allowed; color: #eee; }
+    #hintInfo { color: #b9ffb9; }
+    .search-result { cursor: pointer; }
+    #quizProgress, #scoreBoard, #timer {
+      color: #ffeecf;
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 1.09em;
+    }
+    .result-summary {
+      color: #27462b;
+      background: #ffeecf;
+      border-radius: 10px;
+      padding: 16px 8px;
+      margin: 20px 0;
+      border: 2px solid #3d5931;
+      box-shadow: 0 2px 6px #2223;
+      font-size: 1.15em;
+    }
+    .hidden { display:none !important; }
+  </style>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8G8M908CX1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8G8M908CX1');
+  </script>
+  <!-- End Google Analytics -->
+</head>
+<body>
+<header class="app-header" aria-label="App branding">
+  <div class="header-content">
+    <div class="header-branding">
+      <img src="logo.png" alt="Quran Game Logo" class="logo" aria-hidden="true" />
+      <h1 class="app-title">Najiful Quran Game</h1>
+    </div>
+    <a href="#" class="header-contact-btn" onclick="showSection('contactScreen')" aria-label="Raabta/Suggestion">📩</a>
+  </div>
+</header>
+
+<main>
+  <!-- Welcome/Home Screen -->
+  <section id="welcomeScreen" class="screen active" aria-label="Home screen">
+    <div class="card home-card">
+      <h2 class="main-heading">🌙 Quran Ayat Quiz Game</h2>
+      <p class="subtitle">Apni Quran maloomat ko aazmaayiye! Para, Surah ya Page se quiz kheliye.</p>
+      <!-- MODE SELECTION -->
+      <form id="modeForm" class="mode-group" style="margin-bottom:18px;">
+        <label><input type="radio" name="quizMode" value="practice" checked> 🎯 Practice Mode (unlimited)</label>
+        <label><input type="radio" name="quizMode" value="timed"> ⏱️ Timed Challenge (10 Qs, 30 sec each)</label>
+        <label><input type="radio" name="quizMode" value="survival"> 💥 Survival Mode (wrong = game over)</label>
+      </form>
+      <button class="btn btn-primary" onclick="showSection('paraSelectScreen')" aria-label="Game shuru karein">▶️ Shuru Karein</button>
+      <button class="btn btn-secondary" onclick="toggleSearch()" aria-label="Search dikhayein ya chhupayein" id="toggleSearchBtn">🔎 Search</button>
+    </div>
+    <!-- SEARCH SECTION: hidden by default, toggled by button -->
+    <div class="search-section card" id="searchContainer" style="display:none;">
+      <form aria-label="Quran Search" onsubmit="searchAyats(); return false;">
+        <input id="searchInput" type="text" placeholder="Ayat, Surah, Page, Para se search karein" aria-label="Search field" autocomplete="off">
+        <button type="submit" class="btn btn-primary" aria-label="Search">Search</button>
+      </form>
+      <div id="searchResults" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- Para Range Select Screen -->
+  <section id="paraSelectScreen" class="screen" aria-label="Para Range Selection" tabindex="-1">
+    <div class="card grid-card">
+      <h2 class="main-heading">🌙 Para Range Select Karein</h2>
+      <form onsubmit="startGame(); return false;" autocomplete="off">
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="fromPara">From Para (1–30):</label>
+            <input id="fromPara" type="number" min="1" max="30" placeholder="e.g. 1" aria-label="Shuruati Para number">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="toPara">To Para (1–30):</label>
+            <input id="toPara" type="number" min="1" max="30" placeholder="e.g. 30" aria-label="Aakhri Para number">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" aria-label="Submit Para selection">Submit</button>
+        <div id="selectError" class="error hidden" aria-live="polite"></div>
+      </form>
+      <button class="btn btn-outline" type="button" onclick="showSection('welcomeScreen')" aria-label="Wapas Home">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- Quiz Screen -->
+  <section id="quizScreen" class="screen" aria-label="Quiz Screen" tabindex="-1">
+    <div class="card quiz-card">
+      <div id="quizProgress"></div>
+      <h2 class="main-heading">📖 Ye Ayat Pehchaniye</h2>
+      <div id="ayatText" class="ayat typing-effect" aria-live="polite"></div>
+      <div style="margin-bottom: 12px;">
+        <button id="hintBtn" class="btn btn-secondary" onclick="showHint()" type="button">💡 Hint Do</button>
+        <span id="hintInfo"></span>
+      </div>
+      <form id="answerForm" onsubmit="return checkAnswer();" autocomplete="off">
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="user_page">Page Number (Optional)</label>
+            <input id="user_page" type="number" min="1" max="604" placeholder="Page Number" aria-label="Page Number">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_para">Para Number</label>
+            <input id="user_para" type="number" min="1" max="30" placeholder="Para Number" aria-label="Para Number" required>
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_page_in_para">Page In Para</label>
+            <input id="user_page_in_para" type="number" min="1" max="20" placeholder="Page In Para" aria-label="Page in Para">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_surah">Surah Name (Optional)</label>
+            <input id="user_surah" type="text" placeholder="Surah Name" aria-label="Surah Name">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" aria-label="Jawab check karein">Check</button>
+      </form>
+      <div id="quizError" class="error hidden" aria-live="polite"></div>
+      <div id="quizResult" class="result hidden" aria-live="polite"></div>
+      <div id="survivalAnswer" class="result hidden" style="font-size:1.08em; background:#ffeecf; color:#27462b; margin-bottom:12px;"></div>
+      <button class="btn btn-secondary next-button hidden" onclick="nextQuestion()" aria-label="Agla Sawal">Agla Sawal</button>
+      <button class="btn btn-outline" type="button" onclick="showSection('welcomeScreen')" aria-label="Wapas Home">⬅️ Wapas</button>
+      <div id="scoreBoard"></div>
+      <div id="timer" style="font-size:1.11em;margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <!-- RESULT SCREEN/SUMMARY -->
+  <section id="resultScreen" class="screen" aria-label="Result Screen" tabindex="-1">
+    <div class="card quiz-card">
+      <h2 class="main-heading">🎉 Quiz Khatam!</h2>
+      <div id="finalResult" class="result-summary"></div>
+      <button class="btn btn-primary" onclick="restartGame(true)">🏠 Home</button>
+    </div>
+  </section>
+
+  <!-- CONTACT FORM SECTION -->
+  <section id="contactScreen" class="screen" aria-label="Contact/Feedback" tabindex="-1">
+    <div class="card contact-card">
+      <h2 class="main-heading">📩 Raabta / Feedback</h2>
+      <form action="https://formsubmit.co/hellochaman532@gmail.com" method="POST" class="contact-form" autocomplete="off">
+        <input type="hidden" name="_next" value="https://CHAMANRK.github.io/GAMES/Quran_Quiz/thankyou.html" />
+        <input type="hidden" name="_captcha" value="false">
+        <div class="input-group">
+          <label for="name" class="input-label">Aapka Naam</label>
+          <input type="text" id="name" name="name" required aria-label="Naam">
+        </div>
+        <div class="input-group">
+          <label for="email" class="input-label">Email</label>
+          <input type="email" id="email" name="email" required aria-label="Email">
+        </div>
+        <div class="input-group">
+          <label for="message" class="input-label">Aapka Paighaam</label>
+          <textarea id="message" name="message" rows="4" required aria-label="Paighaam"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" aria-label="Bhejain">Bhejain</button>
+      </form>
+      <button class="btn btn-outline" type="button" onclick="showSection('welcomeScreen')" aria-label="Wapas Home">⬅️ Wapas</button>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer" aria-label="Copyright">
+  <span>© 2025 Najiful Quran Game</span>
+</footer>
+
+<!-- MODULAR JAVASCRIPT FILES - LOAD IN THIS ORDER -->
+<!-- 1. Data Manager - Must load first to fetch quran_full.json -->
+<script src="data.js"></script>
+<!-- 2. UI Manager - Handles screen transitions and effects -->
+<script src="ui.js"></script>
+<!-- 3. Search Module - Handles search functionality -->
+<script src="search.js"></script>
+<!-- 4. Game Logic - Main quiz logic, depends on data.js, ui.js -->
+<script src="game.js"></script>
+
+</body>
+</html>
