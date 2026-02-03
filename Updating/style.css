@@ -17,9 +17,9 @@
     --error: #E57373;
     
     /* UI Effects */
-    --glass-bg: rgba(20, 30, 25, 0.75);
+    --glass-bg: rgba(20, 30, 25, 0.85); /* Slightly darker for better contrast */
     --glass-border: 1px solid rgba(212, 175, 55, 0.15);
-    --glass-blur: blur(14px);
+    --glass-blur: blur(16px);
     
     --radius-xl: 24px;
     --radius-md: 14px;
@@ -74,6 +74,7 @@ h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.5px; color: var(--text-mai
 .btn-fb { background: #1877F2; color: #fff; }
 
 .btn-outline { background: transparent; border: 1px solid var(--primary-gold); color: var(--primary-gold); }
+.btn-locked { opacity: 0.6; cursor: not-allowed; background: #222; color: #777; border: 1px solid #444; }
 
 /* Glass Cards */
 .glass-card {
@@ -102,10 +103,15 @@ input:focus { border-color: var(--primary-gold); }
    ========================================= */
 .screen {
     display: none; padding: 20px 16px; max-width: 500px; margin: 0 auto; width: 100%;
-    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Smooth fade in animation */
+    animation: fadeInPage 0.3s ease-out;
 }
 .screen.active { display: flex; flex-direction: column; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+@keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 .hidden { display: none !important; }
 
@@ -168,11 +174,6 @@ input:focus { border-color: var(--primary-gold); }
     border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around;
     padding: 12px 0; z-index: 999; backdrop-filter: blur(10px);
 }
-.nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); text-decoration: none; font-size: 0.7rem; gap: 4px; transition: 0.2s; }
+.nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); text-decoration: none; font-size: 0.7rem; gap: 4px; transition: 0.2s; cursor: pointer; }
 .nav-item.active { color: var(--primary-gold); transform: translateY(-2px); }
 .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
-
-/* Loading Animation */
-.spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary-gold); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
-              
