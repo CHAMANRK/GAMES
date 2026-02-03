@@ -11,16 +11,10 @@
 </head>
 <body>
 
-    <section id="splashScreen" class="screen active" style="height: 90vh; justify-content: center; text-align: center;">
-        <div style="font-size: 4rem; margin-bottom: 20px;">🌙</div>
-        <h1 class="text-gold" style="font-family: var(--font-quran);">Quran Game</h1>
-        <p class="text-dim" style="margin-top: 10px;">Preparing your experience...</p>
-        <div class="spinner"></div>
-    </section>
-
-    <section id="authScreen" class="screen">
-        <div style="margin-top: 40px; text-align: center; margin-bottom: 30px;">
-            <h1 style="margin-bottom: 10px;">Welcome</h1>
+    <section id="authScreen" class="screen active">
+        <div style="margin-top: 50px; text-align: center; margin-bottom: 40px;">
+            <div style="font-size: 4rem; margin-bottom: 10px;">🌙</div>
+            <h1 class="text-gold" style="font-family: var(--font-quran);">Quran Game</h1>
             <p class="text-dim">Sign in to save progress and earn rewards.</p>
         </div>
 
@@ -75,18 +69,21 @@
                     <h4>Practice</h4>
                     <span class="text-dim">Unlimited</span>
                 </label>
+                
                 <label class="mode-card" onclick="document.getElementById('radioTimed').checked=true">
                     <input type="radio" name="quizMode" value="timed" id="radioTimed" class="hidden">
                     <div class="mode-icon">⏱️</div>
                     <h4>Time Attack</h4>
                     <span class="text-dim">Speed Run</span>
                 </label>
+                
                 <label class="mode-card" onclick="document.getElementById('radioSurvival').checked=true">
                     <input type="radio" name="quizMode" value="survival" id="radioSurvival" class="hidden">
                     <div class="mode-icon">💥</div>
                     <h4>Survival</h4>
                     <span class="text-dim">One Life</span>
                 </label>
+                
                 <div class="mode-card locked" onclick="showSection('onlineModeScreen')">
                     <div class="mode-icon">⚔️</div>
                     <h4>Online</h4>
@@ -186,6 +183,7 @@
         <div class="glass-card" style="text-align: center; padding-top: 40px;">
             <div style="font-size: 4rem;">🎉</div>
             <h2 class="text-gold">Quiz Completed</h2>
+            
             <div id="finalResult" style="margin: 30px 0; font-size: 1.1rem; line-height: 1.6;"></div>
             
             <button class="btn btn-primary" onclick="restartGame(false)">🔄 Play Again</button>
@@ -222,13 +220,6 @@
                     <b>Rizwan</b>
                 </div>
                 <button class="btn btn-outline" style="width:auto; padding: 5px 12px; font-size: 0.8rem; margin:0;">Challenge</button>
-            </div>
-            <div class="glass-card" style="padding: 15px; display: flex; align-items: center; justify-content: space-between;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:35px; height:35px; background:#555; border-radius:50%;"></div>
-                    <b>Abdullah</b>
-                </div>
-                <span class="text-dim" style="font-size: 0.8rem;">Offline</span>
             </div>
         </div>
         <button class="btn btn-secondary" onclick="showSection('welcomeScreen')">Back</button>
@@ -351,4 +342,8 @@
             Profile
         </a>
         <a href="javascript:void(0)" class="nav-item" onclick="showSection('friendsScreen')">
-            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            Friends
+        </a>
+        <a href="javascript:void(0)" class="nav-item" onclick="showSection('settingsScreen')">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L4.04 9.43c-.11.21-.06.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 
