@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quran Knowledge Game</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Scheherazade+New:wght@600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <section id="splashScreen" class="screen">
+        <div style="height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="glass-card" style="padding: 30px; border-radius: 50%; margin-bottom: 20px; border: 2px solid var(--primary-gold);">
+                <span style="font-size: 3rem;">🌙</span>
+            </div>
+            <h1 class="text-gold">Quran Knowledge</h1>
+            <p class="text-muted" style="margin-top: 10px;">Preparing your experience...</p>
+            <div style="margin-top: 30px; width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary-gold); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        </div>
+        <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+    </section>
+
+    <section id="authScreen" class="screen">
+        <div style="margin-top: 40px; text-align: center;">
+            <h1 style="margin-bottom: 10px;">Welcome</h1>
+            <p class="text-muted" style="margin-bottom: 40px;">Sign in to save progress and earn rewards.</p>
+        </div>
+
+        <button class="btn btn-social">
+            <span>G</span> Continue with Google
+        </button>
+        <button class="btn btn-social" style="background: #1877F2;">
+            <span>f</span> Continue with Facebook
+        </button>
+        <button class="btn btn-social">
+            <span>📱</span> Continue with Mobile
+        </button>
+
+        <div style="margin: 20px 0; text-align: center; color: var(--text-muted); font-size: 0.8rem;">OR</div>
+
+        <button class="btn btn-ghost">Play as Guest</button>
+    </section>
+
+    <section id="homeScreen" class="screen active">
+        <div class="top-bar">
+            <div style="font-size: 1.5rem;">☰</div>
+            <div class="coin-badge">
+                <span>🟡</span> 1,250
+            </div>
+            <div style="font-size: 1.2rem;">🔔</div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <p class="text-muted">Assalamu Alaykum,</p>
+            <h2>Chaman</h2>
+        </div>
+
+        <div class="game-modes-grid">
+            <div class="glass-card mode-card">
+                <div class="mode-icon">🎯</div>
+                <h3>Practice</h3>
+                <span class="text-muted" style="font-size: 0.8rem;">Unlimited</span>
+            </div>
+            <div class="glass-card mode-card">
+                <div class="mode-icon">⏱️</div>
+                <h3>Time Attack</h3>
+                <span class="text-muted" style="font-size: 0.8rem;">Speed Run</span>
+            </div>
+            <div class="glass-card mode-card">
+                <div class="mode-icon">💥</div>
+                <h3>Survival</h3>
+                <span class="text-muted" style="font-size: 0.8rem;">One Chance</span>
+            </div>
+            <div class="glass-card mode-card locked">
+                <span class="lock-icon">🔒</span>
+                <div class="mode-icon">⚔️</div>
+                <h3>Online PvP</h3>
+                <span class="text-muted" style="font-size: 0.8rem;">Coming Soon</span>
+            </div>
+        </div>
+
+        <h3 style="margin: 25px 0 15px 0;">Community</h3>
+        <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span>🏆</span>
+                <div>
+                    <div style="font-weight: 600;">Leaderboard</div>
+                    <div class="text-muted" style="font-size: 0.8rem;">You are Rank #42</div>
+                </div>
+            </div>
+            <span class="text-gold">View &gt;</span>
+        </div>
+        
+        <div class="glass-card locked" style="display: flex; justify-content: space-between; align-items: center; opacity: 0.7;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span>📖</span>
+                <div>
+                    <div style="font-weight: 600;">Hifz Mode</div>
+                    <div class="text-muted" style="font-size: 0.8rem;">Level 10 Required</div>
+                </div>
+            </div>
+            <span>🔒</span>
+        </div>
+    </section>
+
+    <section id="questionScreen" class="screen">
+        <div class="progress-container">
+            <span class="text-gold" style="font-weight: bold;">Q. 4</span>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <span>00:14</span>
+        </div>
+
+        <div class="glass-card" style="min-height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px;">
+            <div class="ayat-display">
+                بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+                <br>
+                <span style="font-size: 1.5rem;">(Placeholder Text)</span>
+            </div>
+        </div>
+
+        <div class="compulsory-section">
+            <div class="input-group">
+                <label class="input-label">Para No. <span style="color:red">*</span></label>
+                <input type="number" placeholder="1-30" inputmode="numeric">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Page in Para <span style="color:red">*</span></label>
+                <input type="number" placeholder="1-20" inputmode="numeric">
+            </div>
+        </div>
+
+        <div class="optional-section-header">
+            <div class="divider-line"></div>
+            <span>Bonus Points</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="optional-inputs">
+            <div class="input-group">
+                <label class="input-label">Surah Name (+50 Pts)</label>
+                <input type="text" placeholder="Start typing surah...">
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                 <input type="checkbox" id="bonusCheck" style="width: 20px; height: 20px;">
+                 <label for="bonusCheck" class="text-muted" style="font-size: 0.9rem;">I also know the Page Number (+10)</label>
+            </div>
+        </div>
+
+        <div style="margin-top: 25px;">
+            <button class="btn btn-primary">Submit Answer</button>
+            <p class="text-muted" style="text-align: center; margin-top: 15px; font-size: 0.8rem;">
+                No skipping allowed. Make your best guess.
+            </p>
+        </div>
+    </section>
+
+    <section id="profileScreen" class="screen">
+        <div class="glass-card" style="text-align: center; margin-top: 20px;">
+            <div class="avatar-circle">👤</div>
+            <h2 class="text-gold">Chaman</h2>
+            <p class="text-muted">Student of Knowledge</p>
+            <div style="margin-top: 15px; display: inline-block; padding: 5px 15px; background: rgba(212, 175, 55, 0.2); border-radius: 15px; color: var(--primary-gold); font-size: 0.8rem; font-weight: bold;">
+                Level 5 Scholar
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+            <div class="glass-card" style="padding: 15px; text-align: center;">
+                <div class="text-muted" style="font-size: 0.8rem;">Accuracy</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">87%</div>
+            </div>
+            <div class="glass-card" style="padding: 15px; text-align: center;">
+                <div class="text-muted" style="font-size: 0.8rem;">Avg Time</div>
+                <div style="font-size: 1.5rem; font-weight: bold;">12s</div>
+            </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 15px;">
+            <h4 style="margin-bottom: 10px;">Strengths & Weaknesses</h4>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span class="text-muted">Best Surah</span>
+                <span>Al-Mulk</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span class="text-muted">Needs Work</span>
+                <span style="color: var(--error);">Al-An'am</span>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary" style="margin-top: 20px;">Edit Profile</button>
+    </section>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            <span>Friends</span>
+        </a>
+        <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>Profile</span>
+        </a>
+        <a href="#" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L4.04 9.43c-.11.21-.06.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.11-.22.06-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            <span>Settings</span>
+        </a>
+    </nav>
+
+</body>
+</html>
