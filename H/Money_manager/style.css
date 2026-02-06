@@ -1,0 +1,586 @@
+:root {
+    --bg-dark: #121212;
+    --card-bg: #1e1e1e;
+    --primary: #bb86fc;
+    --green: #03dac6;
+    --red: #cf6679;
+    --text: #ffffff;
+    --orange: #ff8c42;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text);
+    overflow-x: hidden;
+}
+
+/* 1. LOADING & UTILS */
+.hidden {
+    display: none !important;
+}
+
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #333;
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 2. AUTH SCREEN */
+#auth-view {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.login-card h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.google-btn {
+    background: white;
+    color: black;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 25px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 20px;
+}
+
+.google-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.google-btn:active {
+    transform: scale(0.98);
+}
+
+/* 3. APP HEADER */
+header {
+    padding: 20px;
+    background: linear-gradient(135deg, #3700b3, #6200ea);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.user-info h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.user-info small {
+    display: block;
+    color: #ddd;
+    margin-top: 5px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.icon-btn:hover {
+    transform: scale(1.1);
+}
+
+/* 4. STATS SECTION (NEW) */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 15px 20px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.stat-card.income {
+    border-left-color: var(--green);
+}
+
+.stat-card.expense {
+    border-left-color: var(--red);
+}
+
+.stat-card.savings {
+    border-left-color: var(--orange);
+}
+
+.stat-icon {
+    font-size: 1.8em;
+}
+
+.stat-card small {
+    color: #888;
+    font-size: 0.85em;
+}
+
+.stat-card h3 {
+    margin: 5px 0 0 0;
+    font-size: 1.3em;
+}
+
+/* 5. WALLETS */
+.section-title {
+    padding: 15px 20px 5px;
+    font-size: 0.9em;
+    color: #aaa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    background: #333;
+}
+
+.scrolling-wrapper {
+    display: flex;
+    overflow-x: auto;
+    padding: 10px 20px;
+    gap: 15px;
+    scrollbar-width: thin;
+}
+
+.wallet-card {
+    min-width: 140px;
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid #333;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.wallet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(187, 134, 252, 0.1);
+}
+
+.wallet-card.myself {
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 15px rgba(187, 134, 252, 0.3);
+}
+
+.wallet-name {
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.wallet-bal {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* 6. TRANSACTIONS LIST */
+#transactions-list {
+    padding: 0 20px 100px;
+}
+
+.tx-item {
+    background: var(--card-bg);
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.tx-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tx-left h4 {
+    margin: 0;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tx-left small {
+    color: #888;
+    font-size: 0.8em;
+}
+
+.tx-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tx-amount {
+    font-weight: bold;
+    min-width: 80px;
+    text-align: right;
+}
+
+.tx-in {
+    color: var(--green);
+}
+
+.tx-out {
+    color: var(--red);
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.delete-btn:hover {
+    color: var(--red);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #555;
+}
+
+/* 7. FAB */
+.fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--green);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 4px 12px rgba(3, 218, 198, 0.4);
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 500;
+}
+
+.fab:active {
+    transform: scale(0.9);
+}
+
+.fab:hover {
+    box-shadow: 0 6px 20px rgba(3, 218, 198, 0.6);
+}
+
+/* 8. MODALS */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #252525;
+    width: 100%;
+    max-width: 500px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 25px;
+    animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    flex: 1;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: white;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 10px;
+    color: white;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: all 0.2s;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(187, 134, 252, 0.2);
+}
+
+input::placeholder {
+    color: #666;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-save {
+    flex: 2;
+    background: var(--primary);
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-save:hover {
+    box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
+}
+
+.btn-save:active {
+    transform: scale(0.98);
+}
+
+.btn-cancel {
+    flex: 1;
+    background: transparent;
+    border: 1px solid #555;
+    color: white;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    border-color: #888;
+}
+
+/* TOGGLE SWITCH */
+.toggle-switch {
+    display: flex;
+    background: #333;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.toggle-switch button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    color: #888;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.toggle-switch button.active {
+    background: var(--green);
+    color: black;
+    font-weight: bold;
+}
+
+/* LABEL STYLES */
+label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    cursor: pointer;
+    color: #ccc;
+}
+
+label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* 9. TOAST NOTIFICATIONS */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 2001;
+    border-left: 4px solid var(--primary);
+}
+
+.toast.success {
+    border-left-color: var(--green);
+}
+
+.toast.error {
+    border-left-color: var(--red);
+}
+
+.toast.info {
+    border-left-color: #2196F3;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+/* 10. RESPONSIVE */
+@media (max-width: 600px) {
+    header {
+        padding: 15px;
+    }
+
+    .stats-container {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .wallet-card {
+        min-width: 120px;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+    }
+
+    .tx-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .tx-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
