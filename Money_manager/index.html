@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Money Manager - Your Personal Finance Assistan by Chaman Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Syncing Data...</p>
+    </div>
+
+    <div id="auth-view" class="hidden">
+        <div class="login-card">
+            <h1>💰 MONEY MANAGER</h1>
+            <p>Smart expense tracking & budget management</p>
+            <button onclick="window.loginGoogle()" class="google-btn">
+                <span class="material-icons">login</span> Login with Google
+            </button>
+        </div>
+    </div>
+
+    <div id="app-view" class="hidden">
+        
+        <header>
+            <div class="user-info">
+                <h2 id="user-name">Welcome</h2>
+                <small>Total Balance: <span id="grand-total">₹0</span></small>
+            </div>
+            <button onclick="window.openModal('settings-modal')" class="icon-btn" title="Settings">
+                <span class="material-icons">settings</span>
+            </button>
+            <button onclick="window.logout()" class="icon-btn" title="Logout">
+                <span class="material-icons">logout</span>
+            </button>
+        </header>
+
+        <!-- STATS SECTION (NEW) -->
+        <section class="stats-container">
+            <div class="stat-card income">
+                <span class="stat-icon">📈</span>
+                <div>
+                    <small>Total Income</small>
+                    <h3 id="total-income">₹0</h3>
+                </div>
+            </div>
+            <div class="stat-card expense">
+                <span class="stat-icon">📉</span>
+                <div>
+                    <small>Total Expense</small>
+                    <h3 id="total-expense">₹0</h3>
+                </div>
+            </div>
+            <div class="stat-card savings">
+                <span class="stat-icon">💰</span>
+                <div>
+                    <small>Net Savings</small>
+                    <h3 id="net-savings">₹0</h3>
+                </div>
+            </div>
+        </section>
+
+        <section class="wallets-container">
+            <div class="section-title">
+                <span>Accounts / Friends</span>
+                <span class="material-icons add-mini" onclick="window.openModal('add-wallet-modal')" title="Add Wallet">add_circle</span>
+            </div>
+            <div id="wallets-list" class="scrolling-wrapper">
+                </div>
+        </section>
+
+        <section class="transactions-container">
+            <div class="section-title">
+                <div>Recent Activity</div>
+                <button class="filter-btn" onclick="window.openModal('filter-modal')">
+                    <span class="material-icons">filter_list</span>
+                </button>
+            </div>
+            <div id="transactions-list">
+                <div class="empty-state">No transactions yet</div>
+            </div>
+        </section>
+
+        <button class="fab" onclick="window.openModal('transaction-modal')" title="Add Transaction">
+            <span class="material-icons">add</span>
+        </button>
+
+    </div>
+
+    <!-- TRANSACTION MODAL -->
+    <div id="transaction-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>New Transaction</h3>
+                <span class="material-icons close-btn" onclick="window.closeModal('transaction-modal')">close</span>
+            </div>
+            
+            <div class="toggle-switch">
+                <button id="btn-deposit" class="active" onclick="setTxType('deposit')">
+                    <span class="material-icons">arrow_downward</span> Deposit (In)
+                </button>
+                <button id="btn-expense" onclick="setTxType('expense')">
+                    <span class="material-icons">arrow_upward</span> Expense (Out)
+                </button>
+            </div>
+
+            <select id="tx-wallet" required>
+                <option value="" disabled selected>Select Account/Friend</option>
+            </select>
+
+            <input type="number" id="tx-amount" placeholder="Amount (₹)" min="1" max="999999" required>
+            <input type="text" id="tx-desc" placeholder="Note (e.g. Party, Rent)">
+
+            <!-- CATEGORY SELECTOR (NEW) -->
+            <select id="tx-category">
+                <option value="">Select Category (Optional)</option>
+                <option value="food">🍔 Food & Dining</option>
+                <option value="transport">🚕 Transport</option>
+                <option value="shopping">🛍️ Shopping</option>
+                <option value="utilities">⚡ Utilities</option>
+                <option value="entertainment">🎬 Entertainment</option>
+                <option value="health">🏥 Health</option>
+                <option value="salary">💼 Salary</option>
+                <option value="investment">📊 Investment</option>
+                <option value="other">📌 Other</option>
+            </select>
+
+            <div class="modal-actions">
+                <button onclick="window.closeModal('transaction-modal')" class="btn-cancel">Cancel</button>
+                <button onclick="window.saveTransaction()" class="btn-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD WALLET MODAL -->
+    <div id="add-wallet-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Account</h3>
+                <span class="material-icons close-btn" onclick="window.closeModal('add-wallet-modal')">close</span>
+            </div>
+            <input type="text" id="new-wallet-name" placeholder="Name (e.g. Asrar, Bank)" required>
+            <input type="number" id="new-wallet-bal" placeholder="Initial Balance (₹)" min="0">
+            <div class="modal-actions">
+                <button onclick="window.closeModal('add-wallet-modal')" class="btn-cancel">Cancel</button>
+                <button onclick="window.addWallet()" class="btn-save">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER MODAL (NEW) -->
+    <div id="filter-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Filter Transactions</h3>
+                <span class="material-icons close-btn" onclick="window.closeModal('filter-modal')">close</span>
+            </div>
+            <select id="filter-type">
+                <option value="">All Transactions</option>
+                <option value="deposit">Deposits Only</option>
+                <option value="expense">Expenses Only</option>
+            </select>
+            <select id="filter-category">
+                <option value="">All Categories</option>
+                <option value="food">🍔 Food & Dining</option>
+                <option value="transport">🚕 Transport</option>
+                <option value="shopping">🛍️ Shopping</option>
+                <option value="utilities">⚡ Utilities</option>
+                <option value="entertainment">🎬 Entertainment</option>
+                <option value="health">🏥 Health</option>
+                <option value="salary">💼 Salary</option>
+                <option value="investment">📊 Investment</option>
+                <option value="other">📌 Other</option>
+            </select>
+            <div class="modal-actions">
+                <button onclick="window.clearFilters()" class="btn-cancel">Clear</button>
+                <button onclick="window.applyFilters()" class="btn-save">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL (NEW) -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <span class="material-icons close-btn" onclick="window.closeModal('settings-modal')">close</span>
+            </div>
+            <label>
+                <input type="checkbox" id="dark-mode-toggle" checked> Dark Mode
+            </label>
+            <label>
+                <input type="checkbox" id="notifications-toggle" checked> Show Notifications
+            </label>
+            <button class="btn-save" onclick="window.exportData()" style="margin-top: 15px; width: 100%;">
+                <span class="material-icons">download</span> Export Data (CSV)
+            </button>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button onclick="window.closeModal('settings-modal')" class="btn-cancel">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
