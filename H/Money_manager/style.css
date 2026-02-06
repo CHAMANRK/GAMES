@@ -1,0 +1,230 @@
+:root {
+    --bg-dark: #050505;
+    --glass: rgba(20, 20, 20, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --primary: #00f2ea;  /* Cyan Neon */
+    --secondary: #ff0050; /* Hot Pink/Red */
+    --warning: #ff9800;   /* Orange */
+    --text-main: #e0e0e0;
+    --font-tech: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-tech);
+    margin: 0;
+    overflow-x: hidden;
+    height: 100vh;
+}
+
+/* --- 1. LIQUID BACKGROUND --- */
+.liquid-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+    z-index: -5;
+}
+
+.liquid-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -4;
+    opacity: 0.5;
+    animation: float 10s infinite alternate;
+}
+
+.orb-1 { width: 300px; height: 300px; background: var(--primary); top: -50px; left: -50px; }
+.orb-2 { width: 400px; height: 400px; background: var(--secondary); bottom: -100px; right: -100px; animation-delay: -5s; }
+.orb-3 { width: 200px; height: 200px; background: #7b2cbf; top: 40%; left: 40%; animation-duration: 15s; }
+
+@keyframes float {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(40px, 60px); }
+}
+
+/* --- 2. GLASSMORPHISM UTILS --- */
+.glass-panel, .glass-card, .glass-header, .glass-fab {
+    background: var(--glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.hidden { display: none !important; }
+
+/* --- 3. HEADER & PROFILE --- */
+header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
+}
+
+.user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.avatar-ring {
+    width: 45px; height: 45px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    padding: 2px;
+}
+.avatar-ring img { width: 100%; height: 100%; border-radius: 50%; }
+.user-info h2 { margin: 0; font-size: 1.1rem; letter-spacing: 1px; color: white; }
+
+.icon-btn {
+    background: transparent; border: none; color: white; padding: 8px; border-radius: 50%; cursor: pointer;
+}
+
+/* --- 4. NET WORTH CARD (3D & DANGER ZONES) --- */
+.net-worth-panel { padding: 25px 20px 10px; perspective: 1000px; }
+
+.worth-card {
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
+    transition: all 0.5s ease;
+    border: 1px solid rgba(0, 242, 234, 0.3);
+}
+
+.worth-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 10px 0;
+    text-shadow: 0 0 15px rgba(0, 242, 234, 0.5);
+    color: var(--primary);
+}
+
+.liability-row {
+    display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 8px; opacity: 0.8;
+}
+
+/* DANGER ANIMATIONS */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 80, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 0, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 80, 0); }
+}
+
+.critical-zone {
+    border: 2px solid var(--secondary) !important;
+    background: rgba(255, 0, 80, 0.1) !important;
+    animation: pulse-red 1.5s infinite;
+}
+
+.danger-zone {
+    border: 2px solid var(--warning) !important;
+}
+
+.text-green { color: var(--primary); }
+.text-red { color: var(--secondary); }
+
+/* --- 5. STATS --- */
+.stats-container {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px 20px;
+}
+.stat-card {
+    padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 10px;
+}
+.stat-card h4 { margin: 0; font-size: 1.2rem; }
+
+/* --- 6. WALLETS LIST --- */
+.wallets-container { padding: 10px 20px; }
+.section-title {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+    color: #888; font-size: 0.9rem; font-weight: bold; letter-spacing: 1px;
+}
+.add-btn-mini {
+    background: transparent; border: 1px solid #555; color: white; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+.scrolling-wrapper {
+    display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;
+}
+
+.wallet-card {
+    min-width: 150px; padding: 15px; border-radius: 18px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+    position: relative; overflow: hidden; transition: transform 0.2s;
+}
+.wallet-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+
+/* --- 7. TRANSACTIONS --- */
+.transactions-container { padding: 10px 20px 100px; }
+.tx-item {
+    background: rgba(20,20,20,0.8); margin-bottom: 12px; padding: 15px; border-radius: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-left: 4px solid transparent;
+}
+.tx-item.in { border-left-color: var(--primary); }
+.tx-item.out { border-left-color: var(--secondary); }
+
+/* --- 8. FAB & INPUTS --- */
+.fab {
+    position: fixed; bottom: 25px; right: 25px; width: 65px; height: 65px;
+    border-radius: 50%; border: none; color: black; background: var(--primary);
+    box-shadow: 0 0 20px rgba(0, 242, 234, 0.4); cursor: pointer; transition: 0.2s; z-index: 100;
+}
+.fab:active { transform: scale(0.9); }
+
+.cyber-btn {
+    background: linear-gradient(90deg, var(--primary), #00c2ff);
+    border: none; color: black; padding: 14px; border-radius: 10px; font-weight: bold;
+    cursor: pointer; letter-spacing: 1px; transition: 0.3s; margin-top: 10px;
+}
+.cyber-btn:hover { box-shadow: 0 0 15px var(--primary); }
+
+.cyber-input {
+    width: 100%; background: #111; border: 1px solid #333; color: white; padding: 14px;
+    border-radius: 10px; margin: 8px 0; font-size: 1rem; box-sizing: border-box;
+}
+.cyber-input:focus { outline: none; border-color: var(--primary); }
+
+/* --- 9. MODALS --- */
+.modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    display: flex; align-items: flex-end; z-index: 2000;
+}
+.modal-content {
+    width: 100%; background: #1a1a1a; padding: 30px 25px;
+    border-top-left-radius: 25px; border-top-right-radius: 25px;
+    animation: slideUp 0.3s ease; border-top: 2px solid var(--primary);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.close-btn { color: #666; cursor: pointer; }
+
+/* TOGGLE SWITCH */
+.toggle-switch { display: flex; background: #222; border-radius: 10px; margin-bottom: 15px; padding: 4px;}
+.toggle-switch button {
+    flex: 1; padding: 10px; border: none; background: transparent; color: #888; border-radius: 8px;
+}
+.toggle-switch button.active { background: var(--primary); color: black; font-weight: bold; }
+
+/* CHECKBOX */
+.checkbox-container { display: flex; align-items: center; margin: 15px 0; cursor: pointer; color: #ccc; }
+.checkbox-container input { width: 20px; height: 20px; margin-right: 10px; accent-color: var(--primary); }
+
+/* --- 10. AUTH & LOAD --- */
+#auth-view { height: 100vh; display: flex; justify-content: center; align-items: center; text-align: center; }
+.neon-title { font-size: 2.5rem; text-shadow: 0 0 10px var(--primary); line-height: 1; margin: 0; }
+#loading-overlay {
+    position: fixed; inset: 0; background: #000; z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.spinner { width: 50px; height: 50px; border: 4px solid #333; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* TOAST */
+.toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: #222; color: white; padding: 12px 20px; border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5); opacity: 0; transition: 0.3s; z-index: 4000;
+    border: 1px solid #444; font-size: 0.9rem;
+}
+.toast.show { opacity: 1; top: 40px; }
