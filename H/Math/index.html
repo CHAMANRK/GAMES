@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>💎 Smart Ledger Pro</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- AUTH VIEW -->
+    <div id="auth-view" class="hidden auth-container">
+        <div class="login-content">
+            <div class="login-icon">💎</div>
+            <h1>Smart Ledger Pro</h1>
+            <p>📊 Track your wealth like a pro</p>
+            <button onclick="window.loginGoogle()" class="primary-btn">
+                <span class="material-icons">login</span> Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN APP VIEW -->
+    <div id="app-view" class="hidden">
+        
+        <!-- TOP HEADER -->
+        <header class="app-header">
+            <div class="header-left">
+                <button class="header-btn" onclick="window.openModal('profile-modal')">
+                    <img id="header-avatar" src="" alt="Profile" class="header-avatar">
+                </button>
+                <div class="header-user-info">
+                    <div id="header-name" class="header-name">Loading...</div>
+                    <div id="header-age" class="header-age">Age: --</div>
+                </div>
+            </div>
+
+            <div class="app-title">💎 Smart Ledger Pro</div>
+
+            <div class="header-right">
+                <button class="header-btn security-btn" id="security-btn">
+                    <span id="security-icon">🔒</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- PAGE CONTAINER -->
+        <div class="pages-container">
+            
+            <!-- HOME PAGE -->
+            <div id="home-page" class="page active">
+                
+                <!-- Net Worth Card -->
+                <section class="net-worth-section">
+                    <div class="worth-card">
+                        <div class="worth-label">💰 Net Worth</div>
+                        <div class="worth-value" id="actual-worth">₹0</div>
+                        
+                        <div class="worth-details">
+                            <div class="detail-item">
+                                <span class="lbl">💵 My Money</span>
+                                <span id="my-money" class="val">₹0</span>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="detail-item">
+                                <span class="lbl">👥 Owed to Me</span>
+                                <span id="owed-to-me" class="val owe">₹0</span>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="detail-item">
+                                <span class="lbl">📌 I Owe</span>
+                                <span id="i-owe" class="val liability">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Stats Grid -->
+                <section class="stats-grid">
+                    <div class="stat-card income">
+                        <div class="stat-icon">
+                            <span class="material-icons">trending_up</span>
+                        </div>
+                        <div class="stat-info">
+                            <small>📈 Income</small>
+                            <h3 id="total-income">₹0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card expense">
+                        <div class="stat-icon">
+                            <span class="material-icons">trending_down</span>
+                        </div>
+                        <div class="stat-info">
+                            <small>📉 Expense</small>
+                            <h3 id="total-expense">₹0</h3>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Friends Circle -->
+                <section class="friends-section">
+                    <div class="section-header">
+                        <h3>👥 Friends Circle</h3>
+                        <button class="icon-btn" onclick="window.openModal('add-friend-modal')">
+                            <span class="material-icons">person_add</span>
+                        </button>
+                    </div>
+                    <div id="friends-carousel" class="friends-carousel"></div>
+                </section>
+
+                <!-- Recent Activity (Today Only) -->
+                <section class="activity-section">
+                    <div class="section-header">
+                        <h3>⏰ Today's Activity</h3>
+                    </div>
+                    <div id="today-activity" class="activity-list"></div>
+                </section>
+
+                <!-- Wallets Section -->
+                <section class="wallets-section">
+                    <div class="section-header">
+                        <h3>🏦 Wallets & Accounts</h3>
+                        <button class="icon-btn" onclick="window.openModal('add-wallet-modal')">
+                            <span class="material-icons">add_circle</span>
+                        </button>
+                    </div>
+                    <div id="wallets-list" class="wallets-grid"></div>
+                </section>
+            </div>
+
+            <!-- FEATURES PAGE -->
+            <div id="features-page" class="page">
+                <div class="features-banner">
+                    <h2>🚀 Tools & Features</h2>
+                    <p>Manage your finances smartly</p>
+                </div>
+
+                <!-- Features Grid -->
+                <div id="features-grid" class="features-grid">
+                    <div class="feature-card" onclick="window.showFeature('split-bill')">
+                        <div class="feature-icon">🧮</div>
+                        <div class="feature-name">Split Bill</div>
+                        <div class="feature-desc">Divide expenses among friends</div>
+                    </div>
+                    <div class="feature-card" onclick="window.showFeature('debt-manager')">
+                        <div class="feature-icon">🤝</div>
+                        <div class="feature-name">Debt Manager</div>
+                        <div class="feature-desc">Track who owes what</div>
+                    </div>
+                    <div class="feature-card" onclick="window.showFeature('calendar-view')">
+                        <div class="feature-icon">📅</div>
+                        <div class="feature-name">Calendar View</div>
+                        <div class="feature-desc">See expenses by date</div>
+                    </div>
+                    <div class="feature-card" onclick="window.showFeature('recurring')">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-name">Recurring Tx</div>
+                        <div class="feature-desc">Auto-add recurring txs</div>
+                    </div>
+                </div>
+
+                <!-- Feature Tools (Hidden by default) -->
+                
+                <!-- Split Bill Tool -->
+                <div id="split-bill-tool" class="feature-tool hidden">
+                    <button class="back-btn" onclick="window.showFeature('')">← Back</button>
+                    <h3>🧮 Split Bill Calculator</h3>
+                    <div class="form-group">
+                        <label>💰 Total Amount (₹)</label>
+                        <input type="number" id="split-amount" class="input-field" placeholder="Enter total amount">
+                    </div>
+                    <div class="form-group">
+                        <label>👥 Select Friends</label>
+                        <div id="split-friends-list" class="friends-checkboxes"></div>
+                    </div>
+                    <div id="split-preview" class="split-preview hidden">
+                        <h4>💸 Split Preview</h4>
+                        <div id="split-breakdown"></div>
+                    </div>
+                    <button onclick="window.addSplitBill()" class="primary-btn">✅ Add Split Bill</button>
+                </div>
+
+                <!-- Debt Manager Tool -->
+                <div id="debt-manager-tool" class="feature-tool hidden">
+                    <button class="back-btn" onclick="window.showFeature('')">← Back</button>
+                    <h3>🤝 Debt Manager</h3>
+                    <div id="debt-summary" class="debt-summary"></div>
+                    <div id="debt-list" class="debt-list"></div>
+                </div>
+
+                <!-- Calendar View Tool -->
+                <div id="calendar-view-tool" class="feature-tool hidden">
+                    <button class="back-btn" onclick="window.showFeature('')">← Back</button>
+                    <h3>📅 Calendar View</h3>
+                    <div id="calendar-widget" class="calendar-widget"></div>
+                    <div id="calendar-detail" class="calendar-detail"></div>
+                </div>
+
+                <!-- Recurring Tx Tool -->
+                <div id="recurring-tool" class="feature-tool hidden">
+                    <button class="back-btn" onclick="window.showFeature('')">← Back</button>
+                    <h3>🔄 Recurring Transactions</h3>
+                    <button class="primary-btn" onclick="window.openModal('add-recurring-modal')" style="margin-bottom: 20px;">➕ Add Recurring</button>
+                    <div id="recurring-list" class="recurring-list"></div>
+                </div>
+            </div>
+
+            <!-- ANALYSIS PAGE -->
+            <div id="analysis-page" class="page">
+                <div class="analysis-banner">
+                    <h2>📊 Analysis & Search</h2>
+                    <p>Deep dive into your finances</p>
+                </div>
+
+                <!-- Filter Section -->
+                <section class="filter-section">
+                    <div class="filter-controls">
+                        <div class="form-group">
+                            <label>👤 Filter by Friend</label>
+                            <select id="analysis-friend-filter" class="input-field">
+                                <option value="">📊 Global View</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Date Range</label>
+                            <select id="date-preset" class="input-field" onchange="window.updateDateRange()">
+                                <option value="all">All Time</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div id="custom-date-range" class="custom-date-range hidden">
+                            <input type="date" id="date-from" class="input-field">
+                            <input type="date" id="date-to" class="input-field">
+                        </div>
+                        <div class="form-group">
+                            <label>📋 Type</label>
+                            <select id="analysis-type-filter" class="input-field">
+                                <option value="">📊 All</option>
+                                <option value="deposit">📈 Income</option>
+                                <option value="expense">📉 Expense</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search Box -->
+                    <div class="search-box">
+                        <input type="text" id="search-input" class="input-field" placeholder="🔍 Search by description or amount...">
+                    </div>
+
+                    <button onclick="window.applyAnalysisFilters()" class="primary-btn">🔍 Apply Filters</button>
+                </section>
+
+                <!-- Full History -->
+                <section class="history-section">
+                    <div id="analysis-transactions" class="transactions-list"></div>
+                </section>
+
+                <!-- Charts -->
+                <section class="chart-section">
+                    <div class="chart-container">
+                        <h3>💸 Category Breakdown</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>📈 Monthly Trends</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </section>
+            </div>
+
+            <!-- SETTINGS PAGE -->
+            <div id="settings-page" class="page">
+                <div class="settings-banner">
+                    <h2>⚙️ Settings & Profile</h2>
+                    <p>Customize your experience</p>
+                </div>
+
+                <!-- Profile Section -->
+                <section class="settings-section">
+                    <h3>👤 Profile</h3>
+                    <button class="secondary-btn" onclick="window.openModal('profile-modal')">✏️ Edit Profile</button>
+                </section>
+
+                <!-- Night Mode Hub -->
+                <section class="settings-section">
+                    <h3>🌙 Night Mode</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Manual Dark Mode</span>
+                            <small>Toggle dark theme</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="manual-dark-mode" onchange="window.toggleDarkMode()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Auto Night Mode</span>
+                            <small>Dark between 6 PM - 6 AM</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto-night-mode" onchange="window.toggleAutoNightMode()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Security Section -->
+                <section class="settings-section">
+                    <h3>🛡️ Security</h3>
+                    <button class="secondary-btn" onclick="window.openModal('pin-modal')">🔐 Set/Change PIN</button>
+                    <button class="secondary-btn" onclick="window.openModal('security-question-modal')" style="margin-top: 10px;">❓ Set Security Question</button>
+                </section>
+
+                <!-- Data Export -->
+                <section class="settings-section">
+                    <h3>📥 Data Export</h3>
+                    <button class="secondary-btn" onclick="window.openModal('export-modal')">📊 Export Data (Date Range)</button>
+                </section>
+
+                <!-- Logout -->
+                <section class="settings-section">
+                    <h3>🚪 Account</h3>
+                    <button class="danger-btn" onclick="window.logout()">Logout</button>
+                </section>
+            </div>
+        </div>
+
+        <!-- FLOATING ACTION BUTTON -->
+        <button class="fab" onclick="window.openModal('transaction-modal')">
+            <span class="material-icons">add</span>
+        </button>
+
+        <!-- BOTTOM NAVIGATION BAR -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="window.switchPage('home')" id="nav-home">
+                <span class="material-icons">home</span>
+                <span>🏠 Home</span>
+            </button>
+            <button class="nav-item" onclick="window.switchPage('features')" id="nav-features">
+                <span class="material-icons">star</span>
+                <span>🚀 Features</span>
+            </button>
+            <button class="nav-item" onclick="window.switchPage('analysis')" id="nav-analysis">
+                <span class="material-icons">analytics</span>
+                <span>📊 Analysis</span>
+            </button>
+            <button class="nav-item" onclick="window.switchPage('settings')" id="nav-settings">
+                <span class="material-icons">settings</span>
+                <span>⚙️ Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👤 Profile</h3>
+                <button class="close-btn" onclick="window.closeModal('profile-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-avatar-section">
+                    <img id="profile-avatar-large" src="" alt="Avatar" class="large-avatar">
+                </div>
+                <div class="form-group">
+                    <label>📝 Your Name</label>
+                    <input type="text" id="profile-name" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>🎂 Age</label>
+                    <input type="number" id="profile-age" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>⚧️ Gender</label>
+                    <select id="profile-gender" class="input-field">
+                        <option value="Male">👨 Male</option>
+                        <option value="Female">👩 Female</option>
+                        <option value="Other">🧑 Other</option>
+                    </select>
+                </div>
+                <button onclick="window.saveProfile()" class="primary-btn">✅ Save Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Wallet Modal -->
+    <div id="add-wallet-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏦 Add Wallet</h3>
+                <button class="close-btn" onclick="window.closeModal('add-wallet-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>🏷️ Wallet Name</label>
+                    <input type="text" id="new-wallet-name" class="input-field" placeholder="e.g. Cash, Bank">
+                </div>
+                <div class="form-group">
+                    <label>💵 Balance (₹)</label>
+                    <input type="number" id="new-wallet-bal" class="input-field" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>📋 Note</label>
+                    <input type="text" id="new-wallet-desc" class="input-field" placeholder="Short note">
+                </div>
+                <button onclick="window.addWallet()" class="primary-btn">💾 Save Wallet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transaction-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💳 New Transaction</h3>
+                <button class="close-btn" onclick="window.closeModal('transaction-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="toggle-group">
+                    <button id="btn-deposit" class="toggle-btn active" onclick="window.setTxType('deposit')">📈 Income (+)</button>
+                    <button id="btn-expense" class="toggle-btn" onclick="window.setTxType('expense')">📉 Expense (-)</button>
+                </div>
+                <div class="form-group">
+                    <label>🏦 Wallet</label>
+                    <select id="tx-wallet" class="input-field"></select>
+                </div>
+                <div class="form-group">
+                    <label>💰 Amount (₹)</label>
+                    <input type="number" id="tx-amount" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>📝 Description</label>
+                    <input type="text" id="tx-desc" class="input-field" placeholder="What was this for?">
+                </div>
+                <div class="form-group">
+                    <label>🏷️ Category</label>
+                    <select id="tx-category" class="input-field">
+                        <option value="other">🔹 General</option>
+                        <option value="food">🍔 Food & Drink</option>
+                        <option value="transport">🚗 Transport</option>
+                        <option value="shopping">🛍️ Shopping</option>
+                        <option value="utilities">💡 Bills & Rent</option>
+                        <option value="salary">💼 Salary</option>
+                    </select>
+                </div>
+                <button onclick="window.saveTransaction()" class="primary-btn">✅ Add Transaction</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Friend Modal -->
+    <div id="add-friend-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👥 Add Friend</h3>
+                <button class="close-btn" onclick="window.closeModal('add-friend-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>👤 Friend Name</label>
+                    <input type="text" id="friend-name" class="input-field" placeholder="e.g. Asrar">
+                </div>
+                <div class="form-group">
+                    <label>📱 Phone (Optional)</label>
+                    <input type="tel" id="friend-phone" class="input-field" placeholder="Contact number">
+                </div>
+                <button onclick="window.addFriend()" class="primary-btn">➕ Add Friend</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Modal -->
+    <div id="pin-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔐 Set PIN</h3>
+                <button class="close-btn" onclick="window.closeModal('pin-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Enter 4-Digit PIN</label>
+                    <input type="password" id="new-pin" class="input-field" placeholder="••••" maxlength="4">
+                </div>
+                <div class="form-group">
+                    <label>Confirm PIN</label>
+                    <input type="password" id="confirm-pin" class="input-field" placeholder="••••" maxlength="4">
+                </div>
+                <button onclick="window.savePIN()" class="primary-btn">✅ Set PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Question Modal -->
+    <div id="security-question-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>❓ Security Question</h3>
+                <button class="close-btn" onclick="window.closeModal('security-question-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select a Security Question</label>
+                    <select id="security-question" class="input-field">
+                        <option value="">Choose a question...</option>
+                        <option value="childhood-friend">What was your childhood best friend's name?</option>
+                        <option value="first-pet">What was the name of your first pet?</option>
+                        <option value="birth-place">What city were you born in?</option>
+                        <option value="favorite-teacher">Who was your favorite teacher?</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Answer</label>
+                    <input type="text" id="security-answer" class="input-field" placeholder="Answer in lowercase">
+                </div>
+                <button onclick="window.saveSecurityQuestion()" class="primary-btn">✅ Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Data Modal -->
+    <div id="export-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📥 Export Data</h3>
+                <button class="close-btn" onclick="window.closeModal('export-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>📅 From Date</label>
+                    <input type="date" id="export-from" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>📅 To Date</label>
+                    <input type="date" id="export-to" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>📊 Format</label>
+                    <select id="export-format" class="input-field">
+                        <option value="csv">📄 CSV</option>
+                        <option value="pdf">📋 PDF</option>
+                    </select>
+                </div>
+                <button onclick="window.exportDataRange()" class="primary-btn">📥 Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Recurring Modal -->
+    <div id="add-recurring-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔄 Add Recurring Transaction</h3>
+                <button class="close-btn" onclick="window.closeModal('add-recurring-modal')"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>📝 Description</label>
+                    <input type="text" id="recurring-desc" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>💰 Amount (₹)</label>
+                    <input type="number" id="recurring-amount" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>🏦 Wallet</label>
+                    <select id="recurring-wallet" class="input-field"></select>
+                </div>
+                <div class="form-group">
+                    <label>🔄 Frequency</label>
+                    <select id="recurring-freq" class="input-field">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📅 Start Date</label>
+                    <input type="date" id="recurring-start" class="input-field">
+                </div>
+                <button onclick="window.saveRecurring()" class="primary-btn">✅ Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Verification Modal -->
+    <div id="pin-verify-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔐 Enter PIN</h3>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; margin-bottom: 20px;">Enter your 4-digit PIN to continue</p>
+                <input type="password" id="verify-pin" class="input-field" placeholder="••••" maxlength="4">
+                <button onclick="window.verifyPIN()" class="primary-btn" style="margin-top: 15px;">✅ Verify</button>
+                <button onclick="window.closeModal('pin-verify-modal')" class="secondary-btn" style="margin-top: 10px;">❌ Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
