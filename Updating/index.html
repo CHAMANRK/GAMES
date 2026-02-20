@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="utf-8">
+  <title>🌙 Najiful Quran Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8G8M908CX1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8G8M908CX1');
+  </script>
+</head>
+<body>
+
+<!-- ======================================
+     HEADER
+     ====================================== -->
+<header class="app-header" aria-label="App Header">
+  <div class="header-content">
+    <div class="header-branding">
+      <img src="logo.png" alt="Quran Game Logo" class="logo" aria-hidden="true"/>
+      <h1 class="app-title">Najiful Quran Game</h1>
+    </div>
+    <div class="header-actions">
+      <div id="headerCoins" class="header-coins hidden">🪙 <span id="coinCount">0</span></div>
+      <span id="headerUser" class="header-user hidden"></span>
+      <button class="icon-btn" onclick="showSection('contactScreen')" title="Feedback">📩</button>
+      <button class="icon-btn" id="logoutBtn" onclick="Auth.logout()" style="display:none;" title="Logout">🚪</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ======================================
+       0. AUTH SCREEN — Login / Signup
+       ====================================== -->
+  <section id="authScreen" class="screen active" aria-label="Login ya Signup">
+    <div class="card auth-card">
+
+      <!-- Banner -->
+      <div class="auth-banner">
+        <span class="auth-banner-icon">🌙</span>
+        <h2>Najiful Quran Game</h2>
+        <p>Login karein ya account banayein</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" onclick="Auth.switchTab('login')">
+          🔐 Login
+        </button>
+        <button class="auth-tab" data-tab="signup" onclick="Auth.switchTab('signup')">
+          📝 Signup
+        </button>
+      </div>
+
+      <!-- Auth Body -->
+      <div class="auth-body">
+
+        <!-- ── LOGIN PANEL ── -->
+        <div id="loginPanel" class="auth-form-panel active">
+
+          <!-- Email -->
+          <div>
+            <label class="auth-label">📧 Email</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">📧</span>
+              <input id="loginEmail" type="email" placeholder="aapki@email.com" autocomplete="email">
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label class="auth-label">🔒 Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">🔒</span>
+              <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
+              <button class="toggle-pw" type="button" onclick="Auth.togglePw('loginPassword', this)">👁️</button>
+            </div>
+          </div>
+
+          <!-- Forgot -->
+          <div class="auth-forgot" onclick="Auth.forgotPassword()">
+            Password bhool gaye? Reset karein
+          </div>
+
+          <!-- Error msg -->
+          <div class="auth-msg error" id="loginMsg"></div>
+
+          <!-- Login Button -->
+          <button id="loginBtn" class="btn btn-primary" onclick="Auth.login()">
+            🔐 Login
+          </button>
+
+          <!-- Divider -->
+          <div class="auth-divider">ya</div>
+
+          <!-- Google -->
+          <button id="googleLoginBtn" class="btn-google" onclick="Auth.loginWithGoogle()">
+            <span class="google-icon"></span>
+            Google se Login
+          </button>
+
+          <!-- Guest -->
+          <button id="guestBtn" class="btn-guest" onclick="Auth.loginAsGuest()">
+            👤 Guest ke taur par khelein (3 sawaal)
+          </button>
+
+        </div><!-- /loginPanel -->
+
+        <!-- ── SIGNUP PANEL ── -->
+        <div id="signupPanel" class="auth-form-panel">
+
+          <!-- Username -->
+          <div>
+            <label class="auth-label">👤 Username</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">👤</span>
+              <input id="signupUsername" type="text" placeholder="apna_naam (3-20 chars)" autocomplete="username">
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="auth-label">📧 Email</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">📧</span>
+              <input id="signupEmail" type="email" placeholder="aapki@email.com" autocomplete="email">
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label class="auth-label">🔒 Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">🔒</span>
+              <input id="signupPassword" type="password" placeholder="Min 6 characters" autocomplete="new-password">
+              <button class="toggle-pw" type="button" onclick="Auth.togglePw('signupPassword', this)">👁️</button>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label class="auth-label">🔒 Confirm Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">✅</span>
+              <input id="signupConfirmPw" type="password" placeholder="Dobara likhein" autocomplete="new-password">
+              <button class="toggle-pw" type="button" onclick="Auth.togglePw('signupConfirmPw', this)">👁️</button>
+            </div>
+          </div>
+
+          <!-- Player Type -->
+          <div>
+            <label class="auth-label">🎯 Aap kaun hain?</label>
+            <input type="hidden" id="signupPlayerType" value="beginner">
+            <div class="player-type-grid">
+              <div class="player-type-option selected" data-type="beginner"
+                   onclick="Auth.selectPlayerType('beginner')">
+                <span class="pt-icon">🌱</span>
+                <span class="pt-name">Beginner</span>
+                <span class="pt-desc">Naya shuruwaat</span>
+              </div>
+              <div class="player-type-option" data-type="intermediate"
+                   onclick="Auth.selectPlayerType('intermediate')">
+                <span class="pt-icon">📖</span>
+                <span class="pt-name">Intermediate</span>
+                <span class="pt-desc">Thoda tajruba</span>
+              </div>
+              <div class="player-type-option" data-type="pro"
+                   onclick="Auth.selectPlayerType('pro')">
+                <span class="pt-icon">⚡</span>
+                <span class="pt-name">Pro</span>
+                <span class="pt-desc">Kaafi maloomat</span>
+              </div>
+              <div class="player-type-option" data-type="hafiz"
+                   onclick="Auth.selectPlayerType('hafiz')">
+                <span class="pt-icon">👑</span>
+                <span class="pt-name">Hafiz</span>
+                <span class="pt-desc">Admin verify</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error msg -->
+          <div class="auth-msg error" id="signupMsg"></div>
+
+          <!-- Signup Button -->
+          <button id="signupBtn" class="btn btn-primary" onclick="Auth.signup()">
+            📝 Account Banayein
+          </button>
+
+          <!-- Divider -->
+          <div class="auth-divider">ya</div>
+
+          <!-- Google Signup -->
+          <button class="btn-google" onclick="Auth.loginWithGoogle()">
+            <span class="google-icon"></span>
+            Google se Signup
+          </button>
+
+          <!-- Terms -->
+          <p class="auth-terms">
+            Account bana ke aap hamare terms se mutafiq hain.<br>
+            500 🪙 coins shuruwaat mein milenge!
+          </p>
+
+        </div><!-- /signupPanel -->
+
+      </div><!-- /auth-body -->
+    </div><!-- /auth-card -->
+  </section>
+
+  <!-- ======================================
+       1. WELCOME / HOME SCREEN
+       ====================================== -->
+  <section id="welcomeScreen" class="screen" aria-label="Home Screen">
+    <div class="card home-card">
+      <h2 class="main-heading">🌙 Quran Ayat Quiz</h2>
+      <p class="subtitle">Apni Quran maloomat ko aazmaayiye!<br>Para, Surah ya Page se quiz kheliye.</p>
+
+      <!-- Mode Selection -->
+      <form id="modeForm" class="mode-group" style="width:100%; margin-bottom:4px;">
+        <label class="mode-option">
+          <input type="radio" name="quizMode" value="practice" checked>
+          <span>🎯 Practice Mode — Unlimited</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="quizMode" value="timed">
+          <span>⏱️ Timed Challenge — 10 Qs, 30 sec</span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="quizMode" value="survival">
+          <span>💥 Survival Mode — Ek galti = over</span>
+        </label>
+      </form>
+
+      <button class="btn btn-primary" onclick="showSection('paraSelectScreen')">
+        ▶️ Shuru Karein
+      </button>
+      <button class="btn btn-secondary" onclick="toggleSearch()" id="toggleSearchBtn">
+        🔎 Search
+      </button>
+    </div>
+
+    <!-- Search Section (hidden by default) -->
+    <div class="search-section" id="searchContainer" style="display:none;">
+      <form onsubmit="searchAyats(); return false;">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Ayat, Surah, Page, Para se search karein"
+          autocomplete="off"
+        >
+        <button type="submit" class="btn btn-primary" style="width:auto; padding:11px 18px;">
+          Search
+        </button>
+      </form>
+      <div id="searchResults" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ======================================
+       2. PARA SELECT SCREEN
+       ====================================== -->
+  <section id="paraSelectScreen" class="screen" aria-label="Para Range Select" tabindex="-1">
+    <div class="card grid-card">
+      <h2 class="main-heading">🌙 Para Range</h2>
+
+      <form onsubmit="startGame(); return false;" autocomplete="off" style="width:100%;">
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="fromPara">From Para (1–30)</label>
+            <input id="fromPara" type="number" min="1" max="30" placeholder="e.g. 1">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="toPara">To Para (1–30)</label>
+            <input id="toPara" type="number" min="1" max="30" placeholder="e.g. 30">
+          </div>
+        </div>
+        <div id="selectError" class="error hidden" aria-live="polite"></div>
+        <button class="btn btn-primary" type="submit">✅ Submit</button>
+      </form>
+
+      <button class="btn btn-outline" onclick="showSection('welcomeScreen')">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- ======================================
+       3. QUIZ SCREEN
+       ====================================== -->
+  <section id="quizScreen" class="screen" aria-label="Quiz Screen" tabindex="-1">
+    <div class="card quiz-card" style="width:92vw; max-width:540px;">
+
+      <div id="quizProgress"></div>
+
+      <h2 class="main-heading">📖 Ye Ayat Pehchaniye</h2>
+
+      <!-- Ayat Display -->
+      <div id="ayatText" class="ayat" aria-live="polite" dir="rtl"></div>
+
+      <!-- Hint -->
+      <div style="display:flex; align-items:center; gap:12px; width:100%;">
+        <button id="hintBtn" class="btn btn-secondary" onclick="showHint()" style="width:auto; padding:9px 20px;">
+          💡 Hint
+        </button>
+        <span id="hintInfo" style="color:#b9ffb9; font-size:0.95em;"></span>
+      </div>
+
+      <!-- Answer Form -->
+      <form id="answerForm" onsubmit="return checkAnswer();" autocomplete="off" style="width:100%;">
+
+        <!-- Zaroori Fields -->
+        <p style="color:#bfa14a; font-weight:bold; margin:8px 0 4px 0; font-size:0.95em;">
+          ✅ Zaroori Fields:
+        </p>
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="user_para">Para Number</label>
+            <input id="user_para" type="number" min="1" max="30" placeholder="Para No." required>
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_page_in_para">Page In Para</label>
+            <input id="user_page_in_para" type="number" min="1" max="20" placeholder="Page in Para">
+          </div>
+        </div>
+
+        <!-- Optional Fields -->
+        <p style="color:#888; font-weight:bold; margin:8px 0 4px 0; font-size:0.92em;">
+          ⭐ Optional Fields (har sahi = +5 coins):
+        </p>
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="user_page">
+              Page No. <span class="optional-label">(+5)</span>
+            </label>
+            <input id="user_page" type="number" min="1" max="604" placeholder="Page No.">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_surah">
+              Surah Name <span class="optional-label">(+5)</span>
+            </label>
+            <input id="user_surah" type="text" placeholder="Surah Name">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_ruku">
+              Ruku No. <span class="optional-label">(+5)</span>
+            </label>
+            <input id="user_ruku" type="number" min="1" placeholder="Ruku No.">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_ayat">
+              Ayat No. <span class="optional-label">(+5)</span>
+            </label>
+            <input id="user_ayat" type="number" min="1" placeholder="Ayat No.">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">✅ Check Karo</button>
+      </form>
+
+      <!-- Feedback -->
+      <div id="quizError"  class="error  hidden" aria-live="polite"></div>
+      <div id="quizResult" class="result hidden" aria-live="polite"></div>
+      <div id="survivalAnswer" class="hidden" style="background:#ffeecf; color:#27462b; border-radius:8px; padding:12px; width:100%; text-align:center;"></div>
+
+      <button class="btn btn-secondary next-button hidden" onclick="nextQuestion()">
+        ➡️ Agla Sawal
+      </button>
+      <button class="btn btn-outline" onclick="showSection('welcomeScreen')">⬅️ Wapas</button>
+
+      <div id="scoreBoard" style="color:#ffeecf; font-weight:bold; font-size:1.05em;"></div>
+      <div id="timer" style="color:#ffeecf; font-weight:bold; font-size:1.1em;"></div>
+    </div>
+  </section>
+
+  <!-- ======================================
+       4. RESULT SCREEN
+       ====================================== -->
+  <section id="resultScreen" class="screen" aria-label="Result Screen" tabindex="-1">
+    <div class="card quiz-card">
+      <h2 class="main-heading">🎉 Quiz Khatam!</h2>
+      <div id="finalResult" class="result-summary"></div>
+      <button class="btn btn-primary" onclick="restartGame(true)">🏠 Home</button>
+      <button class="btn btn-outline" onclick="restartGame(false)">🔄 Dobara Khelo</button>
+    </div>
+  </section>
+
+  <!-- ======================================
+       5. CONTACT SCREEN
+       ====================================== -->
+  <section id="contactScreen" class="screen" aria-label="Contact / Feedback" tabindex="-1">
+    <div class="card contact-card">
+      <h2 class="main-heading">📩 Raabta / Feedback</h2>
+      <form
+        action="https://formsubmit.co/hellochaman532@gmail.com"
+        method="POST"
+        class="contact-form"
+        style="width:100%;"
+        autocomplete="off"
+      >
+        <input type="hidden" name="_next" value="https://najiful85.xyz/thankyou.html">
+        <input type="hidden" name="_captcha" value="false">
+
+        <div class="input-group" style="margin-bottom:12px;">
+          <label class="input-label" for="contactName">Aapka Naam</label>
+          <input type="text" id="contactName" name="name" required>
+        </div>
+        <div class="input-group" style="margin-bottom:12px;">
+          <label class="input-label" for="contactEmail">Email</label>
+          <input type="email" id="contactEmail" name="email" required>
+        </div>
+        <div class="input-group" style="margin-bottom:12px;">
+          <label class="input-label" for="contactMsg">Paighaam</label>
+          <textarea id="contactMsg" name="message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">📤 Bhejain</button>
+      </form>
+      <button class="btn btn-outline" onclick="showSection('welcomeScreen')">⬅️ Wapas</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ======================================
+     FOOTER
+     ====================================== -->
+<footer class="app-footer">
+  <span>© 2025 Najiful Quran Game</span>
+</footer>
+
+<!-- ======================================
+     SCRIPTS (ES Modules)
+     ====================================== -->
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup">
+  <div class="wp-name" id="wpName">Marhaba! 🌙</div>
+  <div class="wp-coins" id="wpCoins">🪙 500 coins</div>
+</div>
+
+<!-- Guest Limit Modal -->
+<div id="guestLimitModal" class="hidden" style="
+  position:fixed; inset:0; background:rgba(5,15,10,0.92);
+  backdrop-filter:blur(10px); z-index:9000;
+  display:flex; align-items:center; justify-content:center;
+">
+  <div class="card" style="max-width:380px; gap:16px; text-align:center;">
+    <span style="font-size:3rem;">🔐</span>
+    <h3 class="main-heading" style="font-size:1.4rem;">3 Sawaal Pure Ho Gaye!</h3>
+    <p class="subtitle">Coins save karne aur online khelne ke liye account banayein.</p>
+    <button class="btn btn-primary" onclick="
+      document.getElementById('guestLimitModal').classList.add('hidden');
+      showSection('authScreen'); Auth.switchTab('signup');
+    ">📝 Account Banayein</button>
+    <button class="btn btn-outline" onclick="
+      document.getElementById('guestLimitModal').classList.add('hidden');
+    ">Practice Jari Rakhein (Coins Save Nahi)</button>
+  </div>
+</div>
+
+<!-- Stars Particle Animation -->
+<canvas id="starsCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+
+<script>
+(function() {
+  const canvas = document.getElementById('starsCanvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function createStars() {
+    stars = [];
+    const count = Math.floor((canvas.width * canvas.height) / 8000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.2 + 0.2,
+        alpha: Math.random(),
+        speed: Math.random() * 0.004 + 0.001,
+        color: Math.random() > 0.7 ? '#d4a843' : '#00c472'
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.alpha += s.speed;
+      if (s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+      ctx.save();
+      ctx.globalAlpha = Math.abs(Math.sin(s.alpha));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = s.color;
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = s.color;
+      ctx.fill();
+      ctx.restore();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  createStars();
+  draw();
+  window.addEventListener('resize', () => { resize(); createStars(); });
+})();
+</script>
+
+<script type="module">
+  imp
