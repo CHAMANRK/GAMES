@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="utf-8">
+  <title>🌙 Quran Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     HEADER
+══════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-content">
+    <div class="hdr-left">
+      <button class="hdr-profile-btn hidden" id="profileBtn" title="Profile">
+        <span id="profileBtnIcon">👤</span>
+      </button>
+    </div>
+    <!-- 7x click area: game name + branding -->
+    <div class="header-branding" id="hiddenTasbeehTrigger" style="cursor:default;user-select:none">
+      <img src="logo.png" alt="Logo" class="logo"/>
+      <h1 class="app-title">Quran Quiz</h1>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-coins hidden" id="hdrCoins">🪙 <span id="hdrCoinsVal">0</span></div>
+      <!-- Guest logout pill -->
+      <button id="guestLogoutPill" style="display:none;align-items:center;gap:6px;background:rgba(200,50,50,0.15);border:1px solid #c43030;color:#ff9090;border-radius:20px;padding:5px 12px;font-size:0.82rem;font-weight:700;cursor:pointer" onclick="document.dispatchEvent(new CustomEvent('guestLogout'))">
+        👤 Guest &nbsp;·&nbsp; 🚪 Logout
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════
+     PROFILE PANEL
+══════════════════════════════════ -->
+<div id="profileOverlay" class="profile-overlay hidden"></div>
+<div id="profilePanel" class="profile-panel">
+
+  <div class="pp-top">
+    <div class="pp-avatar-circle" id="ppAvatarCircle">👤</div>
+    <div class="pp-user-info">
+      <div class="pp-username" id="ppUsername">—</div>
+      <div class="pp-role" id="ppRole">Player</div>
+    </div>
+    <button class="pp-close-btn" id="ppCloseBtn">✕</button>
+  </div>
+
+  <!-- UID Box -->
+  <div class="pp-uid-box">
+    <div class="pp-uid-label">🆔 Meri UID (friends ke liye)</div>
+    <div class="pp-uid-row">
+      <span class="pp-uid-val" id="ppUidVal">—</span>
+      <button class="pp-uid-copy" id="ppUidCopy" title="Copy UID">📋</button>
+    </div>
+    <div class="pp-uid-copied hidden" id="ppUidCopied">✅ Copy ho gaya!</div>
+  </div>
+
+  <div class="pp-stats-row">
+    <div class="pp-stat-box">
+      <div class="pp-stat-val" id="ppCoins">0</div>
+      <div class="pp-stat-lbl">🪙 Coins</div>
+    </div>
+    <div class="pp-stat-box">
+      <div class="pp-stat-val" id="ppAccuracy">0%</div>
+      <div class="pp-stat-lbl">🎯 Accuracy</div>
+    </div>
+    <div class="pp-stat-box">
+      <div class="pp-stat-val" id="ppGames">0</div>
+      <div class="pp-stat-lbl">🎮 Games</div>
+    </div>
+  </div>
+
+  <div class="pp-divider"></div>
+  <div class="pp-section-label">⚙️ Settings</div>
+
+  <!-- Language Setting -->
+  <div class="pp-setting-row">
+    <div class="pp-setting-info">
+      <span class="pp-setting-icon">🌐</span>
+      <div>
+        <div class="pp-setting-title">Language</div>
+        <div class="pp-setting-desc">Hinglish ya English</div>
+      </div>
+    </div>
+    <div class="lang-toggle-wrap">
+      <button class="lang-btn active" id="btnHinglish">Hinglish</button>
+      <button class="lang-btn" id="btnEnglish">English</button>
+    </div>
+  </div>
+
+  <!-- Contact Setting (Settings menu mein) -->
+  <div class="pp-setting-row pp-setting-row-btn" id="ppContactBtn" style="cursor:pointer">
+    <div class="pp-setting-info">
+      <span class="pp-setting-icon">📩</span>
+      <div>
+        <div class="pp-setting-title">Raabta / Contact</div>
+        <div class="pp-setting-desc">Feedback ya sawal bhejein</div>
+      </div>
+    </div>
+    <span style="color:var(--text-muted);font-size:0.9rem">›</span>
+  </div>
+
+  <div class="pp-divider"></div>
+  <button class="pp-logout-btn" id="ppLogoutBtn">🚪 Logout</button>
+</div>
+
+<!-- ══════════════════════════════════
+     HIDDEN TASBEEH MODAL
+══════════════════════════════════ -->
+<div id="tasbeehOverlay" style="display:none;position:fixed;inset:0;background:rgba(2,8,5,.96);backdrop-filter:blur(16px);z-index:9999;align-items:center;justify-content:center;flex-direction:column">
+  <div class="tasbeeh-panel">
+    <button id="tasbeehClose" style="position:absolute;top:14px;right:16px;background:none;border:1px solid #00c47230;color:var(--text-muted);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center">✕</button>
+    <div style="text-align:center;font-size:2rem;margin-bottom:8px">📿</div>
+    <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold-light);text-align:center;margin-bottom:4px">Tasbeeh</h2>
+    <div id="tasbeehArabic" style="font-family:'Amiri',serif;font-size:1.8rem;color:var(--emerald);text-align:center;direction:rtl;margin:12px 0;line-height:2"></div>
+    <div id="tasbeehCount" style="font-family:'Cinzel',serif;font-size:3.5rem;color:var(--gold);text-align:center;font-weight:900;text-shadow:0 0 20px var(--gold-glow)">0</div>
+    <div style="font-size:0.82rem;color:var(--text-muted);text-align:center;margin-bottom:16px;font-family:'Tajawal',sans-serif">Tasbeeh counter</div>
+    <div class="tasbeeh-btn-wrap">
+      <button id="tasbeehTap" class="tasbeeh-tap-btn">📿 Tasbih</button>
+    </div>
+    <div class="tasbeeh-types">
+      <button class="tasbeeh-type-btn active" data-type="subhan" data-text="سُبْحَانَ اللَّهِ">SubhanAllah</button>
+      <button class="tasbeeh-type-btn" data-type="alhamd" data-text="الْحَمْدُ لِلَّهِ">Alhamdulillah</button>
+      <button class="tasbeeh-type-btn" data-type="akbar" data-text="اللَّهُ أَكْبَرُ">Allahu Akbar</button>
+      <button class="tasbeeh-type-btn" data-type="astaghfar" data-text="أَسْتَغْفِرُ اللَّهَ">Astaghfirullah</button>
+      <button class="tasbeeh-type-btn" data-type="darood" data-text="صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ">Darood Shareef</button>
+    </div>
+    <button id="tasbeehReset" style="margin-top:12px;background:none;border:1px solid #c4293b40;color:#ff9090;border-radius:10px;padding:7px 18px;cursor:pointer;font-size:0.82rem;font-family:'Tajawal',sans-serif">🔄 Reset</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     EXIT MATCH CONFIRM MODAL
+══════════════════════════════════ -->
+<div id="exitMatchModal" style="display:none;position:fixed;inset:0;background:rgba(5,15,10,.93);backdrop-filter:blur(10px);z-index:9000;align-items:center;justify-content:center">
+  <div class="card" style="max-width:340px;gap:14px;text-align:center">
+    <span style="font-size:2.5rem">🚪</span>
+    <h3 class="main-heading" style="font-size:1.3rem">Match Chodo?</h3>
+    <p class="subtitle" style="font-size:0.88rem">Agar aap match chodein to <b style="color:#ff9090">haar maan li jayegi</b>. Coins wapas nahi milenge.</p>
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn btn-outline" id="exitMatchCancel" style="flex:1">❌ Nahi</button>
+      <button class="btn" id="exitMatchConfirm" style="flex:1;background:linear-gradient(135deg,#c4293b,#8b1a26);border:none;color:#fff">🚪 Haan, Chodo</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ══════════════════════════════════
+       SCREEN 0 — AUTH
+  ══════════════════════════════════ -->
+  <section id="authScreen" class="screen active">
+    <div class="card auth-card">
+      <div class="auth-banner">
+        <span class="auth-banner-icon">🌙</span>
+        <h2>Quran Quiz</h2>
+        <p>Login karein ya account banayein</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" id="tabLogin">🔐 Login</button>
+        <button class="auth-tab" data-tab="signup" id="tabSignup">📝 Signup</button>
+      </div>
+      <div class="auth-body">
+        <!-- LOGIN -->
+        <div id="loginPanel" class="auth-form-panel active">
+          <div>
+            <label class="auth-label">📧 Email</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">📧</span>
+              <input id="loginEmail" type="email" placeholder="aapki@email.com">
+            </div>
+          </div>
+          <div>
+            <label class="auth-label">🔒 Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">🔒</span>
+              <input id="loginPassword" type="password" placeholder="Password">
+              <button class="toggle-pw" type="button" id="toggleLoginPw">👁️</button>
+            </div>
+          </div>
+          <div class="auth-forgot" id="forgotBtn">Password bhool gaye? Reset karein</div>
+          <div class="auth-msg" id="loginMsg"></div>
+          <button id="loginBtn" class="btn btn-primary">🔐 Login</button>
+          <div class="auth-divider">ya</div>
+          <button id="googleLoginBtn" class="btn-google">
+            <span class="google-icon"></span> Google se Login
+          </button>
+          <button id="guestBtn" class="btn-guest">👤 Guest (3 sawaal free)</button>
+        </div>
+        <!-- SIGNUP -->
+        <div id="signupPanel" class="auth-form-panel">
+          <div>
+            <label class="auth-label">👤 Username</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">👤</span>
+              <input id="signupUsername" type="text" placeholder="apna_naam (3-20 chars)">
+            </div>
+          </div>
+          <div>
+            <label class="auth-label">📧 Email</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">📧</span>
+              <input id="signupEmail" type="email" placeholder="aapki@email.com">
+            </div>
+          </div>
+          <div>
+            <label class="auth-label">🔒 Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">🔒</span>
+              <input id="signupPassword" type="password" placeholder="Min 6 characters">
+              <button class="toggle-pw" type="button" id="toggleSignupPw">👁️</button>
+            </div>
+          </div>
+          <div>
+            <label class="auth-label">✅ Confirm Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">✅</span>
+              <input id="signupConfirmPw" type="password" placeholder="Dobara likhein">
+            </div>
+          </div>
+          <div class="auth-msg" id="signupMsg"></div>
+          <button id="signupBtn" class="btn btn-primary">📝 Account Banayein</button>
+          <div class="auth-divider">ya</div>
+          <button id="googleSignupBtn" class="btn-google">
+            <span class="google-icon"></span> Google se Signup
+          </button>
+          <p class="auth-terms">500 🪙 coins shuruwaat mein milenge!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 1 — HOME
+  ══════════════════════════════════ -->
+  <section id="welcomeScreen" class="screen">
+    <div class="card home-card">
+      <h2 class="main-heading">🌙 Quran Ayat Quiz</h2>
+      <p class="subtitle">Apni Quran maloomat ko aazmaayiye!</p>
+
+      <!-- Mode Selector — 3 column grid -->
+      <form id="modeForm" class="mode-grid" style="width:100%">
+        <label class="mode-card-option">
+          <input type="radio" name="quizMode" value="practice" checked>
+          <span class="mode-card-inner">
+            <span class="mode-card-icon">🎯</span>
+            <span class="mode-card-title">Practice</span>
+            <span class="mode-card-desc">Unlimited</span>
+          </span>
+        </label>
+        <label class="mode-card-option">
+          <input type="radio" name="quizMode" value="timed">
+          <span class="mode-card-inner">
+            <span class="mode-card-icon">⏱️</span>
+            <span class="mode-card-title">Timed</span>
+            <span class="mode-card-desc">10 Qs, 30s</span>
+          </span>
+        </label>
+        <label class="mode-card-option">
+          <input type="radio" name="quizMode" value="survival">
+          <span class="mode-card-inner">
+            <span class="mode-card-icon">💥</span>
+            <span class="mode-card-title">Survival</span>
+            <span class="mode-card-desc">1 miss = over</span>
+          </span>
+        </label>
+      </form>
+
+      <button class="btn btn-primary" id="goParaSelect">▶️ Shuru Karein</button>
+      <button class="btn btn-gold" id="goOnlineMatch">⚔️ Online Match</button>
+      <!-- Friends page button -->
+      <button class="btn btn-secondary" id="goFriends">👥 Friends</button>
+      <button class="btn btn-secondary" id="toggleSearchBtn">🔎 Search</button>
+    </div>
+    <div class="search-section" id="searchContainer" style="display:none">
+      <form id="searchForm">
+        <input id="searchInput" type="text" placeholder="Ayat, Surah, Page, Para...">
+        <button type="submit" class="btn btn-primary" style="width:auto;padding:11px 18px">Search</button>
+      </form>
+      <div id="searchResults"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 2 — PARA SELECT
+  ══════════════════════════════════ -->
+  <section id="paraSelectScreen" class="screen">
+    <div class="card">
+      <h2 class="main-heading">🌙 Para Range</h2>
+      <form id="paraForm" style="width:100%">
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label">From Para (1–30)</label>
+            <input id="fromPara" type="number" min="1" max="30" placeholder="1">
+          </div>
+          <div class="input-group">
+            <label class="input-label">To Para (1–30)</label>
+            <input id="toPara" type="number" min="1" max="30" placeholder="30">
+          </div>
+        </div>
+        <div id="selectError" class="error hidden"></div>
+        <button class="btn btn-primary" type="submit">✅ Submit</button>
+      </form>
+      <button class="btn btn-outline" id="backFromPara">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 3 — QUIZ
+  ══════════════════════════════════ -->
+  <section id="quizScreen" class="screen">
+    <div class="card" style="max-width:540px">
+      <div id="quizProgress" style="color:var(--text-secondary);font-size:.92em;text-align:center"></div>
+      <h2 class="main-heading">📖 Ye Ayat Pehchaniye</h2>
+      <div id="ayatText" class="ayat" dir="rtl"></div>
+      <div style="display:flex;align-items:center;gap:12px;width:100%">
+        <button id="hintBtn" class="btn btn-secondary" style="width:auto;padding:9px 20px">💡 Hint</button>
+        <span id="hintInfo" style="color:var(--emerald);font-size:.9em"></span>
+      </div>
+      <form id="answerForm" style="width:100%">
+        <p class="section-label">✅ Zaroori</p>
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label">Para Number</label>
+            <input id="user_para" type="number" min="1" max="30" placeholder="Para No.">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Page In Para</label>
+            <input id="user_page_in_para" type="number" min="1" max="20" placeholder="PiP">
+          </div>
+        </div>
+        <p class="section-label">⭐ Optional <span style="color:var(--gold);font-size:.8em;font-weight:400">(+5🪙 each)</span></p>
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label">Page No.</label>
+            <input id="user_page" type="number" min="1" max="604" placeholder="Page">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Surah Name</label>
+            <input id="user_surah" type="text" placeholder="Surah">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Ruku No.</label>
+            <input id="user_ruku" type="number" min="1" placeholder="Ruku">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Ayat No.</label>
+            <input id="user_ayat" type="number" min="1" placeholder="Ayat">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="checkBtn">✅ Check Karo</button>
+      </form>
+      <div id="quizError" class="error hidden"></div>
+      <div id="quizResult" class="result hidden"></div>
+      <div id="survivalAnswer" class="hidden" style="background:linear-gradient(135deg,#180e00,#100900);border:1px solid var(--gold);border-radius:var(--radius-sm);padding:14px;width:100%;text-align:center;color:var(--gold-light);line-height:1.8"></div>
+      <button class="btn btn-secondary next-button hidden" id="nextBtn">➡️ Agla Sawal</button>
+      <button class="btn btn-outline" id="backFromQuiz">⬅️ Wapas</button>
+      <div id="scoreBoard" style="color:var(--emerald);font-weight:700;text-align:center"></div>
+      <div id="timer" style="color:var(--gold-light);font-weight:700;text-align:center;font-family:'Cinzel',serif;letter-spacing:2px"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 4 — RESULT
+  ══════════════════════════════════ -->
+  <section id="resultScreen" class="screen">
+    <div class="card" style="max-width:500px">
+      <h2 class="main-heading">🎉 Quiz Khatam!</h2>
+      <div id="finalResult" class="result-summary"></div>
+      <button class="btn btn-primary" id="goHomeBtn">🏠 Home</button>
+      <button class="btn btn-outline" id="playAgainBtn">🔄 Dobara Khelo</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 5 — CONTACT
+  ══════════════════════════════════ -->
+  <section id="contactScreen" class="screen">
+    <div class="card" style="max-width:460px">
+      <h2 class="main-heading">📩 Raabta</h2>
+      <form action="https://formsubmit.co/hellochaman532@gmail.com" method="POST" style="width:100%">
+        <input type="hidden" name="_captcha" value="false">
+        <div class="input-group" style="margin-bottom:12px">
+          <label class="input-label">Naam</label>
+          <input type="text" name="name" required>
+        </div>
+        <div class="input-group" style="margin-bottom:12px">
+          <label class="input-label">Email</label>
+          <input type="email" name="email" required>
+        </div>
+        <div class="input-group" style="margin-bottom:12px">
+          <label class="input-label">Paighaam</label>
+          <textarea name="message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">📤 Bhejain</button>
+      </form>
+      <button class="btn btn-outline" id="backFromContact">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 6 — ONLINE LOBBY
+  ══════════════════════════════════ -->
+  <section id="onlineLobbyScreen" class="screen">
+    <div class="card" style="max-width:540px">
+      <h2 class="main-heading">⚔️ Online Match</h2>
+      <p class="subtitle" id="lobbyCoinsInfo">Apna table chuniye</p>
+
+      <!-- Tables Grid — now 2x3 with starter table -->
+      <div id="tablesGrid" class="tables-grid">
+
+        <!-- Starter 200 coins -->
+        <div class="table-card" data-table="starter">
+          <div class="tc-medal">🪵</div>
+          <div class="tc-name">Starter</div>
+          <div class="tc-fee">200 🪙</div>
+          <div class="tc-info">7 Qs • First to 4</div>
+          <div class="tc-win">Jeet: 400 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinStarter">Join</button>
+        </div>
+
+        <div class="table-card" data-table="bronze">
+          <div class="tc-medal">🥉</div>
+          <div class="tc-name">Bronze</div>
+          <div class="tc-fee">500 🪙</div>
+          <div class="tc-info">9 Qs • First to 5</div>
+          <div class="tc-win">Jeet: 1000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinBronze">Join</button>
+        </div>
+
+        <div class="table-card" data-table="silver">
+          <div class="tc-medal">🥈</div>
+          <div class="tc-name">Silver</div>
+          <div class="tc-fee">1000 🪙</div>
+          <div class="tc-info">11 Qs • First to 6</div>
+          <div class="tc-win">Jeet: 2000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinSilver">Join</button>
+        </div>
+
+        <div class="table-card" data-table="gold">
+          <div class="tc-medal">🥇</div>
+          <div class="tc-name">Gold</div>
+          <div class="tc-fee">2500 🪙</div>
+          <div class="tc-info">13 Qs • First to 7</div>
+          <div class="tc-win">Jeet: 5000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinGold">Join</button>
+        </div>
+
+        <div class="table-card" data-table="diamond">
+          <div class="tc-medal">💎</div>
+          <div class="tc-name">Diamond</div>
+          <div class="tc-fee">5000 🪙</div>
+          <div class="tc-info">15 Qs • First to 8</div>
+          <div class="tc-win">Jeet: 10000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinDiamond">Join</button>
+        </div>
+
+      </div>
+
+      <button class="btn btn-outline" id="backFromLobby">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 7 — MATCHMAKING WAITING
+  ══════════════════════════════════ -->
+  <section id="matchWaitScreen" class="screen">
+    <div class="card" style="max-width:400px;text-align:center;gap:20px">
+      <div class="match-spinner"></div>
+      <h2 class="main-heading" style="font-size:1.4rem">Opponent Dhundh Raha Hai...</h2>
+      <div class="match-wait-info" id="matchWaitInfo">⚔️ Table</div>
+      <div class="match-wait-timer" id="matchWaitTimer">0s</div>
+      <button class="btn btn-outline" id="cancelMatchBtn">❌ Cancel</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 8 — ONLINE MATCH
+  ══════════════════════════════════ -->
+  <section id="onlineMatchScreen" class="screen">
+    <div class="card" style="max-width:560px">
+
+      <!-- Scoreboard -->
+      <div class="match-scoreboard">
+        <div class="match-player" id="myPlayerBox">
+          <div class="mp-name" id="myName">Aap</div>
+          <div class="mp-score" id="myScore">0</div>
+        </div>
+        <div class="match-vs">VS</div>
+        <div class="match-player match-player-opp" id="oppPlayerBox">
+          <div class="mp-name" id="oppName">Opponent</div>
+          <div class="mp-score" id="oppScore">0</div>
+        </div>
+      </div>
+
+      <div class="match-progress" id="matchProgress">Sawal 1</div>
+      <div class="match-timer-bar"><div class="match-timer-fill" id="matchTimerFill"></div></div>
+      <div id="matchTimer" class="match-timer-txt">30s</div>
+
+      <div id="matchAyatText" class="ayat" dir="rtl" style="margin:8px 0"></div>
+
+      <form id="matchAnswerForm" style="width:100%">
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label">Para Number ✅</label>
+            <input id="match_para" type="number" min="1" max="30" placeholder="Para No.">
+          </div>
+          <div class="input-group">
+            <label class="input-label">Page In Para ✅</label>
+            <input id="match_pip" type="number" min="1" max="20" placeholder="PiP">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="matchCheckBtn">⚡ Submit</button>
+      </form>
+
+      <div id="matchResult" class="hidden" style="text-align:center;padding:10px;font-size:1rem;font-weight:700"></div>
+      <!-- Exit with confirm -->
+      <button class="btn btn-outline" id="exitMatchBtn" style="margin-top:4px;border-color:#c4293b40;color:#ff9090">🚪 Match Chodo</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 9 — MATCH RESULT
+  ══════════════════════════════════ -->
+  <section id="matchResultScreen" class="screen">
+    <div class="card" style="max-width:440px;text-align:center;gap:16px">
+      <div class="match-result-icon" id="matchResultIcon">🏆</div>
+      <h2 class="main-heading" id="matchResultTitle">Mubarak!</h2>
+      <div class="match-result-scores" id="matchResultScores"></div>
+      <div class="match-result-coins" id="matchResultCoins"></div>
+      <button class="btn btn-primary" id="matchPlayAgainBtn">🔄 Phir Khelo</button>
+      <button class="btn btn-outline" id="matchGoHomeBtn">🏠 Home</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SCREEN 10 — FRIENDS
+  ══════════════════════════════════ -->
+  <section id="friendsScreen" class="screen">
+    <div class="card" style="max-width:520px">
+      <h2 class="main-heading">👥 Friends</h2>
+
+      <!-- Search by UID -->
+      <div class="friends-add-box" style="flex-direction:column;gap:10px">
+        <div class="input-group" style="width:100%">
+          <label class="input-label">🔍 UID se dost dhundein</label>
+          <input id="friendUidInput" type="text" placeholder="Dost ki UID yahan paste karein..." style="width:100%">
+        </div>
+        <button class="btn btn-primary" id="searchFriendBtn" style="width:100%;padding:11px 18px">🔍 Search Karein</button>
+        <div id="addFriendMsg" class="auth-msg" style="width:100%;margin:0"></div>
+        <!-- Preview card appears here after search -->
+        <div id="friendSearchPreview" style="width:100%"></div>
+      </div>
+
+      <!-- Friends List -->
+      <div style="width:100%">
+        <div class="friends-section-label">👥 Mere Dost</div>
+        <div id="friendsList" style="width:100%;display:flex;flex-direction:column;gap:8px">
+          <div style="color:var(--text-muted);font-size:0.88rem;text-align:center;padding:16px;font-family:'Tajawal',sans-serif">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Pending Requests -->
+      <div style="width:100%">
+        <div class="friends-section-label" id="pendingLabel" style="display:none">📩 Pending Requests</div>
+        <div id="pendingList" style="width:100%;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <button class="btn btn-outline" id="backFromFriends">⬅️ Wapas</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">© 2025 Quran Quiz</footer>
+
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup">
+  <div class="wp-name" id="wpName">Marhaba! 🌙</div>
+  <div class="wp-coins" id="wpCoins">🪙 500 coins</div>
+</div>
+
+<!-- Guest Limit Modal -->
+<div id="guestModal" style="display:none;position:fixed;inset:0;background:rgba(5,15,10,.93);backdrop-filter:blur(10px);z-index:9000;align-items:center;justify-content:center">
+  <div class="card" style="max-width:360px;gap:16px;text-align:center">
+    <span style="font-size:3rem">🔐</span>
+    <h3 class="main-heading" style="font-size:1.4rem">3 Sawaal Pure!</h3>
+    <p class="subtitle">Login karo — coins save hon aur online khelo!</p>
+    <button class="btn btn-primary" id="guestToSignup">📝 Account Banayein</button>
+    <button class="btn btn-outline" id="guestContinue">Jari Rakhein</button>
+  </div>
+</div>
+
+<!-- Stars Canvas -->
+<canvas id="starsCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none"></canvas>
+<script>
+(function(){
+  var c=document.getElementById('starsCanvas'),x=c.getContext('2d'),s=[];
+  function rs(){c.width=innerWidth;c.height=innerHeight;}
+  function is(){s=[];var n=Math.floor(c.width*c.height/8000);for(var i=0;i<n;i++)s.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.2+.2,a:Math.random(),sp:Math.random()*.005+.001,col:Math.random()>.7?'#d4a843':'#00c472'});}
+  function dr(){x.clearRect(0,0,c.width,c.height);s.forEach(function(p){p.a+=p.sp;if(p.a>1||p.a<0)p.sp=-p.sp;x.save();x.globalAlpha=Math.abs(Math.sin(p.a));x.beginPath();x.arc(p.x,p.y,p.r,0,Math.PI*2);x.fillStyle=p.col;x.shadowBlur=6;x.shadowColor=p.col;x.fill();x.restore();});requestAnimationFrame(dr);}
+  rs();is();dr();addEventListener('resize',function(){rs();is();});
+})();
+</script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
