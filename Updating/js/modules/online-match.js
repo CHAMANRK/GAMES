@@ -16,7 +16,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
 
 import { db, rtdb }          from './firebase.js';
-import { CONFIG, TABLES }    from '../config.js';
+import { CONFIG, TABLES }    from '../../config.js';
 import { $, toast, showScreen, spawnCoinParticles, esc } from './ui.js';
 import {
   timerManager, listenerManager,
