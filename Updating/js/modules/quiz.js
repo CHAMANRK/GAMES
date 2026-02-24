@@ -7,7 +7,7 @@
 import { doc, updateDoc, increment, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import { db }              from './firebase.js';
-import { CONFIG }          from '../config.js';
+import { CONFIG }          from '../../config.js';
 import { $, on, esc, toast, typeText, showScreen, btnLoad } from './ui.js';
 import { timerManager, coinRateLimiter, getCurUser, getCurData,
          quizState, resetQuizState, incGuestAnswered, getGuestAnswered,
