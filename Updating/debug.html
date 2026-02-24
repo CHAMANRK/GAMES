@@ -39,7 +39,7 @@
 
 <!-- Test config.js -->
 <script type="module">
-  import('/config.js')
+  import('Updating/config.js')
     .then(m => {
       document.getElementById('out').insertAdjacentHTML('beforeend',
         '<div class="ok">✅ config.js loaded — apiKey: ' + (m.CONFIG?.FIREBASE_CONFIG?.apiKey ? 'found' : 'MISSING') + '</div>');
@@ -51,7 +51,7 @@
 </script>
 
 <script type="module">
-  import('/js/modules/managers.js')
+  import('Updating/js/modules/managers.js')
     .then(() => {
       document.getElementById('out').insertAdjacentHTML('beforeend',
         '<div class="ok">✅ managers.js loaded</div>');
@@ -63,7 +63,7 @@
 </script>
 
 <script type="module">
-  import('/js/modules/firebase.js')
+  import('Updating/js/modules/firebase.js')
     .then(() => {
       document.getElementById('out').insertAdjacentHTML('beforeend',
         '<div class="ok">✅ firebase.js loaded</div>');
@@ -75,7 +75,7 @@
 </script>
 
 <script type="module">
-  import('/js/state/appState.js')
+  import('Updating/js/state/appState.js')
     .then(() => {
       document.getElementById('out').insertAdjacentHTML('beforeend',
         '<div class="ok">✅ appState.js loaded</div>');
@@ -87,7 +87,7 @@
 </script>
 
 <script type="module">
-  import('/js/modules/auth.js')
+  import('Updating/js/modules/auth.js')
     .then(() => {
       document.getElementById('out').insertAdjacentHTML('beforeend',
         '<div class="ok">✅ auth.js loaded</div>');
@@ -99,7 +99,7 @@
 </script>
 
 <script type="module">
-  import('/js/app.js')
+  import('Updating/js/app.js')
     .then(() => {
       document.getElementById('out').insertAdjacentHTML('beforeend',
         '<div class="ok">✅ app.js loaded — ALL GOOD!</div>');
