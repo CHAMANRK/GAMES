@@ -237,7 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
   }
 
-  document.addEventListener('wheel', e => {
+    document.addEventListener('wheel', e => {
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
-});
+}; // initUI function yahan band hua
+
+// Ye code check karega ki DOM load ho chuka hai ya nahi
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initUI);
+} else {
+  initUI(); // Agar load ho chuka hai, to direct events attach kar do
+}
+
