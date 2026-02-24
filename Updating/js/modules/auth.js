@@ -13,7 +13,7 @@ import { doc, getDoc }  from "https://www.gstatic.com/firebasejs/11.0.0/firebase
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
 
 import { auth, db, rtdb, GP } from './firebase.js';
-import { CONFIG }              from '../config.js';
+import { CONFIG }              from '../../config.js';
 import { BruteForceProtection } from './managers.js';
 import { $, on, isMobile, btnLoad, setMsg, clearMsgs, showScreen, toast, showWelcomePopup, isBootDone, hideBootLoader } from './ui.js';
 import { syncUser, startUserListener, stopUserListener, updateHeader } from './user.js';
