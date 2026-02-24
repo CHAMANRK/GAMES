@@ -4,7 +4,7 @@
 //  Fix: timer ID duplication bug patched
 // ═══════════════════════════════════════════
 
-import { CONFIG } from '../config.js';
+import { CONFIG } from '../../config.js';
 
 // ── Firestore / RTDB listener cleanup ──
 export class ListenerManager {
