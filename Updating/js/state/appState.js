@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════
 
 import { ListenerManager, TimerManager, RateLimiter } from '../modules/managers.js';
-import { TABLES } from '../config.js';
+import { TABLES } from '../../config.js';
 
 // ── Shared manager singletons ──
 export const timerManager    = new TimerManager();
