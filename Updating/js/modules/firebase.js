@@ -9,7 +9,7 @@ import { getAuth, GoogleAuthProvider }
                              from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 import { getFirestore }      from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import { getDatabase }       from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
-import { CONFIG }            from '../config.js';
+import { CONFIG }            from '../../config.js';
 
 const firebaseApp = initializeApp(CONFIG.FIREBASE_CONFIG);
 
