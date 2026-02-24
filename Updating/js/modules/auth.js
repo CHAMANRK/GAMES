@@ -196,7 +196,9 @@ export async function doForgot() {
 // ── Auth state listener (boot sequence) ──
 export function initAuthListener() {
   let _isConnected = false;
-  const bootFailsafe = timerManager.setTimeout('bootFailsafe', () => {
+
+  // Failsafe: agar 8 seconds mein bhi kuch na ho toh forcefully hide karo
+  timerManager.setTimeout('bootFailsafe', () => {
     if (!isBootDone()) {
       console.warn('⚠️ Boot failsafe triggered');
       hideBootLoader(true);
@@ -205,55 +207,69 @@ export function initAuthListener() {
     }
   }, CONFIG.BOOT_FAILSAFE_MS);
 
-  onValue(ref(rtdb, '.info/connected'), snap => {
-    _isConnected = snap.val() === true;
-    const state = import('../state/appState.js');
-    state.then(s => s.setConnected(_isConnected));
-  });
+  // RTDB connection status
+  try {
+    onValue(ref(rtdb, '.info/connected'), snap => {
+      _isConnected = snap.val() === true;
+      import('../state/appState.js').then(s => s.setConnected(_isConnected)).catch(() => {});
+    });
+  } catch (e) {
+    console.warn('RTDB connection listener error:', e.message);
+  }
 
+  // ── MAIN FIX: try-catch-finally ensures hideBootLoader() HAMESHA chale ──
   onAuthStateChanged(auth, async user => {
+    // Failsafe cancel karo — ab hum handle kar rahe hain
     timerManager.clearTimeout('bootFailsafe');
 
-    const state = await import('../state/appState.js');
-    state.setCurUser(user);
+    try {
+      const state = await import('../state/appState.js');
+      state.setCurUser(user);
 
-    if (user) {
-      if (!user.isAnonymous) {
-        try {
-          const snap = await Promise.race([
-            getDoc(doc(db, 'users', user.uid)),
-            new Promise((_, rej) =>
-              timerManager.setTimeout('firestoreTimeout', () => rej(new Error('timeout')), CONFIG.FIRESTORE_TIMEOUT_MS)
-            )
-          ]);
-          if (snap.exists()) {
-            state.setCurData(snap.data());
-            updateHeader();
+      if (user) {
+        if (!user.isAnonymous) {
+          try {
+            const snap = await Promise.race([
+              getDoc(doc(db, 'users', user.uid)),
+              new Promise((_, rej) =>
+                timerManager.setTimeout('firestoreTimeout', () => rej(new Error('timeout')), CONFIG.FIRESTORE_TIMEOUT_MS)
+              )
+            ]);
+            if (snap.exists()) {
+              state.setCurData(snap.data());
+              updateHeader();
+            }
+          } catch (e) {
+            console.warn('User data load skip:', e.message);
           }
-        } catch (e) {
-          console.warn('User data load skip:', e.message);
+          try { startUserListener(user.uid); } catch (e) { console.warn('startUserListener error:', e); }
         }
-        startUserListener(user.uid);
-      }
-      updateHeader();
-      showScreen('welcomeScreen');
+        try { updateHeader(); } catch (e) { console.warn('updateHeader error:', e); }
+        showScreen('welcomeScreen');
 
-      if (!isBootDone() && state.getCurData()) {
-        const d = state.getCurData();
-        showWelcomePopup(d.username || 'Player', d.coins || 0);
-      } else if (!isBootDone() && !user.isAnonymous) {
-        timerManager.setTimeout('welcomeDelay', () => {
+        if (!isBootDone() && state.getCurData()) {
           const d = state.getCurData();
-          if (d) showWelcomePopup(d.username || 'Player', d.coins || 0);
-        }, 1500);
+          showWelcomePopup(d.username || 'Player', d.coins || 0);
+        } else if (!isBootDone() && !user.isAnonymous) {
+          timerManager.setTimeout('welcomeDelay', () => {
+            const d = state.getCurData();
+            if (d) showWelcomePopup(d.username || 'Player', d.coins || 0);
+          }, 1500);
+        }
+      } else {
+        try { stopUserListener(); } catch (e) {}
+        state.setCurUser(null);
+        state.setCurData(null);
+        try { updateHeader(); } catch (e) { console.warn('updateHeader error:', e); }
+        showScreen('authScreen');
       }
-    } else {
-      stopUserListener();
-      state.setCurUser(null);
-      state.setCurData(null);
-      updateHeader();
+    } catch (e) {
+      // Koi bhi unexpected error aaye — phir bhi boot loader hide karo
+      console.error('Auth listener critical error:', e);
       showScreen('authScreen');
+    } finally {
+      // ✅ CRITICAL FIX: Ye HAMESHA chalega — error ho ya na ho
+      hideBootLoader();
     }
-    hideBootLoader();
   });
-}
+    }
