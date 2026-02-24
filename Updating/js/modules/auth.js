@@ -272,4 +272,4 @@ export function initAuthListener() {
       hideBootLoader();
     }
   });
-    }
+}
