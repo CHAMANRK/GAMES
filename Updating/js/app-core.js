@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  app-core.js
+//  app-core.js — FIXED VERSION
 //  1. Firebase Init & Config
 //  2. App State (global variables)
 //  3. UI Helpers (DOM, toast, screen nav, buttons)
@@ -43,7 +43,7 @@ export const CONFIG = {
   SUBMIT_COOLDOWN_MS:     500,
   GRACE_PERIOD_SEC:       15,
   MATCH_AUTO_CANCEL_MS:   60000,
-  BOOT_FAILSAFE_MS:       8000,
+  BOOT_FAILSAFE_MS:       12000,  // ✅ FIXED: 8000 → 12000
   FIRESTORE_TIMEOUT_MS:   5000,
   BRUTE_FORCE_MAX_ATTEMPTS: 5,
   BRUTE_FORCE_TIMEOUT_MS:   300000,
@@ -176,7 +176,7 @@ export const setLang = lang => { currentLang = lang; localStorage.setItem('nqg_l
 
 // ═══════════════════════════════════════════
 //  SECTION 4: UI HELPERS
-// ═══════════════════════════════════════════
+// ═════════════════════════════���═════════════
 
 export const $  = id => document.getElementById(id);
 export const on = (id, ev, fn) => { const el = $(id); if (el) el.addEventListener(ev, fn); };
@@ -238,12 +238,25 @@ export function btnLoad(id, loading, fallback) {
 }
 
 let _bootDone = false;
+let _bootHideTimeoutId = null; // ✅ FIXED: Track timeout ID
+
 export function hideBootLoader(force = false) {
   if (_bootDone && !force) return;
   _bootDone = true;
   const bl = $('bootLoader'); if (!bl) return;
-  bl.style.transition = 'opacity 0.45s ease'; bl.style.opacity = '0';
-  _uiTimers.setTimeout('bootHide', () => { bl.style.display = 'none'; }, 480);
+  
+  // ✅ FIXED: Clear previous timeout before setting new one
+  if (_bootHideTimeoutId) {
+    _uiTimers.clearTimeout('bootHide');
+    _bootHideTimeoutId = null;
+  }
+  
+  bl.style.transition = 'opacity 0.45s ease'; 
+  bl.style.opacity = '0';
+  _bootHideTimeoutId = _uiTimers.setTimeout('bootHide', () => { 
+    bl.style.display = 'none';
+    _bootHideTimeoutId = null;
+  }, 480);
 }
 export const isBootDone = () => _bootDone;
 
@@ -440,297 +453,4 @@ export async function doLogin() {
     await syncUser(cred.user.uid, { username: cred.user.displayName || email.split('@')[0], email: cred.user.email });
     if (emailEl) emailEl.value = ''; if (pwEl) pwEl.value = '';
     bfp.reset(email); showScreen('welcomeScreen'); toast('✅ Login ho gaye!','success');
-    const d = getCurData(); if (d) showWelcomePopup(d.username||'Player', d.coins||0);
-  } catch(e) {
-    bfp.record(email);
-    let msg = fbErr(e.code);
-    if (bfp.isBlocked(email)) msg += `\n⏱️ ${Math.ceil(bfp.remainingMs(email)/1000)}s ruko...`;
-    setMsg('loginMsg', msg); btnLoad('loginBtn', false, '🔐 Login');
-  }
-}
-
-export async function doSignup() {
-  clearMsgs();
-  const un  = $('signupUsername')?.value.trim()  || '';
-  const em  = $('signupEmail')?.value.trim()     || '';
-  const pw  = $('signupPassword')?.value         || '';
-  const cpw = $('signupConfirmPw')?.value        || '';
-  if (!un||!em||!pw||!cpw)    return setMsg('signupMsg','❌ Sab fields bharen!');
-  if (!isValidUsername(un))   return setMsg('signupMsg','❌ Username: 3-20 chars, letters/numbers/_ sirf.');
-  if (!isValidEmail(em))      return setMsg('signupMsg','❌ Sahi email likhein.');
-  if (!isValidPassword(pw))   return setMsg('signupMsg','❌ Password min 6 chars.');
-  if (pw !== cpw)             return setMsg('signupMsg','❌ Passwords match nahi!');
-  btnLoad('signupBtn', true);
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, em, pw);
-    await updateProfile(cred.user, { displayName: un });
-    await syncUser(cred.user.uid, { username: un, email: em });
-    ['signupUsername','signupEmail','signupPassword','signupConfirmPw'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
-    showScreen('welcomeScreen'); showWelcomePopup(un, 500, true); toast('✅ Account ban gaya! 500🪙 mile!','success');
-  } catch(e) { setMsg('signupMsg', fbErr(e.code)); btnLoad('signupBtn', false, '📝 Account Banayein'); }
-}
-
-export async function doGoogle() {
-  clearMsgs();
-  ['googleLoginBtn','googleSignupBtn'].forEach(id => btnLoad(id, true));
-  try {
-    const result = await signInWithPopup(auth, GP);
-    const user   = result.user;
-    const name   = user.displayName || user.email.split('@')[0];
-    const isNew  = result._tokenResponse?.isNewUser || false;
-    await syncUser(user.uid, { username: name, email: user.email });
-    showScreen('welcomeScreen');
-    showWelcomePopup(name, isNew ? 500 : (getCurData()?.coins || 0), isNew);
-    toast('✅ Google se login!','success');
-  } catch(e) { if (e.code !== 'auth/popup-closed-by-user') setMsg('loginMsg', fbErr(e.code)); }
-  ['googleLoginBtn','googleSignupBtn'].forEach(id => btnLoad(id, false));
-}
-
-export async function doGuest() {
-  btnLoad('guestBtn', true);
-  try {
-    await signInAnonymously(auth);
-    resetGuestCounters();
-    showScreen('welcomeScreen');
-    toast('👤 Guest mode — 3 sawaal free!','info', 4000);
-  } catch(e) { setMsg('loginMsg', fbErr(e.code)); btnLoad('guestBtn', false, '👤 Guest (3 sawaal free)'); }
-}
-
-export async function doLogout() {
-  // leaveMatchCleanup called from app.js to avoid circular dep
-  stopUserListener();
-  listenerManager.removeAll();
-  timerManager.clearAll();
-  await signOut(auth);
-  setCurUser(null); setCurData(null);
-  bfp._m.clear();
-  updateHeader();
-  showScreen('authScreen');
-  toast('👋 Phir aana!','info');
-}
-
-export async function doForgot() {
-  const em = $('loginEmail')?.value.trim();
-  if (!em)                return setMsg('loginMsg','❌ Pehle email likhein!');
-  if (!isValidEmail(em))  return setMsg('loginMsg','❌ Sahi email likhein.');
-  try {
-    await sendPasswordResetEmail(auth, em);
-    setMsg('loginMsg','📧 Reset email bhej diya!','success');
-    timerManager.setTimeout('resetMsg', () => { const el=$('loginMsg'); if(el) el.className='auth-msg'; }, 5000);
-  } catch(e) { setMsg('loginMsg', fbErr(e.code)); }
-}
-
-export function initAuthListener() {
-  onValue(ref(rtdb, '.info/connected'), snap => { setConnected(snap.val() === true); });
-
-  timerManager.setTimeout('bootFailsafe', () => {
-    if (!isBootDone()) {
-      hideBootLoader(true); showScreen('authScreen');
-      toast('⚠️ Connection slow — dobara try karein','error', 5000);
-    }
-  }, CONFIG.BOOT_FAILSAFE_MS);
-
-  onAuthStateChanged(auth, async user => {
-    timerManager.clearTimeout('bootFailsafe');
-    setCurUser(user);
-    if (user) {
-      if (!user.isAnonymous) {
-        try {
-          const snap = await Promise.race([
-            getDoc(doc(db,'users',user.uid)),
-            new Promise((_,rej) => timerManager.setTimeout('fsto', () => rej(new Error('timeout')), CONFIG.FIRESTORE_TIMEOUT_MS))
-          ]);
-          if (snap.exists()) { setCurData(snap.data()); updateHeader(); }
-        } catch(e) { console.warn('User data load skip:', e.message); }
-        startUserListener(user.uid);
-      }
-      updateHeader(); showScreen('welcomeScreen');
-      if (!isBootDone() && getCurData()) {
-        const d = getCurData(); showWelcomePopup(d.username||'Player', d.coins||0);
-      } else if (!isBootDone() && !user.isAnonymous) {
-        timerManager.setTimeout('welcomeDelay', () => { const d=getCurData(); if(d) showWelcomePopup(d.username||'Player',d.coins||0); }, 1500);
-      }
-    } else {
-      stopUserListener(); setCurUser(null); setCurData(null); updateHeader(); showScreen('authScreen');
-    }
-    hideBootLoader();
-  });
-}
-
-// ═══════════════════════════════════════════
-//  SECTION 8: SEARCH
-// ═══════════════════════════════════════════
-
-function normalizeArabic(t) {
-  if (!t) return '';
-  return String(t)
-    .replace(/\uFEFF/g,'')
-    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'')
-    .replace(/[\u0622\u0623\u0624\u0625\u0626\u0671]/g,'\u0627')
-    .replace(/\u0629/g,'\u0647')
-    .trim().toLowerCase();
-}
-
-function performSearch(raw) {
-  const q  = normalizeArabic(raw);
-  const rd = $('searchResults'); if (!rd) return;
-  if (!q) { rd.innerHTML = '<em>Kuch likhein...</em>'; return; }
-  if (!quizState.quranData.length) { rd.innerHTML = '<em>Data load ho raha hai...</em>'; return; }
-  const found = quizState.quranData.filter(a => {
-    if (normalizeArabic(a.text).includes(q))       return true;
-    if (normalizeArabic(a.surah_name).includes(q)) return true;
-    if (String(a.page) === raw.trim())             return true;
-    const para = a.para || (((a.page-1)/20|0)+1);
-    if (String(para) === raw.trim())               return true;
-    return false;
-  }).slice(0,30);
-  if (!found.length) { rd.textContent = 'Koi result nahi mila.'; return; }
-  rd.innerHTML = '';
-  found.forEach(r => {
-    const para = r.para || (((r.page-1)/20|0)+1);
-    const div  = document.createElement('div');
-    div.className = 'search-result';
-    div.addEventListener('click', () => window.open(`https://quran.com/page/${r.page}`,'_blank'));
-    div.textContent = `${r.text} — Surah: ${r.surah_name} | Page: ${r.page} | Para: ${para}`;
-    rd.appendChild(div);
-  });
-}
-
-export function doSearch(e) {
-  if (e) e.preventDefault();
-  const raw = $('searchInput')?.value.trim() || '';
-  timerManager.clearTimeout('searchDebounce');
-  timerManager.setTimeout('searchDebounce', () => performSearch(raw), 300);
-}
-
-// ═══════════════════════════════════════════
-//  SECTION 9: FRIENDS
-// ═══════════════════════════════════════════
-
-export async function searchFriend() {
-  const uid     = $('friendUidInput')?.value.trim();
-  const preview = $('friendSearchPreview');
-  const msg     = $('addFriendMsg');
-  if (msg)     { msg.className='auth-msg'; msg.textContent=''; }
-  if (preview) { preview.innerHTML=''; }
-  if (!uid)  { showFriendMsg('❌ UID likhein!','error'); return; }
-  const curUser = getCurUser();
-  if (!curUser || curUser.isAnonymous) { showFriendMsg('❌ Login karein!','error'); return; }
-  if (uid === curUser.uid)             { showFriendMsg('❌ Khud ko friend nahi kar sakte!','error'); return; }
-  try {
-    const snap = await getDoc(doc(db,'users',uid));
-    if (!snap.exists()) { showFriendMsg('❌ User nahi mila.','error'); return; }
-    const data    = snap.data();
-    const curData = getCurData();
-    const friends = curData?.friends || [];
-    const already = friends.includes(uid);
-    const pending = (curData?.friendRequests || []).includes(uid);
-    if (preview) {
-      preview.innerHTML = '';
-      const card = document.createElement('div');
-      card.className = 'friend-preview-card';
-      card.innerHTML = `<div class="friend-preview-avatar">👤</div>
-        <div class="friend-preview-info">
-          <div class="friend-preview-name">${esc(data.username||'Player')}</div>
-          <div class="friend-preview-stats">🪙 ${(data.coins||0).toLocaleString()} | 🎯 ${data.accuracy||0}%</div>
-          <div class="friend-preview-uid">${esc(uid.slice(0,20))}...</div>
-        </div>`;
-      if (!already) {
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-primary friend-action-btn';
-        btn.style.cssText = 'margin-top:10px;width:100%;padding:10px';
-        btn.textContent = pending ? '✅ Request Bheja' : '➕ Friend Request Bhejo';
-        btn.disabled    = pending;
-        if (!pending) btn.addEventListener('click', () => _sendFriendRequest(uid, data.username));
-        card.appendChild(btn);
-      } else {
-        const tag = document.createElement('div');
-        tag.style.cssText = 'color:var(--emerald);font-size:0.82rem;margin-top:8px;font-family:Tajawal,sans-serif';
-        tag.textContent = '✅ Pehle se dost hai';
-        card.appendChild(tag);
-      }
-      preview.appendChild(card);
-    }
-  } catch(e) { showFriendMsg('❌ Error. Dobara try karein.','error'); }
-}
-
-async function _sendFriendRequest(targetUid, targetName) {
-  const curUser = getCurUser(); if (!curUser) return;
-  try {
-    await updateDoc(doc(db,'users',targetUid), { friendRequests: arrayUnion(curUser.uid) });
-    showFriendMsg(`✅ ${esc(targetName)} ko request bheja!`,'success');
-  } catch(e) { showFriendMsg('❌ Request bhejne mein error.','error'); }
-}
-
-async function _acceptRequest(senderUid) {
-  const curUser = getCurUser(); if (!curUser) return;
-  try {
-    await updateDoc(doc(db,'users',curUser.uid), { friends: arrayUnion(senderUid), friendRequests: arrayRemove(senderUid) });
-    await updateDoc(doc(db,'users',senderUid),   { friends: arrayUnion(curUser.uid) });
-    toast('✅ Friend request accept!','success');
-  } catch(e) { toast('❌ Error accepting request.','error'); }
-}
-
-async function _rejectRequest(senderUid) {
-  const curUser = getCurUser(); if (!curUser) return;
-  try { await updateDoc(doc(db,'users',curUser.uid), { friendRequests: arrayRemove(senderUid) }); toast('Request reject ho gayi.','info'); }
-  catch(e) { toast('❌ Error.','error'); }
-}
-
-async function _unfriend(targetUid) {
-  const curUser = getCurUser(); if (!curUser) return;
-  try {
-    await updateDoc(doc(db,'users',curUser.uid), { friends: arrayRemove(targetUid) });
-    await updateDoc(doc(db,'users',targetUid),   { friends: arrayRemove(curUser.uid) });
-    toast('Dost list se hata diya.','info');
-  } catch(e) { toast('❌ Error.','error'); }
-}
-
-export function startFriendsListener() {
-  const curUser = getCurUser();
-  if (!curUser || curUser.isAnonymous) return;
-  const unsub = onSnapshot(doc(db,'users',curUser.uid), async snap => {
-    if (!snap.exists()) return;
-    const data    = snap.data();
-    const friends = data.friends        || [];
-    const pending = data.friendRequests || [];
-    const pl = $('pendingList'), pLabel = $('pendingLabel');
-    if (pl) {
-      pl.innerHTML = '';
-      if (pending.length) {
-        if (pLabel) pLabel.style.display='block';
-        for (const uid of pending.slice(0,10)) {
-          try {
-            const ps = await getDoc(doc(db,'users',uid)); if (!ps.exists()) continue;
-            const pd  = ps.data();
-            const row = document.createElement('div'); row.className='friend-card';
-            row.innerHTML = `<div class="friend-avatar">👤</div><div class="friend-info"><div class="friend-name">${esc(pd.username||'Player')}</div></div>`;
-            const acc = document.createElement('button'); acc.className='friend-action-btn accept-btn'; acc.textContent='✅ Accept'; acc.addEventListener('click',()=>_acceptRequest(uid));
-            const rej = document.createElement('button'); rej.className='friend-action-btn reject-btn'; rej.textContent='❌'; rej.addEventListener('click',()=>_rejectRequest(uid));
-            row.appendChild(acc); row.appendChild(rej); pl.appendChild(row);
-          } catch(_){}
-        }
-      } else { if (pLabel) pLabel.style.display='none'; }
-    }
-    const fl = $('friendsList'); if (!fl) return;
-    fl.innerHTML = '';
-    if (!friends.length) { fl.innerHTML='<div style="color:var(--text-muted);font-size:0.88rem;text-align:center;padding:16px;font-family:Tajawal,sans-serif">Koi dost nahi — UID se dhundein!</div>'; return; }
-    for (const uid of friends.slice(0,20)) {
-      try {
-        const fs = await getDoc(doc(db,'users',uid)); if (!fs.exists()) continue;
-        const fd  = fs.data(); const row = document.createElement('div'); row.className='friend-card';
-        const unBtn = document.createElement('button'); unBtn.className='friend-action-btn unfriend-btn'; unBtn.textContent='🚫 Hata'; unBtn.addEventListener('click',()=>_unfriend(uid));
-        row.innerHTML=`<div class="friend-avatar">👤</div><div class="friend-info"><div class="friend-name">${esc(fd.username||'Player')}</div><div class="friend-uid">${esc(uid.slice(0,16))}...</div></div>`;
-        row.appendChild(unBtn); fl.appendChild(row);
-      } catch(_){}
-    }
-  }, err => console.warn('Friends listener error:', err.message));
-  listenerManager.add('friendsListener', unsub);
-}
-
-export function stopFriendsListener() { listenerManager.remove('friendsListener'); }
-
-function showFriendMsg(msg, type) {
-  const el=$('addFriendMsg'); if(!el) return;
-  el.textContent=msg; el.className=`auth-msg ${type} show`;
-}
+    const d = getCurData(); if (d) show
