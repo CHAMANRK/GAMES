@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-//  app-game.js
+//  app-game.js — FIXED VERSION
 //  1. Quran Data Loader
 //  2. Solo Quiz Logic (Practice, Timed, Survival)
 //  3. Coins System
@@ -18,28 +18,58 @@ import {
 } from './app-core.js';
 
 // ═══════════════════════════════════════════
-//  QURAN DATA LOADER
+//  QURAN DATA LOADER (FIXED)
 // ═══════════════════════════════════════════
 
 export async function loadQuran(retries = 0, maxRetries = 3) {
-  if (quizState.quranData.length || quizState.quranLoading) return;
+  // ✅ FIXED: Don't re-attempt if already loaded
+  if (quizState.quranData.length) return;
+  // ✅ FIXED: If currently loading and this is first call, just return
+  if (quizState.quranLoading && retries === 0) return;
+  
   quizState.quranLoading = true;
   try {
-    const res = await fetch('quran_full.json');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    quizState.quranData = await res.json();
-    if (!Array.isArray(quizState.quranData) || !quizState.quranData.length)
-      throw new Error('Invalid data format');
-    console.log('✅ Quran loaded:', quizState.quranData.length, 'ayats');
+    // ✅ FIXED: Try multiple paths for file
+    const paths = [
+      'quran_full.json',
+      '/quran_full.json',
+      './data/quran_full.json',
+      '/data/quran_full.json'
+    ];
+    
+    let res;
+    for (const path of paths) {
+      res = await fetch(path).catch(() => null);
+      if (res?.ok) break;
+    }
+    
+    if (!res?.ok) {
+      throw new Error(`HTTP ${res?.status || 404} - quran_full.json not found`);
+    }
+    
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) {
+      throw new Error('Invalid data format - expected array');
+    }
+    
+    quizState.quranData = data;
+    console.log('✅ Quran loaded:', data.length, 'ayats');
+    
   } catch(e) {
-    console.error('❌ Quran load fail:', e.message);
+    console.error(`❌ Quran load fail (Attempt ${retries + 1}/${maxRetries}):`, e.message);
+    
     if (retries < maxRetries) {
-      quizState.quranLoading = false;
-      await new Promise(r => setTimeout(r, Math.pow(2, retries) * 2000));
+      const delay = Math.pow(2, retries) * 1000; // Exponential backoff: 1s, 2s, 4s
+      console.log(`⏳ Retrying in ${delay}ms...`);
+      quizState.quranLoading = false; // ✅ FIXED: Set to false BEFORE retry
+      await new Promise(r => setTimeout(r, delay));
       return loadQuran(retries + 1, maxRetries);
     }
+    
     quizState.quranData = [];
-    toast('❌ Quran data load fail', 'error', 5000);
+    toast(`❌ Data load fail: ${e.message}`, 'error', 5000);
+    console.error('❌ Quran load failed permanently after retries');
+    
   } finally {
     quizState.quranLoading = false;
   }
@@ -53,7 +83,7 @@ const getPara = a => a.para || (((a.page - 1) / 20 | 0) + 1);
 const getPip  = a => a.pip  || (((parseInt(a.page) - 1) % 20) + 1);
 
 // ═══════════════════════════════════════════
-//  START GAME
+//  START GAME (FIXED)
 // ═══════════════════════════════════════════
 
 export async function startGame() {
@@ -61,28 +91,45 @@ export async function startGame() {
   if (er) er.classList.add('hidden');
 
   const curUser = getCurUser();
+  
+  // ✅ FIXED: Check guest limit first
   if (curUser?.isAnonymous && getGuestAnswered() >= CONFIG.GUEST_QUESTION_LIMIT) {
-    if (er) { er.textContent = '❌ 3 free questions khatam! Account banao!'; er.classList.remove('hidden'); }
+    if (er) { 
+      er.textContent = '❌ 3 free questions khatam! Account banao!'; 
+      er.classList.remove('hidden'); 
+    }
     const gm = $('guestModal');
     if (gm) gm.style.display = 'flex';
     else { showScreen('authScreen'); switchTab('signup'); }
     return;
   }
 
+  // ✅ FIXED: Load Quran with better error handling
   if (!quizState.quranData.length) {
     if (er) { er.textContent = '⏳ Data load ho raha hai...'; er.classList.remove('hidden'); }
     await loadQuran();
     if (!quizState.quranData.length) {
-      if (er) { er.textContent = '❌ Quran data load nahi hua.'; er.classList.remove('hidden'); }
+      if (er) { 
+        er.textContent = '❌ Quran data load nahi hua. Dobara try karein ya page refresh karein!'; 
+        er.classList.remove('hidden'); 
+      }
       return;
     }
     if (er) er.classList.add('hidden');
   }
 
-  const fp = parseInt($('fromPara')?.value);
-  const tp = parseInt($('toPara')?.value);
+  // ✅ FIXED: Default values + validation
+  let fp = parseInt($('fromPara')?.value) || 1;    // Default 1 if empty
+  let tp = parseInt($('toPara')?.value) || 30;     // Default 30 if empty
+  
+  // ✅ FIXED: Normalize if reversed
+  if (fp > tp) [fp, tp] = [tp, fp];
+  
   if (!isValidParaRange(fp, tp)) {
-    if (er) { er.textContent = '❌ Para 1-30 ke beech!'; er.classList.remove('hidden'); }
+    if (er) { 
+      er.textContent = `❌ Para 1-30 ke beech! Aap ne likha: ${fp}-${tp}`; 
+      er.classList.remove('hidden'); 
+    }
     return;
   }
 
@@ -92,7 +139,10 @@ export async function startGame() {
   });
 
   if (!quizState.selAyats.length) {
-    if (er) { er.textContent = '❌ Is range mein ayat nahi mile.'; er.classList.remove('hidden'); }
+    if (er) { 
+      er.textContent = `❌ Para ${fp}-${tp} mein koi ayat nahi mile.`; 
+      er.classList.remove('hidden'); 
+    }
     return;
   }
 
@@ -337,12 +387,33 @@ async function _addCoins(amount, correct, total) {
   } catch(e) { console.error('Coins save error:', e.message); }
 }
 
+// ✅ FIXED: Better coin calculation with caps
 function _calcCoins(ts, opt, hints, isSurvival) {
-  ts=Math.max(0,Math.min(300,ts||0)); opt=Math.max(0,opt||0); hints=Math.max(0,Math.min(CONFIG.MAX_HINTS,hints||0));
-  let c = ts<=5?15: ts<=10?12: ts<=15?10: ts<=20?8: ts<=30?6: 5;
-  c += opt*5 - hints*5;
+  ts    = Math.max(0, Math.min(300, ts || 0));
+  opt   = Math.max(0, opt || 0);
+  hints = Math.max(0, Math.min(CONFIG.MAX_HINTS, hints || 0));
+  
+  // Base coins by speed
+  let c = ts <= 5  ? 15
+        : ts <= 10 ? 12
+        : ts <= 15 ? 10
+        : ts <= 20 ? 8
+        : ts <= 30 ? 6
+        : 5;
+  
+  // Optional bonus (max 10 optional = 50 coins, but cap to prevent overflow)
+  const optBonus = Math.min(opt * 5, 50);
+  c += optBonus;
+  
+  // Hint penalty (max 2 hints = 10 coins)
+  const hintPenalty = Math.min(hints * 5, 10);
+  c -= hintPenalty;
+  
+  // Survival bonus
   if (isSurvival) c += 20;
-  return Math.max(0,Math.min(500,c));
+  
+  // ✅ FIXED: Final cap 5-100 coins per question (reasonable limits)
+  return Math.max(5, Math.min(100, c));
 }
 
 function _showRes(msg, ok) {
@@ -382,12 +453,33 @@ function _startTimer(sec) {
   },1000);
 }
 
+// ✅ FIXED: Auto-next with guest limit check
 function _startAutoNext() {
   timerManager.clearInterval('autoNext');
-  let cd=5; const nb=$('nextBtn');
-  if (nb) nb.textContent=`➡️ Agla Sawal (${cd}s)`;
-  timerManager.setInterval('autoNext',()=>{
-    cd--; if(nb) nb.textContent=cd>0?`➡️ Agla Sawal (${cd}s)`:'➡️ Agla Sawal';
-    if (cd<=0){ timerManager.clearInterval('autoNext'); nextQ(); }
-  },1000);
-}
+  let cd = 5;
+  const nb = $('nextBtn');
+  
+  if (nb) nb.textContent = `➡️ Agla Sawal (${cd}s)`;
+  
+  timerManager.setInterval('autoNext', () => {
+    cd--;
+    if (nb) {
+      nb.textContent = cd > 0 ? `➡️ Agla Sawal (${cd}s)` : '➡️ Agla Sawal';
+    }
+    
+    if (cd <= 0) {
+      timerManager.clearInterval('autoNext');
+      
+      // ✅ FIXED: Check guest limit BEFORE calling nextQ()
+      const curUser = getCurUser();
+      if (curUser?.isAnonymous && getGuestAnswered() >= CONFIG.GUEST_QUESTION_LIMIT) {
+        timerManager.clearInterval('autoNext');
+        const gm = $('guestModal');
+        if (gm) gm.style.display = 'flex';
+        return;
+      }
+      
+      nextQ();
+    }
+  }, 1000);
+  }
