@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Quiz ──
   on('paraForm',    'submit', e => { e.preventDefault(); startGame(); });
   on('answerForm',  'submit', e => { e.preventDefault(); checkAnswer(); });
-  on('checkBtn',    'click',  e => { e.preventDefault(); checkAnswer(); });
+  // NOTE: checkBtn click nahi — answerForm submit already handle karta hai (double-call bug fix)
   on('nextBtn',     'click',  e => { e.preventDefault(); nextQ(); });
   on('hintBtn',     'click',  e => { e.preventDefault(); showHint(); });
   on('goParaSelect','click',  () => { loadQuran(); showScreen('paraSelectScreen'); });
@@ -130,6 +130,16 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent  = vis ? '🔎 Search' : '❌ Band Karein';
       if (!vis) setTimeout(() => $('searchInput')?.focus(), 100);
     }
+  });
+
+  // ── Guest limit modal ──
+  on('guestToSignup', 'click', () => {
+    const gm = $('guestModal'); if (gm) gm.style.display = 'none';
+    showScreen('authScreen');
+    switchTab('signup');
+  });
+  on('guestContinue', 'click', () => {
+    const gm = $('guestModal'); if (gm) gm.style.display = 'none';
   });
 
   // ── Online match ──
@@ -237,15 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, false);
   }
 
-    document.addEventListener('wheel', e => {
+  document.addEventListener('wheel', e => {
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
-}; // initUI function yahan band hua
-
-// Ye code check karega ki DOM load ho chuka hai ya nahi
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initUI);
-} else {
-  initUI(); // Agar load ho chuka hai, to direct events attach kar do
-}
-
+});
