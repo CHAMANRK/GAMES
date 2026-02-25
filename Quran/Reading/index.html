@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quran Kareem</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     DOWNLOAD MODAL
+══════════════════════════════════ -->
+<div id="downloadModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+        <div class="modal-icon"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+        <h2>Offline Setup</h2>
+        <p>Behtareen tajrube ke liye 113MB download karein</p>
+        <div id="dl-progress" style="display:none;">
+            <div class="dl-track"><div id="dl-bar" class="dl-fill"></div></div>
+            <small id="dl-status">Shuru ho raha hai...</small>
+        </div>
+        <button class="btn-primary" onclick="startDownload()">
+            <i class="fa-solid fa-download"></i> Download Karein
+        </button>
+        <button class="btn-ghost" onclick="skipDownload()">Baad mein</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     START OVERLAY
+══════════════════════════════════ -->
+<div id="selectionOverlay" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-icon green"><i class="fa-solid fa-book-open-quran"></i></div>
+        <h2>بسم الله</h2>
+        <p>Padhna kahan se shuru karein?</p>
+        <label>Para:</label>
+        <div class="select-wrap">
+            <select id="init-juz" onchange="populateOverlayPages(this.value)"></select>
+        </div>
+        <label>Page:</label>
+        <div class="select-wrap">
+            <select id="init-page"></select>
+        </div>
+        <button class="btn-primary" onclick="startFromOverlay()">
+            <i class="fa-solid fa-play"></i> Shuru Karein
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SIDEBAR OVERLAY
+══════════════════════════════════ -->
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
+
+<!-- ══════════════════════════════════
+     SIDEBAR (Menu)
+══════════════════════════════════ -->
+<div id="mySidebar" class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <i class="fa-solid fa-book-quran"></i>
+            <span>Quran Kareem</span>
+        </div>
+        <button class="icon-btn-sm" onclick="closeNav()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="sidebar-body">
+
+        <!-- Reading Stats Card -->
+        <div class="stats-card">
+            <div class="stat-item">
+                <div class="stat-val" id="sb-progress">0%</div>
+                <div class="stat-lbl">Progress</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-val" id="sb-streak">0🔥</div>
+                <div class="stat-lbl">Streak</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-val" id="sb-timer-disp">0m</div>
+                <div class="stat-lbl">Aaj</div>
+            </div>
+        </div>
+
+        <!-- Last Read -->
+        <div class="sidebar-section">
+            <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Akhri jagah</div>
+            <div id="lastReadInfo" class="last-read-info">—</div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="sidebar-section">
+            <div class="section-title"><i class="fa-solid fa-compass"></i> Navigation</div>
+            <label>Para:</label>
+            <div class="select-wrap">
+                <select id="juz-select" onchange="handleParaChange(this.value)"></select>
+            </div>
+            <label style="margin-top:10px;">Page:</label>
+            <div class="select-wrap">
+                <select id="sub-page-select" onchange="jumpToPage(this.value)"></select>
+            </div>
+        </div>
+
+        <!-- Surah Search -->
+        <div class="sidebar-section">
+            <div class="section-title"><i class="fa-solid fa-magnifying-glass"></i> Surah</div>
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="surahSearch" placeholder="Surah dhundein..." onkeyup="filterSurahs()">
+            </div>
+            <select id="surah-select" onchange="jumpToPage(this.value)" size="6"></select>
+        </div>
+
+        <!-- Bookmarks -->
+        <div class="sidebar-section">
+            <div class="section-title"><i class="fa-solid fa-heart"></i> Bookmarks</div>
+            <div id="bookmarksList" class="bookmarks-grid"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TOP BAR (Clean & Minimal)
+══════════════════════════════════ -->
+<div class="top-bar" id="topBar">
+    <button class="icon-btn" onclick="openNav()">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="top-info">
+        <div id="page-info" class="page-num">—</div>
+        <div id="surah-info" class="surah-name">Quran Kareem</div>
+    </div>
+
+    <button class="icon-btn" id="bookmarkBtn" onclick="toggleBookmark()">
+        <i class="fa-regular fa-heart"></i>
+    </button>
+</div>
+
+<!-- Top Progress Line -->
+<div class="progress-line"><div id="progressBar" class="progress-fill"></div></div>
+
+<!-- Para Jump Bar -->
+<div class="para-jump-bar" id="paraJumpBar">
+    <div class="para-jump-inner" id="paraJumpInner"></div>
+</div>
+
+<!-- ══════════════════════════════════
+     MAIN QURAN CANVAS
+══════════════════════════════════ -->
+<div class="quran-container" id="touchArea">
+    <!-- Floating Page Number -->
+    <div class="floating-page-num" id="floatingPageNum"></div>
+
+    <!-- Page Turn Ripple Effect -->
+    <div class="page-ripple" id="pageRipple"></div>
+
+    <div class="quran-frame" id="zoomWrapper">
+        <canvas id="pdf-render"></canvas>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     ZEN MODE EXIT
+══════════════════════════════════ -->
+<button id="zenExitBtn" class="zen-exit-btn" onclick="toggleZenMode()">
+    <i class="fa-solid fa-compress"></i> Zen se bahar
+</button>
+
+<!-- ══════════════════════════════════
+     FAB + PANEL
+══════════════════════════════════ -->
+<div class="fab-overlay" id="fabOverlay" onclick="closeFabPanel()"></div>
+
+<div class="fab-panel" id="fabPanel">
+    <div class="fab-panel-header">
+        <span>⚙️ Features</span>
+        <button class="icon-btn-sm" onclick="closeFabPanel()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Mode Toggle -->
+    <div class="panel-section">
+        <div class="section-title"><i class="fa-solid fa-arrows-left-right"></i> Page Mode</div>
+        <div class="mode-toggle-group">
+            <button id="modeSwipe" class="mode-btn active" onclick="setPageMode('swipe')">
+                <i class="fa-solid fa-hand-pointer"></i> Swipe
+            </button>
+            <button id="modeScroll" class="mode-btn" onclick="setPageMode('scroll')">
+                <i class="fa-solid fa-scroll"></i> Scroll
+            </button>
+        </div>
+        <!-- Auto-scroll (only visible in scroll mode) -->
+        <div id="autoScrollRow" class="toggle-row hidden">
+            <div class="toggle-info">
+                <i class="fa-solid fa-play-circle"></i>
+                <span>Auto Scroll</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="autoScrollToggle" onchange="toggleAutoScroll(this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div id="autoScrollSpeed" class="speed-row hidden">
+            <span>Speed</span>
+            <input type="range" min="1" max="10" value="3" id="scrollSpeedRange" oninput="updateScrollSpeed(this.value)">
+            <span id="speedLabel">3</span>
+        </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="panel-section">
+        <div class="section-title"><i class="fa-solid fa-palette"></i> Theme</div>
+        <div class="theme-btns">
+            <button class="theme-btn day active" onclick="setTheme('day')" title="Day">
+                <i class="fa-solid fa-sun"></i><span>Day</span>
+            </button>
+            <button class="theme-btn sepia" onclick="setTheme('sepia')" title="Sepia">
+                <i class="fa-solid fa-droplet"></i><span>Sepia</span>
+            </button>
+            <button class="theme-btn night" onclick="setTheme('night')" title="Night">
+                <i class="fa-solid fa-moon"></i><span>Night</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Brightness -->
+    <div class="panel-section">
+        <div class="section-title"><i class="fa-solid fa-brightness"></i> Brightness</div>
+        <div class="slider-row">
+            <i class="fa-solid fa-sun" style="font-size:12px;opacity:0.5"></i>
+            <input type="range" min="40" max="100" value="100" id="brightnessRange" oninput="updateBrightness(this.value)">
+            <i class="fa-solid fa-sun"></i>
+        </div>
+    </div>
+
+    <!-- Zen Mode -->
+    <div class="panel-section">
+        <div class="toggle-row">
+            <div class="toggle-info">
+                <i class="fa-solid fa-expand"></i>
+                <span>Zen Mode</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="zenToggle" onchange="toggleZenMode()">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Reading Stats -->
+    <div class="panel-section">
+        <div class="section-title"><i class="fa-solid fa-chart-simple"></i> Stats</div>
+        <div class="stats-mini">
+            <div class="stat-mini-item">
+                <div class="stat-mini-val" id="panel-progress">0%</div>
+                <div class="stat-mini-lbl">Quran Progress</div>
+            </div>
+            <div class="stat-mini-item">
+                <div class="stat-mini-val" id="panel-streak">0</div>
+                <div class="stat-mini-lbl">Day Streak 🔥</div>
+            </div>
+            <div class="stat-mini-item">
+                <div class="stat-mini-val" id="panel-timer">00:00</div>
+                <div class="stat-mini-lbl">Aaj ka waqt</div>
+            </div>
+        </div>
+        <!-- Progress Ring -->
+        <div class="progress-ring-wrap">
+            <svg class="progress-ring" viewBox="0 0 80 80">
+                <circle class="ring-bg" cx="40" cy="40" r="34"/>
+                <circle class="ring-fill" id="progressRing" cx="40" cy="40" r="34" 
+                    stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+            </svg>
+            <div class="ring-text" id="ringText">0%</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- FAB Button -->
+<button class="fab-btn" id="fabBtn" onclick="toggleFabPanel()">
+    <i class="fa-solid fa-sliders" id="fabIcon"></i>
+</button>
+
+<script src="script.js"></script>
+</body>
+</html>
