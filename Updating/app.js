@@ -3,22 +3,24 @@
 //  Sab logic: app-core.js, app-game.js, app-online.js
 // ═══════════════════════════════════════════════════════════════
 
-import {
+
+  import {
   $, on, isMobile, showScreen, toast,
   initAuthListener, doLogin, doSignup, doGoogle, doGuest, doLogout, doForgot, switchTab,
   openProfilePanel, closeProfilePanel, setupUidCopy,
   doSearch, searchFriend, startFriendsListener, stopFriendsListener,
   currentLang, setLang
-} from './js/app-core.js';
+} from './app-core.js';
 
 import {
   loadQuran, startGame, nextQ, checkAnswer, showHint, endQuiz, resetGame
-} from './js/app-game.js';
+} from './app-game.js';
 
 import {
   openOnlineLobby, joinTable, submitMatchAnswer,
   showExitConfirm, hideExitConfirm, leaveMatchCleanup
-} from './js/app-online.js';
+} from './app-online.js';
+
 
 // ── Stars background ──
 (function initStars() {
