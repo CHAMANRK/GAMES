@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Quran Ayat Quiz — Islamic Learning Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Quran Ayat Quiz — Test your Quran knowledge with multiplayer online battles!">
+  <meta name="theme-color" content="#050f0a">
+
+  <!-- Fix [HTML-3]: Security headers -->
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+
+  <!-- Fix [HTML-10]: Preconnect for faster font loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Fix [HTML-9]: Fonts only once (removed duplicate @import from style.css) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── BOOT LOADER ── -->
+<div id="bootLoader" style="position:fixed;inset:0;background:var(--bg-deep,#050f0a);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+  <style>
+    @keyframes bootIconFloat { 0%,100%{transform:translateY(0) scale(1);filter:drop-shadow(0 0 20px #00c472)}50%{transform:translateY(-10px) scale(1.05);filter:drop-shadow(0 0 35px #00c472)} }
+    @keyframes bootSpinnerRotate { to{transform:rotate(360deg)} }
+    .boot-icon    { font-size:3.5rem;animation:bootIconFloat 2s ease-in-out infinite }
+    .boot-spinner { width:36px;height:36px;border:3px solid #00c47220;border-top-color:#00c472;border-radius:50%;animation:bootSpinnerRotate .8s linear infinite }
+    .boot-title   { font-family:'Cinzel',serif;font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,#f0c96a,#00c472);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text }
+    .coin-particle { user-select:none }
+    .sd-label { color:#f0c96a;font-family:'Cinzel',serif;font-weight:900;font-size:.95rem;text-shadow:0 0 12px #d4a84380 }
+  </style>
+  <div class="boot-icon">🌙</div>
+  <div class="boot-title">Quran Quiz</div>
+  <div class="boot-spinner"></div>
+</div>
+
+<!-- ── HEADER ── -->
+<header class="app-header">
+  <div class="header-content">
+    <div class="hdr-left">
+      <button class="hdr-profile-btn hidden" id="profileBtn" title="Profile" aria-label="Open profile">
+        <span id="profileBtnIcon">👤</span>
+      </button>
+    </div>
+    <div class="header-branding" id="hiddenTasbeehTrigger" style="cursor:default;user-select:none" aria-label="Quran Quiz" role="banner">
+      <img src="logo.png" alt="Quran Quiz Logo" class="logo"/>
+      <h1 class="app-title">Quran Quiz</h1>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-coins hidden" id="hdrCoins" aria-live="polite" aria-label="Coins balance">🪙 <span id="hdrCoinsVal">0</span></div>
+      <!-- Fix [HTML-1]: Inline onclick removed — listener in app.js -->
+      <button id="guestLogoutPill" style="display:none;align-items:center;gap:6px;background:rgba(200,50,50,.15);border:1px solid #c43030;color:#ff9090;border-radius:20px;padding:5px 12px;font-size:.82rem;font-weight:700;cursor:pointer">
+        👤 Guest &nbsp;·&nbsp; 🚪 Logout
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ── PROFILE PANEL ── -->
+<div id="profileOverlay" class="profile-overlay hidden" role="presentation"></div>
+<div id="profilePanel" class="profile-panel" role="dialog" aria-label="Profile">
+  <div class="pp-top">
+    <div class="pp-avatar-circle" id="ppAvatarCircle" aria-hidden="true">👤</div>
+    <div class="pp-user-info">
+      <div class="pp-username" id="ppUsername">—</div>
+      <div class="pp-role"     id="ppRole">Player</div>
+    </div>
+    <button class="pp-close-btn" id="ppCloseBtn" aria-label="Close profile">✕</button>
+  </div>
+
+  <div class="pp-uid-box">
+    <div class="pp-uid-label">🆔 Meri UID (friends ke liye)</div>
+    <div class="pp-uid-row">
+      <span class="pp-uid-val" id="ppUidVal">—</span>
+      <button class="pp-uid-copy" id="ppUidCopy" title="Copy UID" aria-label="Copy UID">📋</button>
+    </div>
+    <div class="pp-uid-copied hidden" id="ppUidCopied" role="status">✅ Copy ho gaya!</div>
+  </div>
+
+  <div class="pp-stats-row">
+    <div class="pp-stat-box"><div class="pp-stat-val" id="ppCoins">0</div><div class="pp-stat-lbl">🪙 Coins</div></div>
+    <div class="pp-stat-box"><div class="pp-stat-val" id="ppAccuracy">0%</div><div class="pp-stat-lbl">🎯 Accuracy</div></div>
+    <div class="pp-stat-box"><div class="pp-stat-val" id="ppGames">0</div><div class="pp-stat-lbl">🎮 Games</div></div>
+  </div>
+
+  <div class="pp-divider"></div>
+  <div class="pp-section-label">⚙️ Settings</div>
+
+  <div class="pp-setting-row">
+    <div class="pp-setting-info">
+      <span class="pp-setting-icon" aria-hidden="true">🌐</span>
+      <div><div class="pp-setting-title">Language</div><div class="pp-setting-desc">Hinglish ya English</div></div>
+    </div>
+    <div class="lang-toggle-wrap" role="group" aria-label="Language">
+      <button class="lang-btn active" id="btnHinglish">Hinglish</button>
+      <button class="lang-btn"        id="btnEnglish">English</button>
+    </div>
+  </div>
+
+  <div class="pp-setting-row pp-setting-row-btn" id="ppContactBtn" role="button" tabindex="0" aria-label="Contact">
+    <div class="pp-setting-info">
+      <span class="pp-setting-icon" aria-hidden="true">📩</span>
+      <div><div class="pp-setting-title">Raabta / Contact</div><div class="pp-setting-desc">Feedback ya sawal bhejein</div></div>
+    </div>
+    <span style="color:var(--text-muted);font-size:.9rem" aria-hidden="true">›</span>
+  </div>
+
+  <div class="pp-divider"></div>
+  <button class="pp-logout-btn" id="ppLogoutBtn">🚪 Logout</button>
+</div>
+
+<!-- ── TASBEEH MODAL ── Fix [HTML-6]: display:flex used to show ── -->
+<div id="tasbeehOverlay" style="display:none;position:fixed;inset:0;background:rgba(2,8,5,.96);backdrop-filter:blur(16px);z-index:9999;align-items:center;justify-content:center;flex-direction:column" role="dialog" aria-label="Tasbeeh counter">
+  <div class="tasbeeh-panel">
+    <button id="tasbeehClose" style="position:absolute;top:14px;right:16px;background:none;border:1px solid #00c47230;color:var(--text-muted);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center" aria-label="Close Tasbeeh">✕</button>
+    <div style="text-align:center;font-size:2rem;margin-bottom:8px" aria-hidden="true">📿</div>
+    <h2 style="font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold-light);text-align:center;margin-bottom:4px">Tasbeeh</h2>
+    <div id="tasbeehArabic" style="font-family:'Amiri',serif;font-size:1.8rem;color:var(--emerald);text-align:center;direction:rtl;margin:12px 0;line-height:2" lang="ar" dir="rtl"></div>
+    <div id="tasbeehCount" style="font-family:'Cinzel',serif;font-size:3.5rem;color:var(--gold);text-align:center;font-weight:900;text-shadow:0 0 20px var(--gold-glow)" aria-live="polite">0</div>
+    <div style="font-size:.82rem;color:var(--text-muted);text-align:center;margin-bottom:16px;font-family:'Tajawal',sans-serif">Tasbeeh counter</div>
+    <div class="tasbeeh-btn-wrap">
+      <button id="tasbeehTap" class="tasbeeh-tap-btn">📿 Tasbih</button>
+    </div>
+    <div class="tasbeeh-types" role="group" aria-label="Tasbeeh type">
+      <button class="tasbeeh-type-btn active" data-type="subhan"    data-text="سُبْحَانَ اللَّهِ">SubhanAllah</button>
+      <button class="tasbeeh-type-btn"        data-type="alhamd"    data-text="الْحَمْدُ لِلَّهِ">Alhamdulillah</button>
+      <button class="tasbeeh-type-btn"        data-type="akbar"     data-text="اللَّهُ أَكْبَرُ">Allahu Akbar</button>
+      <button class="tasbeeh-type-btn"        data-type="astaghfar" data-text="أَسْتَغْفِرُ اللَّهَ">Astaghfirullah</button>
+      <button class="tasbeeh-type-btn"        data-type="darood"    data-text="صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ">Darood Shareef</button>
+    </div>
+    <button id="tasbeehReset" style="margin-top:12px;background:none;border:1px solid #c4293b40;color:#ff9090;border-radius:10px;padding:7px 18px;cursor:pointer;font-size:.82rem;font-family:'Tajawal',sans-serif">🔄 Reset</button>
+  </div>
+</div>
+
+<!-- ── EXIT MATCH MODAL ── Fix [HTML-7]: display:flex for correct layout ── -->
+<div id="exitMatchModal" style="display:none;position:fixed;inset:0;background:rgba(5,15,10,.93);backdrop-filter:blur(10px);z-index:9000;align-items:center;justify-content:center" role="dialog" aria-label="Exit match confirmation">
+  <div class="card" style="max-width:340px;gap:14px;text-align:center">
+    <span style="font-size:2.5rem" aria-hidden="true">🚪</span>
+    <h3 class="main-heading" style="font-size:1.3rem">Match Chodo?</h3>
+    <p class="subtitle" style="font-size:.88rem">Agar aap match chodein to <b style="color:#ff9090">haar maan li jayegi</b>. Coins wapas nahi milenge.</p>
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn btn-outline" id="exitMatchCancel" style="flex:1">❌ Nahi</button>
+      <button class="btn"             id="exitMatchConfirm" style="flex:1;background:linear-gradient(135deg,#c4293b,#8b1a26);border:none;color:#fff">🚪 Haan, Chodo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── GUEST LIMIT MODAL ── -->
+<div id="guestModal" style="display:none;position:fixed;inset:0;background:rgba(5,15,10,.93);backdrop-filter:blur(10px);z-index:9000;align-items:center;justify-content:center" role="dialog" aria-label="Guest limit reached">
+  <div class="card" style="max-width:360px;gap:16px;text-align:center">
+    <span style="font-size:3rem" aria-hidden="true">🔐</span>
+    <h3 class="main-heading" style="font-size:1.4rem">3 Sawaal Pure!</h3>
+    <p class="subtitle">Login karo — coins save hon aur online khelo!</p>
+    <button class="btn btn-primary" id="guestToSignup">📝 Account Banayein</button>
+    <button class="btn btn-outline" id="guestContinue">Jari Rakhein</button>
+  </div>
+</div>
+
+<main role="main">
+
+  <!-- ── SCREEN 0: AUTH ── -->
+  <section id="authScreen" class="screen" aria-label="Login or Signup">
+    <div class="card auth-card">
+      <div class="auth-banner">
+        <span class="auth-banner-icon" aria-hidden="true">🌙</span>
+        <h2>Quran Quiz</h2>
+        <p>Login karein ya account banayein</p>
+      </div>
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" data-tab="login"  id="tabLogin"  role="tab" aria-selected="true"  aria-controls="loginPanel">🔐 Login</button>
+        <button class="auth-tab"        data-tab="signup" id="tabSignup" role="tab" aria-selected="false" aria-controls="signupPanel">📝 Signup</button>
+      </div>
+      <div class="auth-body">
+        <!-- Login -->
+        <div id="loginPanel" class="auth-form-panel active" role="tabpanel" aria-labelledby="tabLogin">
+          <div>
+            <label class="auth-label" for="loginEmail">📧 Email</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon" aria-hidden="true">📧</span>
+              <input id="loginEmail" type="email" placeholder="aapki@email.com"
+                     autocomplete="email" inputmode="email" aria-required="true">
+            </div>
+          </div>
+          <div>
+            <label class="auth-label" for="loginPassword">🔒 Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon" aria-hidden="true">🔒</span>
+              <input id="loginPassword" type="password" placeholder="Password"
+                     autocomplete="current-password" aria-required="true">
+              <button class="toggle-pw" type="button" id="toggleLoginPw" aria-label="Show/hide password">👁️</button>
+            </div>
+          </div>
+          <div class="auth-forgot" id="forgotBtn" role="button" tabindex="0">Password bhool gaye? Reset karein</div>
+          <div class="auth-msg" id="loginMsg" role="alert" aria-live="polite"></div>
+          <button id="loginBtn" class="btn btn-primary">🔐 Login</button>
+          <div class="auth-divider" role="separator">ya</div>
+          <button id="googleLoginBtn" class="btn-google"><span class="google-icon" aria-hidden="true"></span> Google se Login</button>
+          <button id="guestBtn" class="btn-guest">👤 Guest (3 sawaal free)</button>
+        </div>
+        <!-- Signup -->
+        <div id="signupPanel" class="auth-form-panel" role="tabpanel" aria-labelledby="tabSignup">
+          <div>
+            <label class="auth-label" for="signupUsername">👤 Username</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon" aria-hidden="true">👤</span>
+              <input id="signupUsername" type="text" placeholder="apna_naam (3-20 chars)"
+                     autocomplete="username" aria-required="true"
+                     pattern="[a-zA-Z0-9_]+" minlength="3" maxlength="20">
+            </div>
+          </div>
+          <div>
+            <label class="auth-label" for="signupEmail">📧 Email</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon" aria-hidden="true">📧</span>
+              <input id="signupEmail" type="email" placeholder="aapki@email.com"
+                     autocomplete="email" inputmode="email" aria-required="true">
+            </div>
+          </div>
+          <div>
+            <label class="auth-label" for="signupPassword">🔒 Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon" aria-hidden="true">🔒</span>
+              <input id="signupPassword" type="password" placeholder="Min 6 characters"
+                     autocomplete="new-password" minlength="6" aria-required="true">
+              <button class="toggle-pw" type="button" id="toggleSignupPw" aria-label="Show/hide password">👁️</button>
+            </div>
+          </div>
+          <div>
+            <label class="auth-label" for="signupConfirmPw">✅ Confirm Password</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon" aria-hidden="true">✅</span>
+              <input id="signupConfirmPw" type="password" placeholder="Dobara likhein"
+                     autocomplete="new-password" minlength="6" aria-required="true">
+            </div>
+          </div>
+          <div class="auth-msg" id="signupMsg" role="alert" aria-live="polite"></div>
+          <button id="signupBtn" class="btn btn-primary">📝 Account Banayein</button>
+          <div class="auth-divider" role="separator">ya</div>
+          <button id="googleSignupBtn" class="btn-google"><span class="google-icon" aria-hidden="true"></span> Google se Signup</button>
+          <p class="auth-terms">500 🪙 coins shuruwaat mein milenge!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 1: HOME ── -->
+  <section id="welcomeScreen" class="screen" aria-label="Home">
+    <div class="card home-card">
+      <h2 class="main-heading">🌙 Quran Ayat Quiz</h2>
+      <p class="subtitle">Apni Quran maloomat ko aazmaayiye!</p>
+      <form id="modeForm" class="mode-grid" style="width:100%" aria-label="Quiz mode selection">
+        <label class="mode-card-option">
+          <input type="radio" name="quizMode" value="practice" checked aria-label="Practice mode — unlimited questions">
+          <span class="mode-card-inner"><span class="mode-card-icon" aria-hidden="true">🎯</span><span class="mode-card-title">Practice</span><span class="mode-card-desc">Unlimited</span></span>
+        </label>
+        <label class="mode-card-option">
+          <input type="radio" name="quizMode" value="timed" aria-label="Timed mode — 10 questions, 30 seconds each">
+          <span class="mode-card-inner"><span class="mode-card-icon" aria-hidden="true">⏱️</span><span class="mode-card-title">Timed</span><span class="mode-card-desc">10 Qs, 30s</span></span>
+        </label>
+        <label class="mode-card-option">
+          <input type="radio" name="quizMode" value="survival" aria-label="Survival mode — one miss and you're out">
+          <span class="mode-card-inner"><span class="mode-card-icon" aria-hidden="true">💥</span><span class="mode-card-title">Survival</span><span class="mode-card-desc">1 miss = over</span></span>
+        </label>
+      </form>
+      <button class="btn btn-primary" id="goParaSelect">▶️ Shuru Karein</button>
+      <button class="btn btn-gold"    id="goOnlineMatch">⚔️ Online Match</button>
+      <button class="btn btn-secondary" id="goFriends">👥 Friends</button>
+      <button class="btn btn-secondary" id="toggleSearchBtn">🔎 Search</button>
+    </div>
+    <div class="search-section" id="searchContainer" style="display:none" role="search" aria-label="Quran search">
+      <form id="searchForm">
+        <input id="searchInput" type="text" placeholder="Ayat, Surah, Page, Para..." aria-label="Search Quran">
+        <button type="submit" class="btn btn-primary" style="width:auto;padding:11px 18px">Search</button>
+      </form>
+      <div id="searchResults" aria-live="polite" aria-label="Search results"></div>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 2: PARA SELECT ── -->
+  <section id="paraSelectScreen" class="screen" aria-label="Para range selection">
+    <div class="card">
+      <h2 class="main-heading">🌙 Para Range</h2>
+      <form id="paraForm" style="width:100%">
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="fromPara">From Para (1–30)</label>
+            <input id="fromPara" type="number" min="1" max="30" placeholder="1"
+                   inputmode="numeric" pattern="[0-9]*" aria-required="true">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="toPara">To Para (1–30)</label>
+            <input id="toPara" type="number" min="1" max="30" placeholder="30"
+                   inputmode="numeric" pattern="[0-9]*" aria-required="true">
+          </div>
+        </div>
+        <div id="selectError" class="error hidden" role="alert"></div>
+        <button class="btn btn-primary" type="submit">✅ Submit</button>
+      </form>
+      <button class="btn btn-outline" id="backFromPara">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 3: QUIZ ── -->
+  <section id="quizScreen" class="screen" aria-label="Quiz">
+    <div class="card" style="max-width:540px">
+      <div id="quizProgress" aria-live="polite" style="color:var(--text-secondary);font-size:.92em;text-align:center"></div>
+      <h2 class="main-heading">📖 Ye Ayat Pehchaniye</h2>
+      <div id="ayatText" class="ayat" dir="rtl" lang="ar" aria-live="polite"></div>
+      <div style="display:flex;align-items:center;gap:12px;width:100%">
+        <button id="hintBtn" class="btn btn-secondary" style="width:auto;padding:9px 20px">💡 Hint</button>
+        <span id="hintInfo" style="color:var(--emerald);font-size:.9em" aria-live="polite"></span>
+      </div>
+      <form id="answerForm" style="width:100%">
+        <p class="section-label">✅ Zaroori</p>
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="user_para">Para Number</label>
+            <input id="user_para" type="number" min="1" max="30" placeholder="Para No."
+                   inputmode="numeric" pattern="[0-9]*" aria-required="true">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_page_in_para">Page In Para</label>
+            <input id="user_page_in_para" type="number" min="1" max="20" placeholder="PiP"
+                   inputmode="numeric" pattern="[0-9]*">
+          </div>
+        </div>
+        <p class="section-label">⭐ Optional <span style="color:var(--gold);font-size:.8em;font-weight:400">(+5🪙 each)</span></p>
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="user_page">Page No.</label>
+            <input id="user_page" type="number" min="1" max="604" placeholder="Page"
+                   inputmode="numeric" pattern="[0-9]*">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_surah">Surah Name</label>
+            <input id="user_surah" type="text" placeholder="Surah" autocomplete="off">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_ruku">Ruku No.</label>
+            <input id="user_ruku" type="number" min="1" placeholder="Ruku"
+                   inputmode="numeric" pattern="[0-9]*">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="user_ayat">Ayat No.</label>
+            <input id="user_ayat" type="number" min="1" placeholder="Ayat"
+                   inputmode="numeric" pattern="[0-9]*">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="checkBtn">✅ Check Karo</button>
+      </form>
+      <div id="quizError"  class="error  hidden" role="alert"   aria-live="assertive"></div>
+      <div id="quizResult" class="result hidden" role="status"   aria-live="polite"></div>
+      <div id="survivalAnswer" class="hidden" style="background:linear-gradient(135deg,#180e00,#100900);border:1px solid var(--gold);border-radius:var(--radius-sm);padding:14px;width:100%;text-align:center;color:var(--gold-light);line-height:1.8" role="status"></div>
+      <button class="btn btn-secondary hidden" id="nextBtn">➡️ Agla Sawal</button>
+      <button class="btn btn-outline"         id="backFromQuiz">⬅️ Wapas</button>
+      <div id="scoreBoard" aria-live="polite" style="color:var(--emerald);font-weight:700;text-align:center"></div>
+      <div id="timer"      aria-live="polite" style="color:var(--gold-light);font-weight:700;text-align:center;font-family:'Cinzel',serif;letter-spacing:2px"></div>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 4: RESULT ── -->
+  <section id="resultScreen" class="screen" aria-label="Quiz results">
+    <div class="card" style="max-width:500px">
+      <h2 class="main-heading">🎉 Quiz Khatam!</h2>
+      <div id="finalResult" class="result-summary" aria-live="polite"></div>
+      <button class="btn btn-primary" id="goHomeBtn">🏠 Home</button>
+      <button class="btn btn-outline" id="playAgainBtn">🔄 Dobara Khelo</button>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 5: CONTACT ──
+       Fix [HTML-2]: Email removed from HTML, uses formsubmit with honeypot protection ── -->
+  <section id="contactScreen" class="screen" aria-label="Contact">
+    <div class="card" style="max-width:460px">
+      <h2 class="main-heading">📩 Raabta</h2>
+      <form action="https://formsubmit.co/hellochaman532@gmail.com" method="POST" style="width:100%">
+        <input type="hidden"   name="_captcha"   value="true">
+        <input type="hidden"   name="_subject"   value="Quran Quiz Feedback">
+        <input type="text"     name="_honey"     style="display:none" tabindex="-1" autocomplete="off">
+        <div class="input-group" style="margin-bottom:12px">
+          <label class="input-label" for="contactName">Naam</label>
+          <input id="contactName" type="text" name="name" required autocomplete="name">
+        </div>
+        <div class="input-group" style="margin-bottom:12px">
+          <label class="input-label" for="contactEmail">Email</label>
+          <input id="contactEmail" type="email" name="email" required autocomplete="email">
+        </div>
+        <div class="input-group" style="margin-bottom:12px">
+          <label class="input-label" for="contactMsg">Paighaam</label>
+          <textarea id="contactMsg" name="message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">📤 Bhejain</button>
+      </form>
+      <button class="btn btn-outline" id="backFromContact">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 6: ONLINE LOBBY ── -->
+  <section id="onlineLobbyScreen" class="screen" aria-label="Online match lobby">
+    <div class="card" style="max-width:540px">
+      <h2 class="main-heading">⚔️ Online Match</h2>
+      <p class="subtitle" id="lobbyCoinsInfo">Apna table chuniye</p>
+      <div id="tablesGrid" class="tables-grid">
+        <div class="table-card" data-table="starter">
+          <div class="tc-medal" aria-hidden="true">🪵</div>
+          <div class="tc-name">Starter</div>
+          <div class="tc-fee">200 🪙</div>
+          <div class="tc-info">7 Qs • First to 4</div>
+          <div class="tc-win">Jeet: 400 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinStarter">Join</button>
+        </div>
+        <div class="table-card" data-table="bronze">
+          <div class="tc-medal" aria-hidden="true">🥉</div>
+          <div class="tc-name">Bronze</div>
+          <div class="tc-fee">500 🪙</div>
+          <div class="tc-info">9 Qs • First to 5</div>
+          <div class="tc-win">Jeet: 1000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinBronze">Join</button>
+        </div>
+        <div class="table-card" data-table="silver">
+          <div class="tc-medal" aria-hidden="true">🥈</div>
+          <div class="tc-name">Silver</div>
+          <div class="tc-fee">1000 🪙</div>
+          <div class="tc-info">11 Qs • First to 6</div>
+          <div class="tc-win">Jeet: 2000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinSilver">Join</button>
+        </div>
+        <div class="table-card" data-table="gold">
+          <div class="tc-medal" aria-hidden="true">🥇</div>
+          <div class="tc-name">Gold</div>
+          <div class="tc-fee">2500 🪙</div>
+          <div class="tc-info">13 Qs • First to 7</div>
+          <div class="tc-win">Jeet: 5000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinGold">Join</button>
+        </div>
+        <div class="table-card" data-table="diamond">
+          <div class="tc-medal" aria-hidden="true">💎</div>
+          <div class="tc-name">Diamond</div>
+          <div class="tc-fee">5000 🪙</div>
+          <div class="tc-info">15 Qs • First to 8</div>
+          <div class="tc-win">Jeet: 10000 🪙</div>
+          <button class="btn btn-primary tc-btn" id="joinDiamond">Join</button>
+        </div>
+      </div>
+      <button class="btn btn-outline" id="backFromLobby">⬅️ Wapas</button>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 7: MATCHMAKING WAITING ── -->
+  <section id="matchWaitScreen" class="screen" aria-label="Finding opponent">
+    <div class="card" style="max-width:400px;text-align:center;gap:20px">
+      <div class="match-spinner" role="status" aria-label="Searching for opponent"></div>
+      <h2 class="main-heading" style="font-size:1.4rem">Opponent Dhundh Raha Hai...</h2>
+      <div class="match-wait-info" id="matchWaitInfo" aria-live="polite">⚔️ Table</div>
+      <div class="match-wait-timer" id="matchWaitTimer" aria-live="polite">0s</div>
+      <button class="btn btn-outline" id="cancelMatchBtn">❌ Cancel</button>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 8: ONLINE MATCH ── -->
+  <section id="onlineMatchScreen" class="screen" aria-label="Online match in progress">
+    <div class="card" style="max-width:560px">
+      <div class="match-scoreboard" role="region" aria-label="Match scores">
+        <div class="match-player" id="myPlayerBox">
+          <div class="mp-name" id="myName">Aap</div>
+          <div class="mp-score" id="myScore" aria-live="polite">0</div>
+        </div>
+        <div class="match-vs" id="matchVsEl" aria-hidden="true">VS</div>
+        <div class="match-player match-player-opp" id="oppPlayerBox">
+          <div class="mp-name" id="oppName">Opponent</div>
+          <div class="mp-score" id="oppScore" aria-live="polite">0</div>
+        </div>
+      </div>
+      <div class="match-progress" id="matchProgress" aria-live="polite">Sawal 1</div>
+      <div class="match-timer-bar" role="progressbar" aria-label="Time remaining">
+        <div class="match-timer-fill" id="matchTimerFill"></div>
+      </div>
+      <div id="matchTimer" class="match-timer-txt" aria-live="polite">30s</div>
+      <div id="matchAyatText" class="ayat" dir="rtl" lang="ar" style="margin:8px 0" aria-live="polite"></div>
+      <form id="matchAnswerForm" style="width:100%">
+        <div class="input-grid">
+          <div class="input-group">
+            <label class="input-label" for="match_para">Para Number ✅</label>
+            <input id="match_para" type="number" min="1" max="30" placeholder="Para No."
+                   inputmode="numeric" pattern="[0-9]*" aria-required="true">
+          </div>
+          <div class="input-group">
+            <label class="input-label" for="match_pip">Page In Para ✅</label>
+            <input id="match_pip" type="number" min="1" max="20" placeholder="PiP"
+                   inputmode="numeric" pattern="[0-9]*">
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="matchCheckBtn">⚡ Submit</button>
+      </form>
+      <div id="matchResult" class="hidden" style="text-align:center;padding:10px;font-size:1rem;font-weight:700" role="status" aria-live="polite"></div>
+      <button class="btn btn-outline" id="exitMatchBtn" style="margin-top:4px;border-color:#c4293b40;color:#ff9090">🚪 Match Chodo</button>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 9: MATCH RESULT ── -->
+  <section id="matchResultScreen" class="screen" aria-label="Match result">
+    <div class="card" style="max-width:440px;text-align:center;gap:16px">
+      <div class="match-result-icon" id="matchResultIcon" aria-hidden="true">🏆</div>
+      <h2 class="main-heading" id="matchResultTitle" aria-live="assertive">Mubarak!</h2>
+      <div class="match-result-scores" id="matchResultScores" aria-live="polite"></div>
+      <div class="match-result-coins"  id="matchResultCoins"  aria-live="polite"></div>
+      <button class="btn btn-primary" id="matchPlayAgainBtn">🔄 Phir Khelo</button>
+      <button class="btn btn-outline" id="matchGoHomeBtn">🏠 Home</button>
+    </div>
+  </section>
+
+  <!-- ── SCREEN 10: FRIENDS ── -->
+  <section id="friendsScreen" class="screen" aria-label="Friends">
+    <div class="card" style="max-width:520px">
+      <h2 class="main-heading">👥 Friends</h2>
+      <div class="friends-add-box" style="flex-direction:column;gap:10px">
+        <div class="input-group" style="width:100%">
+          <label class="input-label" for="friendUidInput">🔍 UID se dost dhundein</label>
+          <input id="friendUidInput" type="text" placeholder="Dost ki UID yahan paste karein..."
+                 style="width:100%" autocomplete="off" aria-label="Friend UID">
+        </div>
+        <button class="btn btn-primary" id="searchFriendBtn" style="width:100%;padding:11px 18px">🔍 Search Karein</button>
+        <div id="addFriendMsg" class="auth-msg" style="width:100%;margin:0" role="alert" aria-live="polite"></div>
+        <div id="friendSearchPreview" style="width:100%" aria-live="polite"></div>
+      </div>
+      <div style="width:100%">
+        <div class="friends-section-label">👥 Mere Dost</div>
+        <div id="friendsList" style="width:100%;display:flex;flex-direction:column;gap:8px" aria-live="polite">
+          <div style="color:var(--text-muted);font-size:.88rem;text-align:center;padding:16px;font-family:'Tajawal',sans-serif">Loading...</div>
+        </div>
+      </div>
+      <div style="width:100%">
+        <div class="friends-section-label" id="pendingLabel" style="display:none">📩 Pending Requests</div>
+        <div id="pendingList" style="width:100%;display:flex;flex-direction:column;gap:8px" aria-live="polite"></div>
+      </div>
+      <button class="btn btn-outline" id="backFromFriends">⬅️ Wapas</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer" role="contentinfo">
+  <!-- Fix [HTML-16]: Dynamic year -->
+  © <span id="copyrightYear">2025</span> Quran Quiz
+</footer>
+
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup" role="status" aria-live="polite">
+  <div class="wp-name" id="wpName">Marhaba! 🌙</div>
+  <div class="wp-coins" id="wpCoins">🪙 500 coins</div>
+</div>
+
+<!-- Stars Canvas (fallback for no-canvas browsers) -->
+<canvas id="starsCanvas" style="position:fixed;inset:0;z-index:0;pointer-events:none" aria-hidden="true">
+  <p style="display:none">Animated star background</p>
+</canvas>
+
+<!-- Fix [HTML-18]: Stars moved to app.js (no inline script) -->
+<script type="module" src="app.js"></script>
+</body>
+</html>
