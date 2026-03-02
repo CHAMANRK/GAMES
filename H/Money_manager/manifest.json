@@ -1,0 +1,49 @@
+{
+  "name": "Money Manager v3.0",
+  "short_name": "MoneyMgr",
+  "description": "Apna hisaab, apne haath mein — Personal finance tracker with wallets, analytics & more.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F0F1A",
+  "theme_color": "#7C3AED",
+  "lang": "hi",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Transaction",
+      "short_name": "Add",
+      "description": "Naya transaction add karo",
+      "url": "./index.html#add",
+      "icons": [{ "src": "logo-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Home",
+      "url": "./index.html",
+      "icons": [{ "src": "logo-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
