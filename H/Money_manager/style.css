@@ -936,88 +936,97 @@ body {
 /* ══════════════════════════════════════
      INSTALL POPUP MODERN STYLING
    ══════════════════════════════════════ */
+/* ══════════════════════════════════════
+     PREMIUM PWA INSTALL POPUP
+   ══════════════════════════════════════ */
 .install-popup {
     position: fixed;
-    bottom: 25px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
+    width: 92%;
     max-width: 420px;
-    background: #1a1a2e; /* Dark theme background */
+    background: rgba(30, 30, 50, 0.85); /* Glass effect */
     backdrop-filter: blur(15px);
-    border: 1px solid #7c3aed; /* Purple border for premium look */
-    border-radius: 20px;
-    padding: 18px;
-    z-index: 10000; /* Isse ye PIN screen ke upar dikhega */
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(124, 58, 237, 0.5); /* Purple glowing border */
+    border-radius: 24px;
+    padding: 20px;
+    z-index: 10000;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    animation: slideUp 0.5s ease-out;
 }
 
-/* Jab hidden class ho toh dikhe nahi */
-.install-popup.hidden {
-    display: none !important;
+@keyframes slideUp {
+    from { transform: translate(-50%, 100%); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
 }
 
 .install-popup-inner {
     display: flex;
     align-items: center;
     gap: 15px;
+    margin-bottom: 20px;
 }
 
 .install-popup-logo {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
+    width: 55px;
+    height: 55px;
+    border-radius: 14px;
     object-fit: cover;
-    background: #7c3aed;
-    padding: 2px;
-}
-
-.install-popup-text {
-    flex: 1;
+    background: #2a2a40;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .install-popup-title {
-    font-weight: 700;
-    font-size: 1.1em;
-    color: #fff;
-    margin-bottom: 2px;
+    font-weight: 800;
+    color: #ffffff;
+    font-size: 1.15rem;
+    margin-bottom: 3px;
+    letter-spacing: 0.5px;
 }
 
 .install-popup-sub {
-    font-size: 0.85em;
-    color: #aaa;
+    font-size: 0.85rem;
+    color: #ccccff;
+    line-height: 1.4;
+    opacity: 0.8;
 }
 
+/* BUTTONS SECTION - Fixing the layout */
 .install-popup-btns {
     display: flex;
-    gap: 10px;
-}
-
-.install-btn-yes, .install-btn-no {
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: 0.3s;
+    gap: 12px;
+    width: 100%;
 }
 
 .install-btn-yes {
-    background: #7c3aed;
-    color: #fff;
-    flex: 2;
-}
-
-.install-btn-yes:active {
-    transform: scale(0.95);
+    background: linear-gradient(135deg, #7C3AED, #5B21B6);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    flex: 2; /* Install button bada rahega */
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+    transition: all 0.3s ease;
 }
 
 .install-btn-no {
-    background: #2a2a40;
-    color: #888;
-    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    color: #aaaaaa;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 14px;
+    flex: 1; /* Baad mein button chhota rahega */
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.install-btn-yes:active, .install-btn-no:active {
+    transform: scale(0.96);
 }
