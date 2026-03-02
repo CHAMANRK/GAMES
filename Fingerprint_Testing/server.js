@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
 const { Pool } = require('pg');
 
@@ -13,13 +14,26 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Database (Neon PostgreSQL) ───────────────────────────────────────────────
+// ─── Database ─────────────────────────────────────────────────────────────────
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
 async function initDB() {
+  // Session table
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS session (
+      sid VARCHAR NOT NULL COLLATE "default",
+      sess JSON NOT NULL,
+      expire TIMESTAMP(6) NOT NULL,
+      CONSTRAINT session_pkey PRIMARY KEY (sid)
+    )
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS IDX_session_expire ON session(expire)
+  `);
+  // Users table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -27,6 +41,7 @@ async function initDB() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+  // Credentials table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS credentials (
       id TEXT PRIMARY KEY,
@@ -53,21 +68,28 @@ function uid() { return Math.random().toString(36).slice(2) + Date.now().toStrin
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Session — PostgreSQL mein store hoga (Vercel serverless ke liye zaroori)
 app.use(session({
+  store: new pgSession({
+    pool,
+    tableName: 'session',
+    createTableIfMissing: false,
+  }),
   secret: process.env.SESSION_SECRET || 'fp-secret-2024',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 86400000,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    secure: true,
+    httpOnly: true,
+    maxAge: 10 * 60 * 1000, // 10 minutes — registration/login ke liye kaafi
+    sameSite: 'none',
   }
 }));
 
 const RP_NAME = 'Fingerprint Auth';
-// Vercel domain ya localhost
-const RP_ID   = process.env.RP_ID   || 'localhost';
-const ORIGIN  = process.env.ORIGIN  || `http://localhost:${PORT}`;
+const RP_ID  = process.env.RP_ID  || 'localhost';
+const ORIGIN = process.env.ORIGIN || `http://localhost:${PORT}`;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // REGISTER START
@@ -100,8 +122,13 @@ app.post('/api/register/start', async (req, res) => {
     excludeCredentials: existingCreds.map(c => ({ id: c.credential_id, type: 'public-key' })),
   });
 
+  // Session mein save karo
   req.session.regChallenge = options.challenge;
   req.session.regUserId = user.id;
+  await new Promise((resolve, reject) =>
+    req.session.save(err => err ? reject(err) : resolve())
+  );
+
   res.json({ options });
 });
 
@@ -109,8 +136,13 @@ app.post('/api/register/start', async (req, res) => {
 // REGISTER FINISH
 // ═══════════════════════════════════════════════════════════════════════════════
 app.post('/api/register/finish', async (req, res) => {
-  const { regChallenge: challenge, regUserId: userId } = req.session;
-  if (!challenge || !userId) return res.status(400).json({ error: 'Session expire ho gaya' });
+  const challenge = req.session.regChallenge;
+  const userId    = req.session.regUserId;
+
+  console.log('reg/finish session:', req.session.id, '| challenge:', !!challenge, '| userId:', userId);
+
+  if (!challenge || !userId)
+    return res.status(400).json({ error: 'Session expire ho gaya — dobara register karo' });
 
   try {
     const { verified, registrationInfo } = await verifyRegistrationResponse({
@@ -120,7 +152,8 @@ app.post('/api/register/finish', async (req, res) => {
       expectedRPID: RP_ID,
       requireUserVerification: true,
     });
-    if (!verified || !registrationInfo) return res.status(400).json({ error: 'Verification fail' });
+    if (!verified || !registrationInfo)
+      return res.status(400).json({ error: 'Verification fail' });
 
     const info = registrationInfo;
     const rawId  = info.credential?.id  ?? info.credentialID;
@@ -132,16 +165,23 @@ app.post('/api/register/finish', async (req, res) => {
     console.log('Saving credential_id:', credentialId);
 
     await pool.query(
-      'INSERT INTO credentials(id,user_id,credential_id,public_key,counter) VALUES($1,$2,$3,$4,$5) ON CONFLICT(credential_id) DO UPDATE SET public_key=$4, counter=$5',
+      `INSERT INTO credentials(id,user_id,credential_id,public_key,counter)
+       VALUES($1,$2,$3,$4,$5)
+       ON CONFLICT(credential_id) DO UPDATE SET public_key=$4, counter=$5`,
       [uid(), userId, credentialId, publicKey, counter]
     );
 
-    delete req.session.regChallenge; delete req.session.regUserId;
+    delete req.session.regChallenge;
+    delete req.session.regUserId;
     req.session.loggedIn = userId;
+    await new Promise((resolve, reject) =>
+      req.session.save(err => err ? reject(err) : resolve())
+    );
+
     const { rows } = await pool.query('SELECT username FROM users WHERE id=$1', [userId]);
     res.json({ success: true, message: `${rows[0].username} registered! 🎉` });
   } catch (err) {
-    console.error('Reg finish:', err.message);
+    console.error('Reg finish error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -174,6 +214,10 @@ app.post('/api/login/start', async (req, res) => {
 
   req.session.authChallenge = options.challenge;
   req.session.authUserId = users[0].id;
+  await new Promise((resolve, reject) =>
+    req.session.save(err => err ? reject(err) : resolve())
+  );
+
   res.json({ options });
 });
 
@@ -181,8 +225,13 @@ app.post('/api/login/start', async (req, res) => {
 // LOGIN FINISH
 // ═══════════════════════════════════════════════════════════════════════════════
 app.post('/api/login/finish', async (req, res) => {
-  const { authChallenge: challenge, authUserId: userId } = req.session;
-  if (!challenge || !userId) return res.status(400).json({ error: 'Session expire ho gaya' });
+  const challenge = req.session.authChallenge;
+  const userId    = req.session.authUserId;
+
+  console.log('login/finish session:', req.session.id, '| challenge:', !!challenge, '| userId:', userId);
+
+  if (!challenge || !userId)
+    return res.status(400).json({ error: 'Session expire ho gaya — dobara try karo' });
 
   const { rows: userCreds } = await pool.query(
     'SELECT * FROM credentials WHERE user_id=$1', [userId]
@@ -215,8 +264,14 @@ app.post('/api/login/finish', async (req, res) => {
       if (result.verified) {
         await pool.query('UPDATE credentials SET counter=$1 WHERE id=$2',
           [result.authenticationInfo.newCounter, cred.id]);
-        delete req.session.authChallenge; delete req.session.authUserId;
+
+        delete req.session.authChallenge;
+        delete req.session.authUserId;
         req.session.loggedIn = userId;
+        await new Promise((resolve, reject) =>
+          req.session.save(err => err ? reject(err) : resolve())
+        );
+
         const { rows } = await pool.query('SELECT username FROM users WHERE id=$1', [userId]);
         console.log('✅ Login success:', rows[0].username);
         return res.json({ success: true, message: `Welcome back, ${rows[0].username}! ✅` });
@@ -254,8 +309,6 @@ app.get('/api/users', async (req, res) => {
 initDB().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 http://localhost:${PORT}`);
-    console.log(`RP_ID: ${RP_ID}`);
-    console.log(`ORIGIN: ${ORIGIN}\n`);
+    console.log(`RP_ID: ${RP_ID} | ORIGIN: ${ORIGIN}\n`);
   });
 });
-  
