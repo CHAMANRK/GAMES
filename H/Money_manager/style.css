@@ -933,3 +933,91 @@ body {
     margin-bottom: 12px;
     box-shadow: 0 6px 24px #7C3AED55;
 }
+/* ══════════════════════════════════════
+     INSTALL POPUP MODERN STYLING
+   ══════════════════════════════════════ */
+.install-popup {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 420px;
+    background: #1a1a2e; /* Dark theme background */
+    backdrop-filter: blur(15px);
+    border: 1px solid #7c3aed; /* Purple border for premium look */
+    border-radius: 20px;
+    padding: 18px;
+    z-index: 10000; /* Isse ye PIN screen ke upar dikhega */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Jab hidden class ho toh dikhe nahi */
+.install-popup.hidden {
+    display: none !important;
+}
+
+.install-popup-inner {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.install-popup-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #7c3aed;
+    padding: 2px;
+}
+
+.install-popup-text {
+    flex: 1;
+}
+
+.install-popup-title {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.install-popup-sub {
+    font-size: 0.85em;
+    color: #aaa;
+}
+
+.install-popup-btns {
+    display: flex;
+    gap: 10px;
+}
+
+.install-btn-yes, .install-btn-no {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.install-btn-yes {
+    background: #7c3aed;
+    color: #fff;
+    flex: 2;
+}
+
+.install-btn-yes:active {
+    transform: scale(0.95);
+}
+
+.install-btn-no {
+    background: #2a2a40;
+    color: #888;
+    flex: 1;
+}
