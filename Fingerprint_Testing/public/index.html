@@ -1,0 +1,725 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fingerprint Auth</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #0d0d14;
+  --surface: #16161f;
+  --surface2: #1e1e2a;
+  --border: rgba(255,255,255,0.07);
+  --accent: #4f8eff;
+  --accent2: #7c5cfc;
+  --success: #00d68f;
+  --error: #ff4d6a;
+  --warn: #ffaa00;
+  --text: #e8eaed;
+  --dim: #8a90a0;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 20%, rgba(79,142,255,0.07) 0%, transparent 55%),
+              radial-gradient(ellipse at 20% 80%, rgba(124,92,252,0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 36px 32px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  position: relative;
+}
+
+/* Header */
+.app-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.app-icon {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 24px rgba(79,142,255,0.3);
+}
+h1 {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 22px; font-weight: 600;
+  margin-bottom: 6px;
+}
+.header-sub { font-size: 13px; color: var(--dim); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  background: var(--surface2);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+.tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--dim);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(79,142,255,0.4);
+}
+
+/* Input */
+.input-group { margin-bottom: 20px; }
+label {
+  display: block;
+  font-size: 12px;
+  color: var(--dim);
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+input[type=text] {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: 'Roboto', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input[type=text]:focus { border-color: var(--accent); }
+input[type=text]::placeholder { color: var(--dim); }
+
+/* Fingerprint button */
+.fp-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 28px 0 24px;
+}
+.fp-ring {
+  position: relative;
+  width: 160px; height: 160px;
+}
+.fp-ring::before, .fp-ring::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  opacity: 0;
+  transition: all 0.3s;
+}
+.fp-ring.scanning::before {
+  width: 190px; height: 190px;
+  border-color: rgba(79,142,255,0.3);
+  animation: expand 1.5s ease-out infinite;
+}
+.fp-ring.scanning::after {
+  width: 220px; height: 220px;
+  border-color: rgba(79,142,255,0.15);
+  animation: expand 1.5s ease-out 0.4s infinite;
+}
+@keyframes expand {
+  0% { transform: translate(-50%,-50%) scale(0.7); opacity: 0.8; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+}
+
+.fp-btn {
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+.fp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.fp-btn .btn-label {
+  font-size: 11px;
+  color: var(--dim);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Scan line inside button */
+.fp-btn::after {
+  content: '';
+  position: absolute;
+  width: 70%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  top: 20%;
+  opacity: 0;
+}
+.fp-btn.scanning::after {
+  animation: scanLine 1.5s ease-in-out infinite;
+  opacity: 1;
+}
+@keyframes scanLine {
+  0% { top: 15%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: 82%; opacity: 0; }
+}
+
+.fp-btn.scanning {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0 rgba(79,142,255,0.4), 0 8px 32px rgba(0,0,0,0.4);
+  animation: glowPulse 1.5s ease-in-out infinite alternate;
+}
+.fp-btn.success {
+  border-color: var(--success);
+  box-shadow: 0 0 30px rgba(0,214,143,0.4);
+}
+.fp-btn.error {
+  border-color: var(--error);
+  box-shadow: 0 0 30px rgba(255,77,106,0.4);
+  animation: shake 0.4s ease;
+}
+@keyframes glowPulse {
+  from { box-shadow: 0 0 10px rgba(79,142,255,0.3), 0 8px 32px rgba(0,0,0,0.4); }
+  to { box-shadow: 0 0 35px rgba(79,142,255,0.6), 0 8px 32px rgba(0,0,0,0.4); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* SVG icon */
+.fp-icon { width: 80px; height: 80px; }
+.fp-icon path {
+  fill: none;
+  stroke: var(--dim);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  transition: stroke 0.3s;
+}
+.scanning .fp-icon path { stroke: var(--accent); }
+.success .fp-icon path { stroke: var(--success); }
+.error .fp-icon path { stroke: var(--error); }
+
+/* Status */
+.status-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dim);
+  margin-top: 14px;
+  min-height: 20px;
+  transition: color 0.3s;
+  text-align: center;
+}
+.status-text.scanning { color: var(--accent); }
+.status-text.success { color: var(--success); }
+.status-text.error { color: var(--error); }
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 340px;
+  width: calc(100% - 40px);
+  text-align: center;
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  opacity: 0;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.success { border-color: var(--success); color: var(--success); }
+.toast.error { border-color: var(--error); color: var(--error); }
+.toast.info { border-color: var(--accent); color: var(--accent); }
+
+/* Logged-in state */
+.logged-in-card {
+  display: none;
+  text-align: center;
+}
+.logged-in-card.show { display: block; }
+.welcome-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  display: block;
+  animation: bounce 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bounce {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.welcome-name {
+  font-family: 'Google Sans', sans-serif;
+  font-size: 24px; font-weight: 600;
+  margin-bottom: 8px;
+}
+.welcome-sub { color: var(--dim); font-size: 14px; margin-bottom: 28px; }
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 16px rgba(79,142,255,0.3);
+}
+.btn-primary:hover { background: #6499ff; }
+.btn-ghost {
+  background: transparent;
+  color: var(--dim);
+  border: 1.5px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+.btn-danger {
+  background: transparent;
+  color: var(--error);
+  border: 1.5px solid rgba(255,77,106,0.3);
+}
+.btn-danger:hover { background: rgba(255,77,106,0.1); }
+
+/* Users list */
+.users-section {
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+.users-title {
+  font-size: 12px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.user-avatar {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; color: white;
+  flex-shrink: 0;
+}
+.user-info { flex: 1; }
+.user-name { font-weight: 500; }
+.user-fp { font-size: 12px; color: var(--dim); }
+
+/* Webauthn not supported */
+.not-supported {
+  text-align: center;
+  padding: 20px;
+  color: var(--warn);
+  font-size: 14px;
+  background: rgba(255,170,0,0.08);
+  border: 1px solid rgba(255,170,0,0.2);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<div class="card" id="mainCard">
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+        <path d="M12 2C9.243 2 7 4.243 7 7v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7c0-2.757-2.243-5-5-5z"/>
+        <circle cx="12" cy="16" r="1.5" fill="white"/>
+      </svg>
+    </div>
+    <h1>Fingerprint Auth</h1>
+    <p class="header-sub">Real biometric authentication</p>
+  </div>
+
+  <!-- WebAuthn not supported warning -->
+  <div class="not-supported" id="notSupported" style="display:none">
+    ⚠️ Is browser mein WebAuthn support nahi hai.<br>Chrome ya Firefox use karo.
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('register')">Register</button>
+    <button class="tab" onclick="switchTab('login')">Login</button>
+  </div>
+
+  <!-- Register Panel -->
+  <div id="registerPanel">
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="regUsername" placeholder="apna naam likho..." autocomplete="username">
+    </div>
+
+    <div class="fp-btn-wrap">
+      <div class="fp-ring" id="fpRingReg">
+        <button class="fp-btn" id="fpBtnReg" onclick="doRegister()">
+          <svg class="fp-icon" viewBox="0 0 100 100">
+            <path d="M50 15 C30 15 15 30 15 50"/>
+            <path d="M50 15 C70 15 85 30 85 50"/>
+            <path d="M25 68 C20 60 18 55 20 45 C22 35 30 26 42 22"/>
+            <path d="M75 68 C80 60 82 55 80 45 C78 35 70 26 58 22"/>
+            <path d="M35 72 C28 65 26 57 30 48 C34 39 42 33 50 33 C58 33 66 39 70 48 C74 57 72 65 65 72"/>
+            <path d="M42 76 C38 71 36 64 40 56 C43 49 50 45 57 47 C64 49 67 56 65 64 C63 70 58 74 52 75"/>
+            <path d="M50 78 C46 75 44 70 46 64 C48 58 53 55 58 57"/>
+            <path d="M30 80 C24 73 22 63 26 53"/>
+            <path d="M70 80 C76 73 78 63 74 53"/>
+          </svg>
+          <span class="btn-label">Register</span>
+        </button>
+      </div>
+      <div class="status-text" id="regStatus">Username likho, phir touch karo</div>
+    </div>
+  </div>
+
+  <!-- Login Panel -->
+  <div id="loginPanel" style="display:none">
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="loginUsername" placeholder="apna naam likho..." autocomplete="username">
+    </div>
+
+    <div class="fp-btn-wrap">
+      <div class="fp-ring" id="fpRingLogin">
+        <button class="fp-btn" id="fpBtnLogin" onclick="doLogin()">
+          <svg class="fp-icon" viewBox="0 0 100 100">
+            <path d="M50 15 C30 15 15 30 15 50"/>
+            <path d="M50 15 C70 15 85 30 85 50"/>
+            <path d="M25 68 C20 60 18 55 20 45 C22 35 30 26 42 22"/>
+            <path d="M75 68 C80 60 82 55 80 45 C78 35 70 26 58 22"/>
+            <path d="M35 72 C28 65 26 57 30 48 C34 39 42 33 50 33 C58 33 66 39 70 48 C74 57 72 65 65 72"/>
+            <path d="M42 76 C38 71 36 64 40 56 C43 49 50 45 57 47 C64 49 67 56 65 64 C63 70 58 74 52 75"/>
+            <path d="M50 78 C46 75 44 70 46 64 C48 58 53 55 58 57"/>
+            <path d="M30 80 C24 73 22 63 26 53"/>
+            <path d="M70 80 C76 73 78 63 74 53"/>
+          </svg>
+          <span class="btn-label">Verify</span>
+        </button>
+      </div>
+      <div class="status-text" id="loginStatus">Username likho, phir touch karo</div>
+    </div>
+  </div>
+
+  <!-- Registered users list -->
+  <div class="users-section" id="usersSection">
+    <div class="users-title">Registered Users</div>
+    <div id="usersList"></div>
+  </div>
+</div>
+
+<!-- Logged In Card -->
+<div class="card logged-in-card" id="loggedInCard">
+  <span class="welcome-icon">🎉</span>
+  <div class="welcome-name" id="welcomeName">Welcome!</div>
+  <div class="welcome-sub">Fingerprint successfully verified</div>
+  <button class="btn btn-ghost" onclick="goBack()">← Wapas jao</button>
+  <button class="btn btn-danger" onclick="doLogout()">Logout</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function base64ToBuffer(base64) {
+  const binary = atob(base64.replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from(binary, c => c.charCodeAt(0));
+}
+function bufferToBase64(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+function setScanState(btnId, ringId, statusId, state, msg) {
+  const btn = document.getElementById(btnId);
+  const ring = document.getElementById(ringId);
+  const status = document.getElementById(statusId);
+  btn.className = `fp-btn ${state}`;
+  ring.className = `fp-ring ${state}`;
+  status.className = `status-text ${state}`;
+  status.textContent = msg;
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='register') || (i===1 && tab==='login'));
+  });
+  document.getElementById('registerPanel').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('loginPanel').style.display = tab==='login' ? 'block' : 'none';
+}
+
+// ─── Check WebAuthn support ───────────────────────────────────────────────────
+if (!window.PublicKeyCredential) {
+  document.getElementById('notSupported').style.display = 'block';
+  document.querySelectorAll('.fp-btn').forEach(b => b.disabled = true);
+}
+
+// ─── Load registered users ────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const res = await fetch('/api/users');
+    const users = await res.json();
+    const list = document.getElementById('usersList');
+    if (users.length === 0) {
+      list.innerHTML = '<div style="color:var(--dim);font-size:13px;text-align:center;padding:8px">Abhi koi registered nahi hai</div>';
+      return;
+    }
+    list.innerHTML = users.map(u => `
+      <div class="user-item">
+        <div class="user-avatar">${u.username[0].toUpperCase()}</div>
+        <div class="user-info">
+          <div class="user-name">${u.username}</div>
+          <div class="user-fp">🔐 ${u.fingerprints} fingerprint${u.fingerprints!==1?'s':''} registered</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {}
+}
+loadUsers();
+
+// ─── Check if already logged in ──────────────────────────────────────────────
+async function checkStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if (data.loggedIn) showLoggedIn(data.username);
+  } catch(e) {}
+}
+checkStatus();
+
+// ─── Register ─────────────────────────────────────────────────────────────────
+async function doRegister() {
+  const username = document.getElementById('regUsername').value.trim();
+  if (!username) { showToast('Pehle username likho!', 'error'); return; }
+
+  setScanState('fpBtnReg', 'fpRingReg', 'regStatus', 'scanning', 'Fingerprint sensor pe rakh...');
+
+  try {
+    // Step 1: Get options from server
+    const startRes = await fetch('/api/register/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username })
+    });
+    const { options, error } = await startRes.json();
+    if (error) throw new Error(error);
+
+    // Step 2: Create credential (triggers fingerprint prompt on phone)
+    options.challenge = base64ToBuffer(options.challenge);
+    options.user.id = base64ToBuffer(
+      typeof options.user.id === 'string' ? options.user.id : bufferToBase64(options.user.id)
+    );
+    if (options.excludeCredentials) {
+      options.excludeCredentials = options.excludeCredentials.map(c => ({
+        ...c, id: base64ToBuffer(c.id)
+      }));
+    }
+
+    const credential = await navigator.credentials.create({ publicKey: options });
+
+    setScanState('fpBtnReg', 'fpRingReg', 'regStatus', 'scanning', 'Verify ho raha hai...');
+
+    // Step 3: Send to server
+    const credentialJSON = {
+      id: credential.id,
+      rawId: bufferToBase64(credential.rawId),
+      response: {
+        clientDataJSON: bufferToBase64(credential.response.clientDataJSON),
+        attestationObject: bufferToBase64(credential.response.attestationObject),
+      },
+      type: credential.type,
+    };
+
+    const finishRes = await fetch('/api/register/finish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ response: credentialJSON })
+    });
+    const result = await finishRes.json();
+    if (result.error) throw new Error(result.error);
+
+    setScanState('fpBtnReg', 'fpRingReg', 'regStatus', 'success', '✓ Registered!');
+    showToast(result.message, 'success');
+    loadUsers();
+    setTimeout(() => {
+      showLoggedIn(username);
+    }, 1500);
+
+  } catch(err) {
+    setScanState('fpBtnReg', 'fpRingReg', 'regStatus', 'error', 'Failed — dobara try karo');
+    showToast(err.message || 'Registration failed', 'error');
+    console.error(err);
+    setTimeout(() => {
+      setScanState('fpBtnReg', 'fpRingReg', 'regStatus', '', 'Username likho, phir touch karo');
+    }, 2000);
+  }
+}
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
+  if (!username) { showToast('Pehle username likho!', 'error'); return; }
+
+  setScanState('fpBtnLogin', 'fpRingLogin', 'loginStatus', 'scanning', 'Fingerprint sensor pe rakh...');
+
+  try {
+    // Step 1: Get challenge
+    const startRes = await fetch('/api/login/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username })
+    });
+    const { options, error } = await startRes.json();
+    if (error) throw new Error(error);
+
+    // Step 2: Get assertion (fingerprint verification)
+    options.challenge = base64ToBuffer(options.challenge);
+    // allowCredentials empty ho sakta hai Android Chrome ke liye
+    // allowCredentials empty ho sakta hai Android Chrome ke liye
+    if (options.allowCredentials && options.allowCredentials.length > 0) {
+      options.allowCredentials = options.allowCredentials.map(c => ({
+        ...c, id: base64ToBuffer(c.id)
+      }));
+    } else {
+      options.allowCredentials = [];
+    }
+
+    const assertion = await navigator.credentials.get({ publicKey: options });
+
+    setScanState('fpBtnLogin', 'fpRingLogin', 'loginStatus', 'scanning', 'Server verify kar raha hai...');
+
+    // Step 3: Verify on server
+    const assertionJSON = {
+      id: assertion.id,
+      rawId: bufferToBase64(assertion.rawId),
+      response: {
+        clientDataJSON: bufferToBase64(assertion.response.clientDataJSON),
+        authenticatorData: bufferToBase64(assertion.response.authenticatorData),
+        signature: bufferToBase64(assertion.response.signature),
+        userHandle: assertion.response.userHandle ? bufferToBase64(assertion.response.userHandle) : null,
+      },
+      type: assertion.type,
+    };
+
+    const finishRes = await fetch('/api/login/finish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ response: assertionJSON })
+    });
+    const result = await finishRes.json();
+    if (result.error) throw new Error(result.error);
+
+    setScanState('fpBtnLogin', 'fpRingLogin', 'loginStatus', 'success', '✓ Verified!');
+    showToast(result.message, 'success');
+    setTimeout(() => showLoggedIn(username), 1000);
+
+  } catch(err) {
+    setScanState('fpBtnLogin', 'fpRingLogin', 'loginStatus', 'error', 'Match nahi hua!');
+    showToast(err.message || 'Login failed', 'error');
+    console.error(err);
+    setTimeout(() => {
+      setScanState('fpBtnLogin', 'fpRingLogin', 'loginStatus', '', 'Username likho, phir touch karo');
+    }, 2000);
+  }
+}
+
+// ─── UI states ────────────────────────────────────────────────────────────────
+function showLoggedIn(username) {
+  document.getElementById('mainCard').style.display = 'none';
+  document.getElementById('loggedInCard').classList.add('show');
+  document.getElementById('welcomeName').textContent = `Welcome, ${username}! 👋`;
+}
+
+function goBack() {
+  document.getElementById('mainCard').style.display = 'block';
+  document.getElementById('loggedInCard').classList.remove('show');
+}
+
+async function doLogout() {
+  await fetch('/api/logout', { method: 'POST' });
+  goBack();
+  showToast('Logout ho gaye', 'info');
+}
+</script>
+</body>
+</html>
+
+              
