@@ -100,7 +100,7 @@ function applyTheme() {
 // ════════════════════════════
 //  AUTH
 // ════════════════════════════
-// Safety fallback — 6 sec ke baad bhi loading screen hai toh auth screen dikhao
+// Safety fallback — 12 sec ke baad bhi loading screen hai toh auth screen dikhao
 const loadingFallback = setTimeout(() => {
     const ls = document.getElementById('loading-screen');
     if (ls && !ls.classList.contains('hidden')) {
@@ -108,7 +108,7 @@ const loadingFallback = setTimeout(() => {
         show('auth-screen');
         window.showToast('Connection slow hai, phir try karo 🌐', 'error');
     }
-}, 6000);
+}, 12000);
 
 onAuthStateChanged(auth, user => {
     clearTimeout(loadingFallback);
