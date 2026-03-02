@@ -1,6 +1,6 @@
 {
   "name": "Money Manager v3.0",
-  "short_name": "MoneyMgr",
+  "short_name": "MoneyManager",
   "description": "Apna hisaab, apne haath mein — Personal finance tracker with wallets, analytics & more.",
   "start_url": "./index.html",
   "display": "standalone",
