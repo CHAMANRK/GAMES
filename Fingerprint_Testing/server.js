@@ -73,9 +73,9 @@ app.post('/api/register/start', async (req, res) => {
     userID: Buffer.from(user.id), userName: user.username,
     attestationType: 'none',
     authenticatorSelection: {
-      authenticatorAttachment: 'platform',
+      // authenticatorAttachment bilkul mat do — Chrome ko choose karne do
       userVerification: 'required',
-      residentKey: 'discouraged',
+      residentKey: 'preferred',
     },
     excludeCredentials: existing.map(c => ({ id: c.credential_id, type: 'public-key' })),
   });
@@ -99,7 +99,8 @@ app.post('/api/register/finish', async (req, res) => {
   try {
     const { verified, registrationInfo } = await verifyRegistrationResponse({
       response, expectedChallenge: ch.challenge,
-      expectedOrigin: ORIGIN, expectedRPID: RP_ID, requireUserVerification: true,
+      expectedOrigin: ORIGIN, expectedRPID: RP_ID,
+      requireUserVerification: true,
     });
     if (!verified || !registrationInfo) return res.status(400).json({ error: 'Verification fail' });
 
@@ -136,7 +137,6 @@ app.post('/api/login/start', async (req, res) => {
   const options = await generateAuthenticationOptions({
     rpID: RP_ID,
     userVerification: 'required',
-    // EMPTY — Chrome ko passkey dhundne ki zaroorat nahi, sirf fingerprint scan karo
     allowCredentials: [],
     timeout: 60000,
   });
@@ -160,10 +160,6 @@ app.post('/api/login/finish', async (req, res) => {
   const { rows: userCreds } = await pool.query('SELECT * FROM credentials WHERE user_id=$1', [ch.user_id]);
   if (!userCreds.length) return res.status(404).json({ error: 'Koi credential nahi' });
 
-  console.log('Response ID:', response?.id);
-  console.log('Stored IDs :', userCreds.map(c => c.credential_id));
-
-  // Saare credentials try karo
   for (const cred of userCreds) {
     try {
       const publicKey = new Uint8Array(Buffer.from(cred.public_key, 'base64'));
@@ -186,17 +182,15 @@ app.post('/api/login/finish', async (req, res) => {
         await pool.query('UPDATE credentials SET counter=$1 WHERE id=$2',
           [result.authenticationInfo.newCounter, cred.id]);
         const { rows: u } = await pool.query('SELECT username FROM users WHERE id=$1', [ch.user_id]);
-        console.log('✅ Login:', u[0].username);
         return res.json({ success: true, username: u[0].username, message: `Welcome back, ${u[0].username}! ✅` });
       }
     } catch (err) {
-      console.log('cred try failed:', err.message);
+      console.log('cred failed:', err.message);
     }
   }
-  res.status(400).json({ error: 'Fingerprint match nahi hua. Dobara try karo.' });
+  res.status(400).json({ error: 'Fingerprint match nahi hua.' });
 });
 
-// ── MISC ──────────────────────────────────────────────────────────────────────
 app.get('/api/users', async (req, res) => {
   const { rows } = await pool.query(`
     SELECT u.username, COUNT(c.id) as fingerprints
