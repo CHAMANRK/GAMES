@@ -1,6 +1,4 @@
 const express = require('express');
-const session = require('express-session');
-const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
 const { Pool } = require('pg');
 
@@ -14,26 +12,12 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Database ─────────────────────────────────────────────────────────────────
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
 async function initDB() {
-  // Session table
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS session (
-      sid VARCHAR NOT NULL COLLATE "default",
-      sess JSON NOT NULL,
-      expire TIMESTAMP(6) NOT NULL,
-      CONSTRAINT session_pkey PRIMARY KEY (sid)
-    )
-  `);
-  await pool.query(`
-    CREATE INDEX IF NOT EXISTS IDX_session_expire ON session(expire)
-  `);
-  // Users table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -41,18 +25,30 @@ async function initDB() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
-  // Credentials table
   await pool.query(`
     CREATE TABLE IF NOT EXISTS credentials (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL REFERENCES users(id),
       credential_id TEXT UNIQUE NOT NULL,
       public_key TEXT NOT NULL,
-      counter INTEGER DEFAULT 0,
+      counter INTEGER DEFAULT 0
+    )
+  `);
+  // Session ki jagah challenges DB mein store honge
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS challenges (
+      token TEXT PRIMARY KEY,
+      challenge TEXT NOT NULL,
+      user_id TEXT,
+      type TEXT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
-  console.log('✅ Database ready');
+  // Purane challenges clean karo (5 min se zyada purane)
+  await pool.query(`
+    DELETE FROM challenges WHERE created_at < NOW() - INTERVAL '5 minutes'
+  `).catch(() => {});
+  console.log('✅ DB ready');
 }
 
 function toBase64url(val) {
@@ -65,35 +61,16 @@ function toBase64url(val) {
 
 function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session — PostgreSQL mein store hoga (Vercel serverless ke liye zaroori)
-app.use(session({
-  store: new pgSession({
-    pool,
-    tableName: 'session',
-    createTableIfMissing: false,
-  }),
-  secret: process.env.SESSION_SECRET || 'fp-secret-2024',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true,
-    httpOnly: true,
-    maxAge: 10 * 60 * 1000, // 10 minutes — registration/login ke liye kaafi
-    sameSite: 'none',
-  }
-}));
-
 const RP_NAME = 'Fingerprint Auth';
-const RP_ID  = process.env.RP_ID  || 'localhost';
-const ORIGIN = process.env.ORIGIN || `http://localhost:${PORT}`;
+const RP_ID   = process.env.RP_ID   || 'localhost';
+const ORIGIN  = process.env.ORIGIN  || `http://localhost:${PORT}`;
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // REGISTER START
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 app.post('/api/register/start', async (req, res) => {
   const username = req.body.username?.trim().toLowerCase();
   if (!username) return res.status(400).json({ error: 'Username chahiye' });
@@ -122,32 +99,36 @@ app.post('/api/register/start', async (req, res) => {
     excludeCredentials: existingCreds.map(c => ({ id: c.credential_id, type: 'public-key' })),
   });
 
-  // Session mein save karo
-  req.session.regChallenge = options.challenge;
-  req.session.regUserId = user.id;
-  await new Promise((resolve, reject) =>
-    req.session.save(err => err ? reject(err) : resolve())
+  // Challenge DB mein save karo — token frontend ko bhejo
+  const token = uid() + uid();
+  await pool.query(
+    'INSERT INTO challenges(token, challenge, user_id, type) VALUES($1,$2,$3,$4)',
+    [token, options.challenge, user.id, 'register']
   );
 
-  res.json({ options });
+  res.json({ options, token });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // REGISTER FINISH
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 app.post('/api/register/finish', async (req, res) => {
-  const challenge = req.session.regChallenge;
-  const userId    = req.session.regUserId;
+  const { response, token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Token missing' });
 
-  console.log('reg/finish session:', req.session.id, '| challenge:', !!challenge, '| userId:', userId);
+  const { rows } = await pool.query(
+    'SELECT * FROM challenges WHERE token=$1 AND type=$2', [token, 'register']
+  );
+  const ch = rows[0];
+  if (!ch) return res.status(400).json({ error: 'Session expire ho gaya — dobara register karo' });
 
-  if (!challenge || !userId)
-    return res.status(400).json({ error: 'Session expire ho gaya — dobara register karo' });
+  // Challenge use ho gaya — delete karo
+  await pool.query('DELETE FROM challenges WHERE token=$1', [token]);
 
   try {
     const { verified, registrationInfo } = await verifyRegistrationResponse({
-      response: req.body.response,
-      expectedChallenge: challenge,
+      response,
+      expectedChallenge: ch.challenge,
       expectedOrigin: ORIGIN,
       expectedRPID: RP_ID,
       requireUserVerification: true,
@@ -162,33 +143,26 @@ app.post('/api/register/finish', async (req, res) => {
     const credentialId = toBase64url(rawId);
     const publicKey = Buffer.from(rawKey).toString('base64');
 
-    console.log('Saving credential_id:', credentialId);
+    console.log('✅ Saving credential:', credentialId);
 
     await pool.query(
       `INSERT INTO credentials(id,user_id,credential_id,public_key,counter)
        VALUES($1,$2,$3,$4,$5)
        ON CONFLICT(credential_id) DO UPDATE SET public_key=$4, counter=$5`,
-      [uid(), userId, credentialId, publicKey, counter]
+      [uid(), ch.user_id, credentialId, publicKey, counter]
     );
 
-    delete req.session.regChallenge;
-    delete req.session.regUserId;
-    req.session.loggedIn = userId;
-    await new Promise((resolve, reject) =>
-      req.session.save(err => err ? reject(err) : resolve())
-    );
-
-    const { rows } = await pool.query('SELECT username FROM users WHERE id=$1', [userId]);
-    res.json({ success: true, message: `${rows[0].username} registered! 🎉` });
+    const { rows: u } = await pool.query('SELECT username FROM users WHERE id=$1', [ch.user_id]);
+    res.json({ success: true, message: `${u[0].username} registered! 🎉` });
   } catch (err) {
     console.error('Reg finish error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // LOGIN START
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 app.post('/api/login/start', async (req, res) => {
   const username = req.body.username?.trim().toLowerCase();
   if (!username) return res.status(400).json({ error: 'Username chahiye' });
@@ -212,33 +186,36 @@ app.post('/api/login/start', async (req, res) => {
     timeout: 60000,
   });
 
-  req.session.authChallenge = options.challenge;
-  req.session.authUserId = users[0].id;
-  await new Promise((resolve, reject) =>
-    req.session.save(err => err ? reject(err) : resolve())
+  const token = uid() + uid();
+  await pool.query(
+    'INSERT INTO challenges(token, challenge, user_id, type) VALUES($1,$2,$3,$4)',
+    [token, options.challenge, users[0].id, 'login']
   );
 
-  res.json({ options });
+  res.json({ options, token });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // LOGIN FINISH
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 app.post('/api/login/finish', async (req, res) => {
-  const challenge = req.session.authChallenge;
-  const userId    = req.session.authUserId;
+  const { response, token } = req.body;
+  if (!token) return res.status(400).json({ error: 'Token missing' });
 
-  console.log('login/finish session:', req.session.id, '| challenge:', !!challenge, '| userId:', userId);
+  const { rows } = await pool.query(
+    'SELECT * FROM challenges WHERE token=$1 AND type=$2', [token, 'login']
+  );
+  const ch = rows[0];
+  if (!ch) return res.status(400).json({ error: 'Session expire ho gaya — dobara try karo' });
 
-  if (!challenge || !userId)
-    return res.status(400).json({ error: 'Session expire ho gaya — dobara try karo' });
+  await pool.query('DELETE FROM challenges WHERE token=$1', [token]);
 
   const { rows: userCreds } = await pool.query(
-    'SELECT * FROM credentials WHERE user_id=$1', [userId]
+    'SELECT * FROM credentials WHERE user_id=$1', [ch.user_id]
   );
   if (!userCreds.length) return res.status(404).json({ error: 'Koi credential nahi' });
 
-  console.log('Response ID:', req.body.response?.id);
+  console.log('Response ID:', response?.id);
   console.log('Stored IDs :', userCreds.map(c => c.credential_id));
 
   for (const cred of userCreds) {
@@ -248,8 +225,8 @@ app.post('/api/login/finish', async (req, res) => {
       const credId    = toBase64url(cred.credential_id);
 
       const result = await verifyAuthenticationResponse({
-        response: req.body.response,
-        expectedChallenge: challenge,
+        response,
+        expectedChallenge: ch.challenge,
         expectedOrigin: ORIGIN,
         expectedRPID: RP_ID,
         requireUserVerification: true,
@@ -264,17 +241,9 @@ app.post('/api/login/finish', async (req, res) => {
       if (result.verified) {
         await pool.query('UPDATE credentials SET counter=$1 WHERE id=$2',
           [result.authenticationInfo.newCounter, cred.id]);
-
-        delete req.session.authChallenge;
-        delete req.session.authUserId;
-        req.session.loggedIn = userId;
-        await new Promise((resolve, reject) =>
-          req.session.save(err => err ? reject(err) : resolve())
-        );
-
-        const { rows } = await pool.query('SELECT username FROM users WHERE id=$1', [userId]);
-        console.log('✅ Login success:', rows[0].username);
-        return res.json({ success: true, message: `Welcome back, ${rows[0].username}! ✅` });
+        const { rows: u } = await pool.query('SELECT username FROM users WHERE id=$1', [ch.user_id]);
+        console.log('✅ Login success:', u[0].username);
+        return res.json({ success: true, username: u[0].username, message: `Welcome back, ${u[0].username}! ✅` });
       }
     } catch (err) {
       console.log('Cred failed:', err.message);
@@ -283,19 +252,7 @@ app.post('/api/login/finish', async (req, res) => {
   res.status(400).json({ error: 'Fingerprint match nahi hua. Dobara try karo.' });
 });
 
-// ─── Misc ─────────────────────────────────────────────────────────────────────
-app.get('/api/status', async (req, res) => {
-  if (req.session.loggedIn) {
-    const { rows: u } = await pool.query('SELECT username FROM users WHERE id=$1', [req.session.loggedIn]);
-    const { rows: c } = await pool.query('SELECT COUNT(*) as n FROM credentials WHERE user_id=$1', [req.session.loggedIn]);
-    res.json({ loggedIn: true, username: u[0]?.username, fingerprintsRegistered: Number(c[0]?.n) || 0 });
-  } else {
-    res.json({ loggedIn: false });
-  }
-});
-
-app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ success: true }); });
-
+// ─── Misc ──────────────────────────────────────────────────────────────────
 app.get('/api/users', async (req, res) => {
   const { rows } = await pool.query(`
     SELECT u.username, COUNT(c.id) as fingerprints
@@ -305,10 +262,13 @@ app.get('/api/users', async (req, res) => {
   res.json(rows);
 });
 
-// ─── Start ────────────────────────────────────────────────────────────────────
+app.get('/api/status', (req, res) => res.json({ loggedIn: false }));
+app.post('/api/logout', (req, res) => res.json({ success: true }));
+
 initDB().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 http://localhost:${PORT}`);
     console.log(`RP_ID: ${RP_ID} | ORIGIN: ${ORIGIN}\n`);
   });
 });
+                     
