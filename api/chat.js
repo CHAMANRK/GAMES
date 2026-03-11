@@ -1,15 +1,11 @@
 export const config = { runtime: 'edge' };
 
-// Model chain — tries in order until one  works
 const MODELS = [
-  'google/gemini-2.0-flash-exp:free',      // Best quality, fast
-  'deepseek/deepseek-r1:free',              // Strong reasoning fallback
-  'deepseek/deepseek-chat:free',            // Lighter deepseek
-  'meta-llama/llama-3.3-70b-instruct:free', // Last resort
+  'google/gemini-2.0-flash-exp:free',
+  'deepseek/deepseek-r1:free',
+  'deepseek/deepseek-chat:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
 ];
-
-// Groq as final fallback if OpenRouter all fail
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
@@ -30,6 +26,14 @@ export default async function handler(req) {
     });
   }
 
+  const OR_KEY = process.env.OPENROUTER_API_KEY;
+  if (!OR_KEY) {
+    return new Response(JSON.stringify({ error: 'OPENROUTER_API_KEY not set in Vercel env' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+
   try {
     const body = await req.json();
     const messages = [
@@ -37,57 +41,20 @@ export default async function handler(req) {
       ...body.messages
     ];
 
-    const OR_KEY = process.env.OPENROUTER_API_KEY;
-    const GROQ_KEY = process.env.GROQ_API_KEY;
-    const errors = [];
     let successResponse = null;
+    const errors = [];
 
-    // ── Try OpenRouter models ──
-    if (OR_KEY) {
-      for (const model of MODELS) {
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OR_KEY}`,
-            'HTTP-Referer': 'https://chaman.vercel.app',
-            'X-Title': 'Chaman AI',
-          },
-          body: JSON.stringify({
-            model,
-            messages,
-            max_tokens: body.max_tokens || 1000,
-            stream: true,
-            temperature: 0.85,
-          }),
-        });
-
-        if (res.status === 429 || res.status === 503) {
-          errors.push(`OR/${model.split('/')[1]}: busy`);
-          await new Promise(r => setTimeout(r, 600));
-          continue;
-        }
-        if (!res.ok) {
-          const e = await res.text();
-          errors.push(`OR/${model.split('/')[1]}: ${e.slice(0,60)}`);
-          continue;
-        }
-
-        successResponse = res;
-        break;
-      }
-    }
-
-    // ── Fallback: Groq ──
-    if (!successResponse && GROQ_KEY) {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    for (const model of MODELS) {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_KEY}`,
+          'Authorization': `Bearer ${OR_KEY}`,
+          'HTTP-Referer': 'https://chaman.vercel.app',
+          'X-Title': 'Chaman AI',
         },
         body: JSON.stringify({
-          model: GROQ_MODEL,
+          model,
           messages,
           max_tokens: body.max_tokens || 1000,
           stream: true,
@@ -95,11 +62,19 @@ export default async function handler(req) {
         }),
       });
 
-      if (res.ok) {
-        successResponse = res;
-      } else {
-        errors.push(`Groq: ${res.status}`);
+      if (res.status === 429 || res.status === 503) {
+        errors.push(`${model.split('/')[1]}: busy`);
+        await new Promise(r => setTimeout(r, 600));
+        continue;
       }
+      if (!res.ok) {
+        const e = await res.text();
+        errors.push(`${model.split('/')[1]}: ${e.slice(0, 60)}`);
+        continue;
+      }
+
+      successResponse = res;
+      break;
     }
 
     if (!successResponse) {
@@ -111,7 +86,7 @@ export default async function handler(req) {
       });
     }
 
-    // ── Stream: OpenAI SSE → Anthropic SSE ──
+    // OpenAI SSE → Anthropic SSE
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
