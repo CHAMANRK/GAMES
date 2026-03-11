@@ -30,7 +30,6 @@ export default async function handler(req) {
   try {
     const body = await req.json();
 
-    // Groq uses OpenAI-compatible API — direct passthrough, just change model
     const groqBody = {
       model: 'llama-3.3-70b-versatile',
       messages: [
@@ -42,24 +41,45 @@ export default async function handler(req) {
       temperature: 0.8,
     };
 
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-      },
-      body: JSON.stringify(groqBody),
-    });
-
-    if (!response.ok) {
-      const err = await response.text();
-      return new Response(err, {
-        status: response.status,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    // Retry up to 2 times on 429
+    let response;
+    for (let attempt = 0; attempt <= 2; attempt++) {
+      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+        },
+        body: JSON.stringify(groqBody),
       });
+
+      if (response.status === 429) {
+        if (attempt < 2) {
+          // Wait 2s then retry
+          await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+          continue;
+        }
+        // After retries, return friendly error
+        return new Response(JSON.stringify({
+          error: 'Rate limit reached. Thodi der baad try karo (Groq free tier limit).'
+        }), {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+      }
+
+      if (!response.ok) {
+        const err = await response.text();
+        return new Response(err, {
+          status: response.status,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+      }
+
+      break; // success
     }
 
-    // Convert OpenAI SSE format → Anthropic SSE format (what HTML expects)
+    // Convert OpenAI SSE → Anthropic SSE
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
@@ -115,4 +135,4 @@ export default async function handler(req) {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
-                                                  }
+}
