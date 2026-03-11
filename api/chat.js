@@ -1,5 +1,31 @@
 export const config = { runtime: 'edge' };
 
+// Provider configs
+const PROVIDERS = [
+  {
+    name: 'OpenRouter',
+    envKey: 'OPENROUTER_API_KEY',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    model: 'meta-llama/llama-3.3-70b-instruct:free',
+    extraHeaders: {
+      'HTTP-Referer': 'https://chaman.vercel.app',
+      'X-Title': 'Chaman AI',
+    },
+    fallbackModels: [
+      'meta-llama/llama-3.1-8b-instruct:free',
+      'mistralai/mistral-7b-instruct:free',
+    ]
+  },
+  {
+    name: 'Groq',
+    envKey: 'GROQ_API_KEY',
+    url: 'https://api.groq.com/openai/v1/chat/completions',
+    model: 'llama-3.3-70b-versatile',
+    extraHeaders: {},
+    fallbackModels: ['llama-3.1-8b-instant']
+  },
+];
+
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -19,74 +45,79 @@ export default async function handler(req) {
     });
   }
 
-  const GROQ_API_KEY = process.env.GROQ_API_KEY;
-  if (!GROQ_API_KEY) {
-    return new Response(JSON.stringify({ error: 'API key not configured' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
-  }
-
   try {
     const body = await req.json();
+    const messages = [
+      ...(body.system ? [{ role: 'system', content: body.system }] : []),
+      ...body.messages
+    ];
 
-    const groqBody = {
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        ...(body.system ? [{ role: 'system', content: body.system }] : []),
-        ...body.messages
-      ],
-      max_tokens: body.max_tokens || 1000,
-      stream: true,
-      temperature: 0.8,
-    };
+    let successResponse = null;
+    const errors = [];
 
-    // Retry up to 2 times on 429
-    let response;
-    for (let attempt = 0; attempt <= 2; attempt++) {
-      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-        },
-        body: JSON.stringify(groqBody),
-      });
+    // Try each provider, then its fallback models
+    for (const provider of PROVIDERS) {
+      const apiKey = process.env[provider.envKey];
+      if (!apiKey) {
+        errors.push(`${provider.name}: API key not set`);
+        continue;
+      }
 
-      if (response.status === 429) {
-        if (attempt < 2) {
-          // Wait 2s then retry
-          await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+      const modelsToTry = [provider.model, ...provider.fallbackModels];
+
+      for (const model of modelsToTry) {
+        const res = await fetch(provider.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            ...provider.extraHeaders,
+          },
+          body: JSON.stringify({
+            model,
+            messages,
+            max_tokens: body.max_tokens || 1000,
+            stream: true,
+            temperature: 0.8,
+          }),
+        });
+
+        if (res.status === 429) {
+          errors.push(`${provider.name}/${model}: rate limited`);
+          await new Promise(r => setTimeout(r, 800));
           continue;
         }
-        // After retries, return friendly error
-        return new Response(JSON.stringify({
-          error: 'Rate limit reached. Thodi der baad try karo (Groq free tier limit).'
-        }), {
-          status: 429,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          errors.push(`${provider.name}/${model}: ${err.slice(0, 80)}`);
+          continue;
+        }
+
+        successResponse = res;
+        break;
       }
 
-      if (!response.ok) {
-        const err = await response.text();
-        return new Response(err, {
-          status: response.status,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-        });
-      }
-
-      break; // success
+      if (successResponse) break;
     }
 
-    // Convert OpenAI SSE → Anthropic SSE
+    if (!successResponse) {
+      return new Response(JSON.stringify({
+        error: `Dono providers busy hain! Thodi der baad try karo.\nDetails: ${errors.join(' | ')}`
+      }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    // Convert OpenAI SSE → Anthropic SSE (what HTML expects)
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
     (async () => {
-      const reader = response.body.getReader();
+      const reader = successResponse.body.getReader();
       let buffer = '';
       try {
         while (true) {
