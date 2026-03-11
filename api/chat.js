@@ -1,28 +1,6 @@
 export const config = { runtime: 'edge' };
 
-// Converts Anthropic-format messages to Gemini format
-function toGeminiMessages(messages) {
-  return messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }]
-  }));
-}
-
-// Converts a Gemini SSE chunk to Anthropic SSE format
-function toAnthropicChunk(geminiChunk) {
-  try {
-    const j = JSON.parse(geminiChunk);
-    const text = j?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return null;
-    return JSON.stringify({
-      type: 'content_block_delta',
-      delta: { type: 'text_delta', text }
-    });
-  } catch { return null; }
-}
-
 export default async function handler(req) {
-  // CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -41,53 +19,54 @@ export default async function handler(req) {
     });
   }
 
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  if (!GEMINI_API_KEY) {
-    return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not set in environment' }), {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  if (!GROQ_API_KEY) {
+    return new Response(JSON.stringify({ error: 'API key not configured' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
 
   try {
-    // Parse incoming Anthropic-format body from HTML
     const body = await req.json();
-    const { system, messages, max_tokens } = body;
 
-    // Build Gemini request
-    const geminiBody = {
-      systemInstruction: system ? { parts: [{ text: system }] } : undefined,
-      contents: toGeminiMessages(messages),
-      generationConfig: {
-        maxOutputTokens: max_tokens || 1000,
-        temperature: 0.8,
-      }
+    // Groq uses OpenAI-compatible API — direct passthrough, just change model
+    const groqBody = {
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        ...(body.system ? [{ role: 'system', content: body.system }] : []),
+        ...body.messages
+      ],
+      max_tokens: body.max_tokens || 1000,
+      stream: true,
+      temperature: 0.8,
     };
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
-
-    const geminiRes = await fetch(url, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiBody),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify(groqBody),
     });
 
-    if (!geminiRes.ok) {
-      const err = await geminiRes.text();
+    if (!response.ok) {
+      const err = await response.text();
       return new Response(err, {
-        status: geminiRes.status,
+        status: response.status,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
 
-    // Transform Gemini SSE stream → Anthropic SSE stream
+    // Convert OpenAI SSE format → Anthropic SSE format (what HTML expects)
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
     (async () => {
-      const reader = geminiRes.body.getReader();
+      const reader = response.body.getReader();
       let buffer = '';
       try {
         while (true) {
@@ -95,19 +74,26 @@ export default async function handler(req) {
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split('\n');
-          buffer = lines.pop(); // keep incomplete line in buffer
+          buffer = lines.pop();
           for (const line of lines) {
             if (!line.startsWith('data: ')) continue;
             const data = line.slice(6).trim();
             if (!data || data === '[DONE]') continue;
-            const converted = toAnthropicChunk(data);
-            if (converted) {
-              await writer.write(encoder.encode(`data: ${converted}\n\n`));
-            }
+            try {
+              const j = JSON.parse(data);
+              const text = j?.choices?.[0]?.delta?.content;
+              if (text) {
+                const converted = JSON.stringify({
+                  type: 'content_block_delta',
+                  delta: { type: 'text_delta', text }
+                });
+                await writer.write(encoder.encode(`data: ${converted}\n\n`));
+              }
+            } catch (_) {}
           }
         }
         await writer.write(encoder.encode('data: [DONE]\n\n'));
-      } catch(e) {
+      } catch (e) {
         // stream ended
       } finally {
         await writer.close();
@@ -129,4 +115,4 @@ export default async function handler(req) {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
-}
+                                                  }
