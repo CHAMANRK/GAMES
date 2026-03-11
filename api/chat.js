@@ -1,6 +1,6 @@
 export const config = { runtime: 'edge' };
 
-// Model chain — tries in order until one works
+// Model chain — tries in order until one  works
 const MODELS = [
   'google/gemini-2.0-flash-exp:free',      // Best quality, fast
   'deepseek/deepseek-r1:free',              // Strong reasoning fallback
