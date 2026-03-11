@@ -5,7 +5,13 @@ export default async function handler(req) {
     return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } });
   }
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+    const CF_ID=process.env.CF_ACCOUNT_ID, CF_TOKEN=process.env.CF_API_TOKEN;
+    return new Response(JSON.stringify({
+      status:'imggen online',
+      CF_ID_set:!!CF_ID, CF_ID_len:CF_ID?.length,
+      CF_TOKEN_set:!!CF_TOKEN, CF_TOKEN_len:CF_TOKEN?.length,
+      CF_TOKEN_prefix:CF_TOKEN?.slice(0,8),
+    }), { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
   }
 
   const CF_ID    = process.env.CF_ACCOUNT_ID;
