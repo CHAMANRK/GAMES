@@ -22,8 +22,15 @@ export default async function handler(req) {
   const CF_ID    = process.env.CF_ACCOUNT_ID;
   const CF_TOKEN = process.env.CF_API_TOKEN;
 
+  // Debug — return env status (remove after fixing)
   if (!CF_ID || !CF_TOKEN) {
-    return new Response(JSON.stringify({ error: 'Cloudflare keys not configured' }), {
+    return new Response(JSON.stringify({
+      error: 'Missing env vars',
+      CF_ID_set: !!CF_ID,
+      CF_TOKEN_set: !!CF_TOKEN,
+      CF_ID_length: CF_ID?.length || 0,
+      CF_TOKEN_length: CF_TOKEN?.length || 0,
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
@@ -31,43 +38,48 @@ export default async function handler(req) {
 
   try {
     const { prompt } = await req.json();
-    if (!prompt) {
-      return new Response(JSON.stringify({ error: 'Prompt required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-      });
-    }
 
-    const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${CF_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${CF_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt, num_steps: 4 }),
-      }
-    );
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CF_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt: prompt || 'a cat', num_steps: 4 }),
+    });
+
+    const rawText = await res.text();
 
     if (!res.ok) {
-      const err = await res.text();
-      return new Response(JSON.stringify({ error: 'Cloudflare error: ' + err.slice(0, 100) }), {
+      return new Response(JSON.stringify({
+        error: 'CF API error',
+        status: res.status,
+        url_used: url.replace(CF_ID, 'CF_ID_HIDDEN'),
+        response: rawText.slice(0, 300),
+      }), {
         status: res.status,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
 
-    // Cloudflare returns raw image bytes
-    const imgBuffer = await res.arrayBuffer();
+    // Success — rawText is binary, re-fetch as arrayBuffer
+    const res2 = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CF_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt: prompt || 'a cat', num_steps: 4 }),
+    });
+
+    const imgBuffer = await res2.arrayBuffer();
     const b64 = btoa(String.fromCharCode(...new Uint8Array(imgBuffer)));
 
     return new Response(JSON.stringify({ image: b64 }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
 
   } catch (e) {
