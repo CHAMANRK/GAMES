@@ -1,30 +1,15 @@
 export const config = { runtime: 'edge' };
 
-// Provider configs
-const PROVIDERS = [
-  {
-    name: 'OpenRouter',
-    envKey: 'OPENROUTER_API_KEY',
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    model: 'meta-llama/llama-3.3-70b-instruct:free',
-    extraHeaders: {
-      'HTTP-Referer': 'https://chaman.vercel.app',
-      'X-Title': 'Chaman AI',
-    },
-    fallbackModels: [
-      'meta-llama/llama-3.1-8b-instruct:free',
-      'mistralai/mistral-7b-instruct:free',
-    ]
-  },
-  {
-    name: 'Groq',
-    envKey: 'GROQ_API_KEY',
-    url: 'https://api.groq.com/openai/v1/chat/completions',
-    model: 'llama-3.3-70b-versatile',
-    extraHeaders: {},
-    fallbackModels: ['llama-3.1-8b-instant']
-  },
+// Model chain — tries in order until one works
+const MODELS = [
+  'google/gemini-2.0-flash-exp:free',      // Best quality, fast
+  'deepseek/deepseek-r1:free',              // Strong reasoning fallback
+  'deepseek/deepseek-chat:free',            // Lighter deepseek
+  'meta-llama/llama-3.3-70b-instruct:free', // Last resort
 ];
+
+// Groq as final fallback if OpenRouter all fail
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
@@ -52,65 +37,81 @@ export default async function handler(req) {
       ...body.messages
     ];
 
-    let successResponse = null;
+    const OR_KEY = process.env.OPENROUTER_API_KEY;
+    const GROQ_KEY = process.env.GROQ_API_KEY;
     const errors = [];
+    let successResponse = null;
 
-    // Try each provider, then its fallback models
-    for (const provider of PROVIDERS) {
-      const apiKey = process.env[provider.envKey];
-      if (!apiKey) {
-        errors.push(`${provider.name}: API key not set`);
-        continue;
-      }
-
-      const modelsToTry = [provider.model, ...provider.fallbackModels];
-
-      for (const model of modelsToTry) {
-        const res = await fetch(provider.url, {
+    // ── Try OpenRouter models ──
+    if (OR_KEY) {
+      for (const model of MODELS) {
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            ...provider.extraHeaders,
+            'Authorization': `Bearer ${OR_KEY}`,
+            'HTTP-Referer': 'https://chaman.vercel.app',
+            'X-Title': 'Chaman AI',
           },
           body: JSON.stringify({
             model,
             messages,
             max_tokens: body.max_tokens || 1000,
             stream: true,
-            temperature: 0.8,
+            temperature: 0.85,
           }),
         });
 
-        if (res.status === 429) {
-          errors.push(`${provider.name}/${model}: rate limited`);
-          await new Promise(r => setTimeout(r, 800));
+        if (res.status === 429 || res.status === 503) {
+          errors.push(`OR/${model.split('/')[1]}: busy`);
+          await new Promise(r => setTimeout(r, 600));
           continue;
         }
-
         if (!res.ok) {
-          const err = await res.text();
-          errors.push(`${provider.name}/${model}: ${err.slice(0, 80)}`);
+          const e = await res.text();
+          errors.push(`OR/${model.split('/')[1]}: ${e.slice(0,60)}`);
           continue;
         }
 
         successResponse = res;
         break;
       }
+    }
 
-      if (successResponse) break;
+    // ── Fallback: Groq ──
+    if (!successResponse && GROQ_KEY) {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_KEY}`,
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages,
+          max_tokens: body.max_tokens || 1000,
+          stream: true,
+          temperature: 0.85,
+        }),
+      });
+
+      if (res.ok) {
+        successResponse = res;
+      } else {
+        errors.push(`Groq: ${res.status}`);
+      }
     }
 
     if (!successResponse) {
       return new Response(JSON.stringify({
-        error: `Dono providers busy hain! Thodi der baad try karo.\nDetails: ${errors.join(' | ')}`
+        error: `Sab models busy hain. Thodi der baad try karo.\n(${errors.join(' | ')})`
       }), {
         status: 429,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
 
-    // Convert OpenAI SSE → Anthropic SSE (what HTML expects)
+    // ── Stream: OpenAI SSE → Anthropic SSE ──
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
