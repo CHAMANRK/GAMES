@@ -119,8 +119,8 @@ export default async function handler(req) {
         extraHeaders: { 'HTTP-Referer': 'https://chaman.vercel.app', 'X-Title': 'Chaman AI' },
         body: hasImage ? {
           // Vision model for images
-          model: 'google/gemini-2.0-flash-exp:free',
-          models: ['google/gemini-2.0-flash-exp:free', 'meta-llama/llama-3.2-11b-vision-instruct:free', 'qwen/qwen2.5-vl-7b-instruct:free'],
+          model: 'meta-llama/llama-3.2-11b-vision-instruct:free',
+          models: ['meta-llama/llama-3.2-11b-vision-instruct:free', 'google/gemini-2.0-flash-exp:free', 'openrouter/free'],
           route: 'fallback',
           messages, max_tokens: body.max_tokens || 1000, stream: true, temperature: 0.85
         } : {
@@ -227,3 +227,4 @@ function streamResponse(res, modelName) {
     }
   });
 }
+  
