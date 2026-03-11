@@ -1,10 +1,15 @@
 export const config = { runtime: 'edge' };
 
+// Updated model list — more stable free models
 const MODELS = [
-  'google/gemini-2.0-flash-exp:free',
-  'deepseek/deepseek-r1:free',
-  'deepseek/deepseek-chat:free',
+  'google/gemini-2.0-flash-thinking-exp:free',
+  'google/gemini-flash-1-5:free',
+  'mistralai/mistral-small-3.1-24b-instruct:free',
+  'qwen/qwen3-8b:free',
+  'qwen/qwen2.5-vl-7b-instruct:free',
   'meta-llama/llama-3.3-70b-instruct:free',
+  'microsoft/mai-ds-r1:free',
+  'tngtech/deepseek-r1t-chimera:free',
 ];
 
 export default async function handler(req) {
@@ -64,22 +69,25 @@ export default async function handler(req) {
 
       if (res.status === 429 || res.status === 503) {
         errors.push(`${model.split('/')[1]}: busy`);
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 400));
         continue;
       }
       if (!res.ok) {
-        const e = await res.text();
-        errors.push(`${model.split('/')[1]}: ${e.slice(0, 60)}`);
+        let e = '';
+        try { const j = await res.json(); e = j?.error?.message?.slice(0,40) || res.status; }
+        catch(_) { e = res.status; }
+        errors.push(`${model.split('/')[1]}: ${e}`);
         continue;
       }
 
       successResponse = res;
+      successResponse._model = model;
       break;
     }
 
     if (!successResponse) {
       return new Response(JSON.stringify({
-        error: `Sab models busy hain. Thodi der baad try karo.\n(${errors.join(' | ')})`
+        error: `Koi model available nahi hai abhi. Thodi der baad try karo.\n(${errors.slice(0,3).join(' | ')})`
       }), {
         status: 429,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
@@ -133,6 +141,7 @@ export default async function handler(req) {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Access-Control-Allow-Origin': '*',
+        'x-active-model': successResponse._model || '',
       }
     });
 
