@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="description" content="TIMEX — Modern Timing Suite">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TIMEX">
+<link rel="manifest" href="manifest.json">
+<title>TIMEX</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #05050a;
+    --surface: #0e0e1a;
+    --border: rgba(255,255,255,0.07);
+    --accent: #00f5c4;
+    --accent2: #ff2d6e;
+    --accent3: #7b5ef8;
+    --text: #e8e8f0;
+    --muted: rgba(232,232,240,0.35);
+    --glow: 0 0 40px rgba(0,245,196,0.15);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── BACKGROUND MESH ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 10%, rgba(0,245,196,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 90%, rgba(123,94,248,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,45,110,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── GRID LINES ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  /* ── LAYOUT ── */
+  #app {
+    position: relative; z-index: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 20px 10px;
+    background: rgba(5,5,10,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+
+  .logo {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    margin-right: 12px;
+    flex-shrink: 0;
+    text-shadow: 0 0 20px rgba(0,245,196,0.5);
+  }
+
+  .tab {
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .tab.active {
+    background: rgba(0,245,196,0.12);
+    border-color: rgba(0,245,196,0.3);
+    color: var(--accent);
+  }
+
+  /* ── VIEWS ── */
+  .view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+  .view.active { display: flex; }
+
+  /* ══════════════════════════════════════
+     1. CLOCK VIEW
+  ══════════════════════════════════════ */
+  #view-clock {
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .main-clock-wrap {
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .clock-date {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(12px, 2vw, 16px);
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .clock-time {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(80px, 18vw, 200px);
+    line-height: 0.9;
+    letter-spacing: -2px;
+    color: var(--text);
+    text-shadow: 0 0 60px rgba(0,245,196,0.2);
+  }
+
+  .clock-seconds {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(30px, 6vw, 72px);
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,245,196,0.5);
+    letter-spacing: 4px;
+  }
+
+  .clock-ampm {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(14px, 2.5vw, 22px);
+    color: var(--muted);
+    letter-spacing: 6px;
+    margin-top: 8px;
+  }
+
+  .clock-tz {
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  /* Progress ring */
+  .second-ring {
+    position: relative;
+    width: clamp(60px, 12vw, 120px);
+    height: clamp(60px, 12vw, 120px);
+    flex-shrink: 0;
+  }
+  .second-ring svg { transform: rotate(-90deg); }
+  .second-ring-label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 1.5vw, 14px);
+    color: var(--accent);
+  }
+
+  /* World clocks strip */
+  .world-strip {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0 4px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .world-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    text-align: center;
+    min-width: 100px;
+    transition: border-color 0.2s;
+  }
+  .world-card:hover { border-color: rgba(0,245,196,0.3); }
+
+  .world-card-city {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .world-card-time {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+  .world-card-offset {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: 2px;
+  }
+
+  /* ══════════════════════════════════════
+     2. STOPWATCH VIEW
+  ══════════════════════════════════════ */
+  #view-stopwatch {
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 20px;
+    gap: 12px;
+  }
+
+  .sw-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .sw-time {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(70px, 16vw, 180px);
+    line-height: 1;
+    letter-spacing: 4px;
+    color: var(--text);
+    transition: color 0.3s;
+  }
+  .sw-time.running { color: var(--accent); text-shadow: var(--glow); }
+
+  .sw-ms {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(24px, 5vw, 56px);
+    color: var(--muted);
+    letter-spacing: 6px;
+  }
+  .sw-time.running + .sw-ms { color: var(--accent); opacity: 0.6; }
+
+  .sw-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .btn-circle {
+    width: clamp(60px, 10vw, 80px);
+    height: clamp(60px, 10vw, 80px);
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .btn-circle:hover { border-color: var(--muted); color: var(--text); }
+  .btn-circle.primary {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(0,245,196,0.2);
+    width: clamp(72px, 12vw, 96px);
+    height: clamp(72px, 12vw, 96px);
+    font-size: 15px;
+  }
+  .btn-circle.primary:hover { background: rgba(0,245,196,0.1); box-shadow: 0 0 30px rgba(0,245,196,0.3); }
+  .btn-circle.danger { border-color: var(--accent2); color: var(--accent2); }
+  .btn-circle.danger:hover { background: rgba(255,45,110,0.1); }
+
+  .sw-laps {
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .lap-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    animation: lapIn 0.3s ease;
+  }
+  @keyframes lapIn { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:none; } }
+
+  .lap-num { color: var(--muted); font-size: 11px; }
+  .lap-split { color: var(--muted); font-size: 11px; }
+  .lap-time { color: var(--text); }
+  .lap-item.best .lap-time { color: var(--accent); }
+  .lap-item.worst .lap-time { color: var(--accent2); }
+
+  /* ══════════════════════════════════════
+     3. TIMER VIEW
+  ══════════════════════════════════════ */
+  #view-timer {
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .timer-ring-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .timer-ring-svg { transform: rotate(-90deg); }
+  .timer-ring-track { fill: none; stroke: var(--surface); stroke-width: 8; }
+  .timer-ring-fill {
+    fill: none; stroke: var(--accent); stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke 0.3s;
+  }
+  .timer-ring-fill.urgent { stroke: var(--accent2); }
+
+  .timer-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+
+  .timer-display {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(52px, 10vw, 110px);
+    line-height: 1;
+    letter-spacing: 4px;
+    color: var(--text);
+  }
+  .timer-display.urgent { color: var(--accent2); text-shadow: 0 0 30px rgba(255,45,110,0.4); }
+  .timer-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Timer input grid */
+  .timer-inputs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .timer-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .timer-input-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .timer-input {
+    width: clamp(60px, 12vw, 80px);
+    height: clamp(50px, 8vw, 64px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(28px, 5vw, 42px);
+    color: var(--text);
+    letter-spacing: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .timer-input:focus { border-color: var(--accent); }
+
+  .timer-sep {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 32px;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+
+  .timer-controls {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Quick presets */
+  .timer-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .preset-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .preset-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+
+  /* ══════════════════════════════════════
+     4. COUNTDOWN VIEW
+  ══════════════════════════════════════ */
+  #view-countdown {
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .cd-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .cd-target-label {
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .cd-event-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(24px, 4vw, 40px);
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-align: center;
+  }
+
+  .cd-units {
+    display: flex;
+    gap: clamp(12px, 3vw, 32px);
+    align-items: flex-end;
+  }
+
+  .cd-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .cd-num {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(48px, 10vw, 120px);
+    line-height: 1;
+    color: var(--text);
+    min-width: 2ch;
+    text-align: center;
+    transition: transform 0.3s;
+  }
+  .cd-num.tick { animation: numTick 0.3s ease; }
+  @keyframes numTick { 0%{transform:translateY(-8px);opacity:0} 100%{transform:none;opacity:1} }
+
+  .cd-unit-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .cd-separator {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(36px, 7vw, 80px);
+    color: var(--muted);
+    margin-bottom: 20px;
+    opacity: 0.4;
+  }
+
+  .cd-progress {
+    width: 100%;
+    height: 3px;
+    background: var(--surface);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .cd-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 3px;
+    transition: width 1s linear;
+  }
+
+  .cd-setup {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  .cd-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .cd-text-input {
+    flex: 1;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0 16px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .cd-text-input:focus { border-color: var(--accent); }
+
+  .cd-datetime-input {
+    flex: 1;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    color-scheme: dark;
+  }
+  .cd-datetime-input:focus { border-color: var(--accent); }
+
+  .btn-solid {
+    padding: 10px 24px;
+    border-radius: 10px;
+    background: rgba(0,245,196,0.1);
+    border: 1px solid rgba(0,245,196,0.3);
+    color: var(--accent);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-solid:hover { background: rgba(0,245,196,0.2); box-shadow: 0 0 20px rgba(0,245,196,0.2); }
+
+  /* ══════════════════════════════════════
+     5. ALARM VIEW
+  ══════════════════════════════════════ */
+  #view-alarm {
+    padding: 20px;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .alarm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .alarm-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--text);
+  }
+
+  .alarm-add-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .alarm-time-input {
+    height: 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0 16px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 28px;
+    color: var(--text);
+    outline: none;
+    color-scheme: dark;
+    letter-spacing: 2px;
+  }
+  .alarm-time-input:focus { border-color: var(--accent); }
+
+  .alarm-label-input {
+    flex: 1;
+    height: 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0 16px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    min-width: 100px;
+  }
+  .alarm-label-input:focus { border-color: var(--accent); }
+
+  .alarm-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .alarm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.2s;
+    animation: lapIn 0.3s ease;
+  }
+  .alarm-card.active-alarm { border-color: rgba(0,245,196,0.4); }
+
+  .alarm-card-time {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 38px;
+    color: var(--text);
+    letter-spacing: 2px;
+    flex: 1;
+  }
+
+  .alarm-card-label {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .alarm-card-countdown {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  /* Toggle switch */
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    transition: 0.3s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; bottom: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .toggle input:checked + .toggle-slider { background: rgba(0,245,196,0.3); }
+  .toggle input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+    background: var(--accent);
+  }
+
+  .alarm-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .alarm-delete:hover { color: var(--accent2); }
+
+  /* ══════════════════════════════════════
+     RING ANIMATION
+  ══════════════════════════════════════ */
+  .ringing-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(5,5,10,0.95);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+  .ringing-overlay.show { display: flex; }
+  .ringing-icon {
+    font-size: 80px;
+    animation: ringShake 0.5s infinite;
+  }
+  @keyframes ringShake {
+    0%,100% { transform: rotate(-15deg); }
+    50% { transform: rotate(15deg); }
+  }
+  .ringing-label {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 48px;
+    letter-spacing: 6px;
+    color: var(--accent);
+    text-shadow: var(--glow);
+  }
+  .ringing-time {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 80px;
+    color: var(--text);
+  }
+
+  /* ══════════════════════════════════════
+     DONE OVERLAY (Timer finished)
+  ══════════════════════════════════════ */
+  .done-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 99;
+    background: rgba(5,5,10,0.9);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .done-overlay.show { display: flex; }
+  .done-overlay .pulse {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(0,245,196,0.15);
+    border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 50px;
+    animation: pulseDone 1s infinite;
+  }
+  @keyframes pulseDone {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,245,196,0.4); }
+    50% { box-shadow: 0 0 0 30px rgba(0,245,196,0); }
+  }
+  .done-text {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 52px;
+    letter-spacing: 6px;
+    color: var(--text);
+  }
+
+  /* ══════════════════════════════════════
+     UTILITIES
+  ══════════════════════════════════════ */
+  .flex-row { display: flex; align-items: center; gap: 10px; }
+  .spacer { flex: 1; }
+
+  /* No alarms placeholder */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .empty-state-icon { font-size: 40px; opacity: 0.3; }
+
+  /* ══════════════════════════════════════
+     RESPONSIVENESS
+  ══════════════════════════════════════ */
+  @media (max-width: 480px) {
+    nav { padding: 10px 12px 8px; }
+    .logo { font-size: 18px; }
+    .tab { padding: 5px 10px; font-size: 11px; }
+    .world-strip { gap: 8px; }
+    .world-card { padding: 8px 12px; min-width: 80px; }
+    .world-card-time { font-size: 22px; }
+    .cd-units { gap: 8px; }
+    .btn-circle { width: 56px !important; height: 56px !important; }
+    .btn-circle.primary { width: 68px !important; height: 68px !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- NAV -->
+  <nav>
+    <div class="logo">TIMEX</div>
+    <button class="tab active" onclick="switchTab('clock')">🕐 Clock</button>
+    <button class="tab" onclick="switchTab('stopwatch')">⏱ Stopwatch</button>
+    <button class="tab" onclick="switchTab('timer')">⏲ Timer</button>
+    <button class="tab" onclick="switchTab('countdown')">📅 Countdown</button>
+    <button class="tab" onclick="switchTab('alarm')">🔔 Alarm</button>
+  </nav>
+
+  <!-- ─── 1. CLOCK ─── -->
+  <div class="view active" id="view-clock">
+    <div class="main-clock-wrap">
+      <div class="clock-date" id="clock-date"></div>
+      <div class="clock-time" id="clock-hm"></div>
+      <div class="clock-seconds" id="clock-s"></div>
+      <div class="clock-ampm" id="clock-ampm"></div>
+      <div class="clock-tz" id="clock-tz"></div>
+    </div>
+    <div class="world-strip" id="world-strip"></div>
+  </div>
+
+  <!-- ─── 2. STOPWATCH ─── -->
+  <div class="view" id="view-stopwatch">
+    <div class="sw-display">
+      <div class="sw-time" id="sw-time">00:00</div>
+      <div class="sw-ms" id="sw-ms">.000</div>
+    </div>
+    <div class="sw-controls">
+      <button class="btn-circle" id="sw-lap-btn" onclick="swLap()" disabled>LAP</button>
+      <button class="btn-circle primary" id="sw-start-btn" onclick="swToggle()">START</button>
+      <button class="btn-circle danger" id="sw-reset-btn" onclick="swReset()">RESET</button>
+    </div>
+    <div class="sw-laps" id="sw-laps"></div>
+  </div>
+
+  <!-- ─── 3. TIMER ─── -->
+  <div class="view" id="view-timer">
+    <div class="timer-ring-wrap">
+      <svg class="timer-ring-svg" id="timer-ring-svg" width="260" height="260" viewBox="0 0 260 260">
+        <circle class="timer-ring-track" cx="130" cy="130" r="118"/>
+        <circle class="timer-ring-fill" id="timer-ring-fill" cx="130" cy="130" r="118"
+          stroke-dasharray="741.42" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-center">
+        <div class="timer-display" id="timer-display">00:00:00</div>
+        <div class="timer-label" id="timer-label">SET TIMER</div>
+      </div>
+    </div>
+
+    <div class="timer-inputs" id="timer-inputs">
+      <div class="timer-input-group">
+        <input class="timer-input" id="t-h" type="number" min="0" max="99" value="0" placeholder="0">
+        <div class="timer-input-label">HH</div>
+      </div>
+      <div class="timer-sep">:</div>
+      <div class="timer-input-group">
+        <input class="timer-input" id="t-m" type="number" min="0" max="59" value="5" placeholder="0">
+        <div class="timer-input-label">MM</div>
+      </div>
+      <div class="timer-sep">:</div>
+      <div class="timer-input-group">
+        <input class="timer-input" id="t-s" type="number" min="0" max="59" value="0" placeholder="0">
+        <div class="timer-input-label">SS</div>
+      </div>
+    </div>
+
+    <div class="timer-presets">
+      <button class="preset-btn" onclick="setTimerPreset(1)">1 min</button>
+      <button class="preset-btn" onclick="setTimerPreset(3)">3 min</button>
+      <button class="preset-btn" onclick="setTimerPreset(5)">5 min</button>
+      <button class="preset-btn" onclick="setTimerPreset(10)">10 min</button>
+      <button class="preset-btn" onclick="setTimerPreset(15)">15 min</button>
+      <button class="preset-btn" onclick="setTimerPreset(25)">25 min</button>
+    </div>
+
+    <div class="timer-controls">
+      <button class="btn-circle" onclick="timerReset()">RESET</button>
+      <button class="btn-circle primary" id="timer-start-btn" onclick="timerToggle()">START</button>
+    </div>
+  </div>
+
+  <!-- ─── 4. COUNTDOWN ─── -->
+  <div class="view" id="view-countdown">
+    <div class="cd-display">
+      <div class="cd-target-label">COUNTING DOWN TO</div>
+      <div class="cd-event-name" id="cd-event-name">—</div>
+      <div class="cd-units">
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-days">00</div>
+          <div class="cd-unit-label">Days</div>
+        </div>
+        <div class="cd-separator">:</div>
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-hours">00</div>
+          <div class="cd-unit-label">Hours</div>
+        </div>
+        <div class="cd-separator">:</div>
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-mins">00</div>
+          <div class="cd-unit-label">Mins</div>
+        </div>
+        <div class="cd-separator">:</div>
+        <div class="cd-unit">
+          <div class="cd-num" id="cd-secs">00</div>
+          <div class="cd-unit-label">Secs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd-progress"><div class="cd-progress-fill" id="cd-progress-fill" style="width:0%"></div></div>
+
+    <div class="cd-setup">
+      <div class="cd-input-row">
+        <input class="cd-text-input" id="cd-name" type="text" placeholder="Event name (e.g. Eid 2025)">
+      </div>
+      <div class="cd-input-row">
+        <input class="cd-datetime-input" id="cd-target" type="datetime-local">
+        <button class="btn-solid" onclick="cdStart()">SET</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 5. ALARM ─── -->
+  <div class="view" id="view-alarm">
+    <div class="alarm-header">
+      <div class="alarm-title">ALARMS</div>
+    </div>
+    <div class="alarm-add-form">
+      <input class="alarm-time-input" id="alarm-time" type="time">
+      <input class="alarm-label-input" id="alarm-label" type="text" placeholder="Label (optional)">
+      <button class="btn-solid" onclick="addAlarm()">ADD</button>
+    </div>
+    <div class="alarm-list" id="alarm-list">
+      <div class="empty-state" id="alarm-empty">
+        <div class="empty-state-icon">🔔</div>
+        <div>No alarms set</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RINGING OVERLAY -->
+<div class="ringing-overlay" id="ringing-overlay">
+  <div class="ringing-icon">🔔</div>
+  <div class="ringing-time" id="ringing-time"></div>
+  <div class="ringing-label" id="ringing-label">ALARM</div>
+  <button class="btn-solid" onclick="dismissAlarm()">DISMISS</button>
+</div>
+
+<!-- TIMER DONE OVERLAY -->
+<div class="done-overlay" id="done-overlay">
+  <div class="pulse">✓</div>
+  <div class="done-text">TIME'S UP!</div>
+  <button class="btn-solid" onclick="dismissDone()">OK</button>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('view-' + name).classList.add('active');
+}
+
+// ══════════════════════════════════════
+// 1. CLOCK
+// ══════════════════════════════════════
+const WORLD_CITIES = [
+  { city: 'New York',   tz: 'America/New_York',   short: 'NYC'  },
+  { city: 'London',     tz: 'Europe/London',       short: 'LON'  },
+  { city: 'Dubai',      tz: 'Asia/Dubai',          short: 'DXB'  },
+  { city: 'Mumbai',     tz: 'Asia/Kolkata',        short: 'MUM'  },
+  { city: 'Tokyo',      tz: 'Asia/Tokyo',          short: 'TKY'  },
+  { city: 'Sydney',     tz: 'Australia/Sydney',    short: 'SYD'  },
+];
+
+// Build world clock cards
+const strip = document.getElementById('world-strip');
+WORLD_CITIES.forEach((c, i) => {
+  const div = document.createElement('div');
+  div.className = 'world-card';
+  div.innerHTML = `<div class="world-card-city">${c.short}</div>
+    <div class="world-card-time" id="wc${i}">--:--</div>
+    <div class="world-card-offset" id="wo${i}"></div>`;
+  strip.appendChild(div);
+});
+
+function updateClock() {
+  const now = new Date();
+  const days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('clock-date').textContent =
+    `${days[now.getDay()]} · ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  document.getElementById('clock-hm').textContent = pad(h12) + ':' + pad(m);
+  document.getElementById('clock-s').textContent = pad(s);
+  document.getElementById('clock-ampm').textContent = ampm;
+  document.getElementById('clock-tz').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  // World clocks
+  WORLD_CITIES.forEach((c, i) => {
+    const t = new Date().toLocaleTimeString('en-US', { timeZone: c.tz, hour: '2-digit', minute: '2-digit', hour12: false });
+    document.getElementById('wc' + i).textContent = t;
+    const offset = new Date().toLocaleTimeString('en-US', { timeZone: c.tz, timeZoneName: 'short' }).split(' ').pop();
+    document.getElementById('wo' + i).textContent = offset;
+  });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ══════════════════════════════════════
+// 2. STOPWATCH
+// ══════════════════════════════════════
+let swRunning = false, swStart = 0, swElapsed = 0, swInterval = null;
+let lapTimes = [], lapStart = 0;
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function formatMs(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const mil = ms % 1000;
+  if (h > 0) return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  return `${pad(m)}:${pad(s)}`;
+}
+
+function swRender() {
+  const ms = swRunning ? swElapsed + Date.now() - swStart : swElapsed;
+  document.getElementById('sw-time').textContent = formatMs(ms);
+  document.getElementById('sw-ms').textContent = '.' + String(ms % 1000).padStart(3, '0');
+}
+
+function swToggle() {
+  if (!swRunning) {
+    swStart = Date.now();
+    if (lapStart === 0) lapStart = Date.now();
+    swRunning = true;
+    swInterval = setInterval(swRender, 30);
+    document.getElementById('sw-time').classList.add('running');
+    document.getElementById('sw-start-btn').textContent = 'PAUSE';
+    document.getElementById('sw-lap-btn').disabled = false;
+  } else {
+    swElapsed += Date.now() - swStart;
+    clearInterval(swInterval);
+    swRunning = false;
+    document.getElementById('sw-time').classList.remove('running');
+    document.getElementById('sw-start-btn').textContent = 'RESUME';
+  }
+}
+
+function swReset() {
+  clearInterval(swInterval);
+  swRunning = false; swElapsed = 0; swStart = 0; lapStart = 0;
+  lapTimes = [];
+  document.getElementById('sw-time').textContent = '00:00';
+  document.getElementById('sw-ms').textContent = '.000';
+  document.getElementById('sw-time').classList.remove('running');
+  document.getElementById('sw-start-btn').textContent = 'START';
+  document.getElementById('sw-lap-btn').disabled = true;
+  document.getElementById('sw-laps').innerHTML = '';
+}
+
+function swLap() {
+  if (!swRunning) return;
+  const now = Date.now();
+  const total = swElapsed + now - swStart;
+  const split = lapStart ? now - lapStart : total;
+  lapTimes.push({ total, split, num: lapTimes.length + 1 });
+  lapStart = now;
+  renderLaps();
+}
+
+function renderLaps() {
+  const laps = lapTimes;
+  if (!laps.length) return;
+  const splits = laps.map(l => l.split);
+  const best = Math.min(...splits);
+  const worst = Math.max(...splits);
+  const container = document.getElementById('sw-laps');
+  container.innerHTML = '';
+  [...laps].reverse().forEach(l => {
+    const div = document.createElement('div');
+    div.className = 'lap-item' + (l.split === best && laps.length > 1 ? ' best' : '') + (l.split === worst && laps.length > 1 ? ' worst' : '');
+    div.innerHTML = `<span class="lap-num">LAP ${pad(l.num)}</span>
+      <span class="lap-time">${formatMs(l.total)}</span>
+      <span class="lap-split">+${formatMs(l.split)}</span>`;
+    container.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════
+// 3. TIMER
+// ══════════════════════════════════════
+let timerTotal = 0, timerRemaining = 0, timerRunning = false;
+let timerInterval = null, timerEndTime = 0;
+const CIRCUMFERENCE = 2 * Math.PI * 118; // 741.42
+
+function setTimerPreset(mins) {
+  document.getElementById('t-h').value = 0;
+  document.getElementById('t-m').value = mins;
+  document.getElementById('t-s').value = 0;
+}
+
+function timerToggle() {
+  if (!timerRunning) {
+    if (timerRemaining === 0) {
+      // Fresh start
+      const h = parseInt(document.getElementById('t-h').value) || 0;
+      const m = parseInt(document.getElementById('t-m').value) || 0;
+      const s = parseInt(document.getElementById('t-s').value) || 0;
+      timerTotal = (h * 3600 + m * 60 + s) * 1000;
+      if (timerTotal === 0) return;
+      timerRemaining = timerTotal;
+    }
+    timerEndTime = Date.now() + timerRemaining;
+    timerRunning = true;
+    document.getElementById('timer-start-btn').textContent = 'PAUSE';
+    document.getElementById('timer-inputs').style.opacity = '0.3';
+    document.getElementById('timer-label').textContent = 'RUNNING';
+    timerInterval = setInterval(timerTick, 100);
+    timerTick();
+  } else {
+    timerRunning = false;
+    timerRemaining = timerEndTime - Date.now();
+    clearInterval(timerInterval);
+    document.getElementById('timer-start-btn').textContent = 'RESUME';
+    document.getElementById('timer-label').textContent = 'PAUSED';
+  }
+}
+
+function timerTick() {
+  const rem = timerEndTime - Date.now();
+  if (rem <= 0) {
+    clearInterval(timerInterval);
+    timerRunning = false; timerRemaining = 0;
+    renderTimer(0);
+    document.getElementById('done-overlay').classList.add('show');
+    try { if (navigator.vibrate) navigator.vibrate([300,200,300,200,300]); } catch(e){}
+    return;
+  }
+  renderTimer(rem);
+}
+
+function renderTimer(rem) {
+  const h = Math.floor(rem / 3600000);
+  const m = Math.floor((rem % 3600000) / 60000);
+  const s = Math.floor((rem % 60000) / 1000);
+  document.getElementById('timer-display').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+
+  const pct = timerTotal > 0 ? rem / timerTotal : 0;
+  const offset = CIRCUMFERENCE * (1 - pct);
+  document.getElementById('timer-ring-fill').style.strokeDashoffset = offset;
+
+  const urgent = rem < 10000;
+  document.getElementById('timer-ring-fill').classList.toggle('urgent', urgent);
+  document.getElementById('timer-display').classList.toggle('urgent', urgent);
+}
+
+function timerReset() {
+  clearInterval(timerInterval);
+  timerRunning = false; timerRemaining = 0; timerTotal = 0;
+  document.getElementById('timer-display').textContent = '00:00:00';
+  document.getElementById('timer-display').classList.remove('urgent');
+  document.getElementById('timer-ring-fill').style.strokeDashoffset = 0;
+  document.getElementById('timer-ring-fill').classList.remove('urgent');
+  document.getElementById('timer-start-btn').textContent = 'START';
+  document.getElementById('timer-inputs').style.opacity = '1';
+  document.getElementById('timer-label').textContent = 'SET TIMER';
+}
+
+function dismissDone() {
+  document.getElementById('done-overlay').classList.remove('show');
+  timerReset();
+}
+
+// ══════════════════════════════════════
+// 4. COUNTDOWN
+// ══════════════════════════════════════
+let cdTarget = null, cdStart = null, cdInterval = null;
+
+function cdTick() {
+  if (!cdTarget) return;
+  const now = Date.now();
+  let diff = cdTarget - now;
+  if (diff < 0) diff = 0;
+
+  const days = Math.floor(diff / 86400000);
+  const hrs = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+
+  setCD('cd-days', days);
+  setCD('cd-hours', pad(hrs));
+  setCD('cd-mins', pad(mins));
+  setCD('cd-secs', pad(secs));
+
+  // Progress
+  if (cdStart) {
+    const total = cdTarget - cdStart;
+    const elapsed = now - cdStart;
+    const pct = total > 0 ? Math.max(0, Math.min(100, (elapsed / total) * 100)) : 100;
+    document.getElementById('cd-progress-fill').style.width = pct + '%';
+  }
+}
+
+const cdPrev = {};
+function setCD(id, val) {
+  const el = document.getElementById(id);
+  if (el.textContent !== String(val)) {
+    el.classList.remove('tick');
+    void el.offsetWidth;
+    el.classList.add('tick');
+    el.textContent = val;
+  }
+}
+
+function cdStart2() { /* alias */ }
+function cdStart() {
+  const name = document.getElementById('cd-name').value.trim() || 'Event';
+  const dt = document.getElementById('cd-target').value;
+  if (!dt) { alert('Please pick a date & time!'); return; }
+  cdTarget = new Date(dt).getTime();
+  cdStart = Date.now();
+  document.getElementById('cd-event-name').textContent = name;
+  clearInterval(cdInterval);
+  cdInterval = setInterval(cdTick, 1000);
+  cdTick();
+}
+
+// ══════════════════════════════════════
+// 5. ALARM
+// ══════════════════════════════════════
+let alarms = [];
+let alarmInterval = null;
+let ringingId = null;
+
+// Set default time to next hour
+const defTime = new Date();
+defTime.setHours(defTime.getHours() + 1, 0, 0, 0);
+document.getElementById('alarm-time').value = `${pad(defTime.getHours())}:${pad(defTime.getMinutes())}`;
+
+function addAlarm() {
+  const t = document.getElementById('alarm-time').value;
+  if (!t) return;
+  const label = document.getElementById('alarm-label').value.trim() || 'Alarm';
+  const id = Date.now();
+  alarms.push({ id, time: t, label, enabled: true });
+  document.getElementById('alarm-label').value = '';
+  renderAlarms();
+}
+
+function renderAlarms() {
+  const list = document.getElementById('alarm-list');
+  const empty = document.getElementById('alarm-empty');
+  if (alarms.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    return;
+  }
+  list.innerHTML = '';
+  alarms.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'alarm-card' + (a.enabled ? ' active-alarm' : '');
+    card.id = 'alarm-' + a.id;
+    card.innerHTML = `
+      <div style="flex:1">
+        <div class="alarm-card-time">${a.time}</div>
+        <div class="alarm-card-label">${a.label}</div>
+        <div class="alarm-card-countdown" id="acd-${a.id}"></div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" ${a.enabled ? 'checked' : ''} onchange="toggleAlarm(${a.id})">
+        <span class="toggle-slider"></span>
+      </label>
+      <button class="alarm-delete" onclick="deleteAlarm(${a.id})">✕</button>`;
+    list.appendChild(card);
+  });
+}
+
+function toggleAlarm(id) {
+  const a = alarms.find(x => x.id === id);
+  if (a) a.enabled = !a.enabled;
+  renderAlarms();
+}
+
+function deleteAlarm(id) {
+  alarms = alarms.filter(x => x.id !== id);
+  renderAlarms();
+}
+
+function checkAlarms() {
+  const now = new Date();
+  const hhmm = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  alarms.forEach(a => {
+    // Update countdown
+    const el = document.getElementById('acd-' + a.id);
+    if (el) {
+      const [ah, am] = a.time.split(':').map(Number);
+      let diff = (ah * 60 + am) - (now.getHours() * 60 + now.getMinutes());
+      if (diff < 0) diff += 1440;
+      const hh = Math.floor(diff / 60), mm = diff % 60;
+      el.textContent = diff === 0 ? 'NOW' : `in ${hh > 0 ? hh + 'h ' : ''}${mm}m`;
+    }
+
+    // Ring check (only on :00 seconds)
+    if (a.enabled && a.time === hhmm && now.getSeconds() === 0 && ringingId !== a.id) {
+      ringingId = a.id;
+      document.getElementById('ringing-time').textContent = a.time;
+      document.getElementById('ringing-label').textContent = a.label;
+      document.getElementById('ringing-overlay').classList.add('show');
+      try { if (navigator.vibrate) navigator.vibrate([500,300,500,300,500,300,500]); } catch(e){}
+    }
+  });
+}
+
+function dismissAlarm() {
+  document.getElementById('ringing-overlay').classList.remove('show');
+  ringingId = null;
+}
+
+setInterval(checkAlarms, 1000);
+renderAlarms();
+
+// Prevent sleep on mobile via wake lock (best effort)
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+</script>
+</body>
+</html>

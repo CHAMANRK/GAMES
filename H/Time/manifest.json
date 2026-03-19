@@ -1,0 +1,41 @@
+{
+  "name": "TIMEX — Modern Timing Suite",
+  "short_name": "TIMEX",
+  "description": "Clock, Stopwatch, Timer, Countdown & Alarm — all in one.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05050a",
+  "theme_color": "#0a0a0f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%2305050a'/><text x='50%' y='58%' font-size='120' text-anchor='middle' dominant-baseline='middle' fill='%2300f5c4'>⏱</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%2305050a'/><text x='50%' y='58%' font-size='320' text-anchor='middle' dominant-baseline='middle' fill='%2300f5c4'>⏱</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Stopwatch",
+      "short_name": "Stopwatch",
+      "description": "Start the stopwatch",
+      "url": "/?tab=stopwatch",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><text y='.9em' font-size='90'>⏱</text></svg>", "sizes": "96x96" }]
+    },
+    {
+      "name": "Timer",
+      "short_name": "Timer",
+      "description": "Set a timer",
+      "url": "/?tab=timer",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><text y='.9em' font-size='90'>⏲</text></svg>", "sizes": "96x96" }]
+    }
+  ]
+}
