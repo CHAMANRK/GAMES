@@ -15,7 +15,7 @@ const MODELS = {
 // ── Groq fallback for chat/code if OpenRouter fails ─────────────────
 const GROQ_FALLBACK = {
   chat: 'moonshotai/kimi-k2-instruct',
-  code: 'qwen/qwen3-32b',
+  code:  'llama-3.3-70b-versatile',
 };
 
 export default async function handler(req) {
