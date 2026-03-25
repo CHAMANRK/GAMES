@@ -94,6 +94,31 @@ body::before {
   color: #fca5a5; font-size: 13px; display: none;
 }
 .err-box.show { display: block; animation: fadeIn .3s ease; }
+  
+/* ── Shared ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+}
+.sec-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sec-label::before {
+  content: ''; display: block;
+  width: 14px; height: 2px;
+  background: var(--blue); border-radius: 2px;
+}
+.err-box {
+  background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fca5a5; font-size: 13px; display: none;
+}
+.err-box.show { display: block; animation: fadeIn .3s ease; }
 
 /* ════ SETUP ════ */
 .logo { text-align: center; padding: 4px 0; }
@@ -191,7 +216,7 @@ body::before {
 }
 .start-btn:hover  { filter:brightness(1.1); transform:translateY(-1px); }
 .start-btn:active { transform:scale(.98); }
-
+  
 /* ════ LOADING ════ */
 .loader-ring {
   width:56px; height:56px;
@@ -420,7 +445,6 @@ body::before {
 .play-again-btn:hover  { filter:brightness(1.1); transform:translateY(-1px); }
 .play-again-btn:active { transform:scale(.98); }
 
-
 /* Language Toggle */
 .lang-toggle-wrap {
   display: flex; align-items: center; justify-content: space-between;
@@ -471,7 +495,7 @@ body::before {
 </style>
 </head>
 <body>
-
+  
 <!-- ══════════ SETUP ══════════ -->
 <div class="screen active" id="setupScreen">
   <div class="logo">
@@ -537,7 +561,6 @@ body::before {
       <div class="round-btn" data-r="20" onclick="selectRounds(this)">20</div>
     </div>
   </div>
-
 
   <div class="card" onclick="toggleLang()" style="cursor:pointer">
     <div class="lang-toggle-wrap" id="langToggleWrap">
@@ -678,13 +701,7 @@ body::before {
 
 <script>
 'use strict';
-
-/* ─── API Key ─────────────────────────────────── */
-const KEY_STORE   = 'mathmind_groq_key';
-const KEY_DEFAULT = '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';
-if (!localStorage.getItem(KEY_STORE)) localStorage.setItem(KEY_STORE, KEY_DEFAULT);
-const getKey = () => localStorage.getItem(KEY_STORE) || KEY_DEFAULT;
-
+  
 /* ─── Constants ───────────────────────────────── */
 const TIMER_SEC = 30;
 const BASE_PTS  = { Easy:10, Medium:20, Hard:30 };
@@ -809,7 +826,7 @@ function showScreen(id) {
 }
 
 /* ══════════════════════════════════════════════
-   GROQ — QUESTION
+   API (PROXIED TO VERCEL BACKEND)
 ══════════════════════════════════════════════ */
 async function fetchQuestion() {
   const isHinglish = cfg.lang === 'hinglish';
@@ -829,16 +846,16 @@ STRICT RULES:
 - No multiple choice
 - Easy = 1-step  |  Medium = 2-3 steps  |  Hard = multi-step
 
-Respond with ONLY valid JSON (no markdown, no extra text):
+Respond with ONLY valid JSON:
 {"question":"...","answer":"...","explanation":"brief 1-line solution"}`;
 
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  // SECURE FIX: Calling local Vercel API proxy instead of direct Groq URL
+  const res = await fetch('/api/game-proxy', {
     method: 'POST',
-    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getKey() },
+    headers: { 'Content-Type':'application/json' },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
       messages: [
-        { role:'system', content:'You are a math quiz generator for Indian students. Respond ONLY in pure JSON. No markdown fences. No extra text whatsoever.' },
+        { role:'system', content:'You are a math quiz generator for Indian students. Respond ONLY in pure JSON.' },
         { role:'user',   content: prompt }
       ],
       temperature: 0.85,
@@ -848,17 +865,14 @@ Respond with ONLY valid JSON (no markdown, no extra text):
 
   if (!res.ok) {
     const e = await res.json().catch(() => ({}));
-    throw new Error(e.error?.message || 'Groq API error: ' + res.status);
+    throw new Error(e.error?.message || 'Server API error: ' + res.status);
   }
   const data  = await res.json();
   const raw   = data.choices[0].message.content;
-  const clean = raw.replace(/^```(?:json)?|```$/gm, '').trim();
-  return JSON.parse(clean);
+  // Regex cleaning is no longer needed since backend uses json_object mode
+  return JSON.parse(raw);
 }
 
-/* ══════════════════════════════════════════════
-   GROQ — HINT
-══════════════════════════════════════════════ */
 async function fetchHint(level) {
   const q = G.currentQ.question;
   const isHinglish = cfg.lang === 'hinglish';
@@ -871,11 +885,12 @@ async function fetchHint(level) {
     2: `Show ONLY the first calculation step for: "${q}". Do not give the final answer.`,
     3: `State the formula or method to solve: "${q}". Do not reveal the final answer.`
   };
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  
+  // SECURE FIX: Calling local Vercel API proxy
+  const res = await fetch('/api/game-proxy', {
     method: 'POST',
-    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getKey() },
+    headers: { 'Content-Type':'application/json' },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
       messages: [
         { role:'system', content: cfg.lang === 'hinglish'
         ? 'You are a helpful Indian math tutor. Give hints in Hinglish (Hindi+English mix). NEVER reveal the final answer.'
@@ -889,17 +904,15 @@ async function fetchHint(level) {
   if (!res.ok) throw new Error('Hint fetch failed');
   const data = await res.json();
   return data.choices[0].message.content.trim();
-}
-
+  }
+  
 /* ══════════════════════════════════════════════
    GAME FLOW
 ══════════════════════════════════════════════ */
 async function startGame() {
-  // sync topic from DOM in case user changed it
   const at = document.querySelector('.topic-chip.active');
   if (at) cfg.topic = at.textContent;
 
-  // clear error
   const errEl = document.getElementById('setupErr');
   errEl.textContent = '';
   errEl.classList.remove('show');
@@ -923,7 +936,7 @@ async function loadNextQuestion() {
   } catch (err) {
     showScreen('setupScreen');
     const errEl = document.getElementById('setupErr');
-    errEl.textContent = '⚠️ ' + (err.message || 'Network error. Dobara try karo.');
+    errEl.innerHTML = '⚠️ API error. Ensure Vercel proxy is setup.<br><small>' + err.message + '</small>';
     errEl.classList.add('show');
   }
 }
@@ -936,23 +949,19 @@ function renderQuestion(q) {
 
   showScreen('gameScreen');
 
-  /* Progress — question N out of total fills bar to N/total */
   document.getElementById('progressFill').style.width  = (G.qNum / cfg.rounds * 100) + '%';
   document.getElementById('qLabel').textContent = 'Question ' + G.qNum;
   document.getElementById('qFrac').textContent  = G.qNum + ' / ' + cfg.rounds;
   document.getElementById('scoreDisplay').textContent = G.score;
 
-  /* Meta tags */
   const diffEmoji = cfg.diff === 'Easy' ? '😊' : cfg.diff === 'Medium' ? '🔥' : '💀';
   document.getElementById('qMeta').innerHTML =
     `<span class="q-tag tag-num">Q${G.qNum}</span>` +
     `<span class="q-tag tag-topic">📐 ${cfg.topic}</span>` +
     `<span class="q-tag tag-${cfg.diff}">${diffEmoji} ${cfg.diff}</span>`;
 
-  /* Question */
   document.getElementById('qText').textContent = q.question;
 
-  /* Reset hints */
   document.getElementById('hintPanel').innerHTML  = '';
   document.getElementById('hintsInfo').textContent = '';
   ['hBtn1','hBtn2','hBtn3'].forEach((id, i) => {
@@ -961,7 +970,6 @@ function renderQuestion(q) {
     b.className = 'hint-btn';
   });
 
-  /* Reset answer */
   const inp = document.getElementById('ansInput');
   inp.value     = '';
   inp.className = 'ans-input';
@@ -974,7 +982,6 @@ function renderQuestion(q) {
   renderStreak();
   startTimer();
 
-  // focus after screen transition
   setTimeout(() => inp.focus(), 150);
 }
 
@@ -1023,7 +1030,7 @@ function timeUp() {
 /* ─── Hints ───────────────────────────────────── */
 async function useHint(level) {
   if (G.answered) return;
-  if (level !== G.hintsUsed + 1) return; // sequential only
+  if (level !== G.hintsUsed + 1) return; 
 
   const btn = document.getElementById('hBtn' + level);
   btn.disabled  = true;
@@ -1050,13 +1057,11 @@ async function useHint(level) {
       `<div class="hint-text">${text}</div>`;
     loadEl.replaceWith(card);
 
-    // unlock next hint
     if (level < 3) {
       document.getElementById('hBtn' + (level + 1)).disabled = false;
     }
   } catch {
     loadEl.innerHTML = '⚠️ Hint load nahi hua. Try again.';
-    // rollback
     btn.disabled  = false;
     btn.className = 'hint-btn';
     G.hintPenalty -= HINT_COST[level];
@@ -1077,10 +1082,19 @@ function normalize(s) {
   return String(s).trim()
     .toLowerCase()
     .replace(/\s+/g, '')
-    .replace(/,/g, '')        // 1,000 → 1000
-    .replace(/rs\.?/gi, '')   // remove Rs prefix
+    .replace(/,/g, '')        
+    .replace(/rs\.?/gi, '')   
     .replace(/×/g, '*')
     .replace(/÷/g, '/');
+}
+
+// BUG FIX: Parse fractions correctly (e.g., "3/4" => 0.75)
+function parseMath(str) {
+  if (str.includes('/')) {
+    const parts = str.split('/');
+    if (parts.length === 2) return parseFloat(parts[0]) / parseFloat(parts[1]);
+  }
+  return parseFloat(str);
 }
 
 function submitAnswer() {
@@ -1098,8 +1112,9 @@ function submitAnswer() {
 
   let correct = userNorm === rightNorm;
   if (!correct) {
-    const u = parseFloat(userNorm);
-    const r = parseFloat(rightNorm);
+    // BUG FIX: Use parseMath instead of parseFloat
+    const u = parseMath(userNorm);
+    const r = parseMath(rightNorm);
     if (!isNaN(u) && !isNaN(r)) correct = Math.abs(u - r) < 0.01;
   }
 
@@ -1110,8 +1125,8 @@ function submitAnswer() {
     const base      = BASE_PTS[cfg.diff] || 20;
     const pts       = Math.max(1, base + timeBonus - G.hintPenalty);
 
-    G.score++;  // temp — replace with pts
-    G.score = (G.score - 1) + pts; // net score add
+    // BUG FIX: Clean score increment logic
+    G.score += pts;
     G.streak++;
     if (G.streak > G.maxStreak) G.maxStreak = G.streak;
 
@@ -1121,7 +1136,6 @@ function submitAnswer() {
       pts, hintsUsed: G.hintsUsed
     });
 
-    /* Score bump animation */
     const sv = document.getElementById('scoreDisplay');
     sv.textContent = G.score;
     sv.classList.remove('bump');
@@ -1187,8 +1201,8 @@ function renderStreak() {
 async function nextQuestion() {
   if (G.qNum >= cfg.rounds) showResults();
   else await loadNextQuestion();
-}
-
+  }
+  
 /* ══════════════════════════════════════════════
    RESULTS
 ══════════════════════════════════════════════ */
