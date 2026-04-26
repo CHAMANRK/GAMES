@@ -1,0 +1,31 @@
+{
+  "name": "देसी खेल",
+  "short_name": "देसी खेल",
+  "description": "Bagh Bachhur aur Sholo Guti — desi board games",
+  "start_url": "./desi_games.html",
+  "display": "standalone",
+  "background_color": "#060d1a",
+  "theme_color": "#0a1020",
+  "orientation": "portrait-primary",
+  "lang": "hi",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
