@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════
-   देसी खेल — Service Worker v2
+   Desi Khel — Service Worker v2
    Version badlane pe CACHE_NAME update karo
 ═══════════════════════════════════════════ */
 const CACHE_NAME = 'desi-khel-v2';
