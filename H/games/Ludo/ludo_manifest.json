@@ -1,0 +1,27 @@
+{
+  "name": "Ludo — Classic Edition",
+  "short_name": "Ludo",
+  "description": "Classic Ludo board game — 2 to 4 players, online multiplayer supported",
+  "start_url": "./ludo_v8_fixed.html",
+  "display": "standalone",
+  "background_color": "#06060f",
+  "theme_color": "#0d0d2b",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "ludo_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "ludo_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "prefer_related_applications": false
+}
