@@ -1,6 +1,6 @@
 {
-  "name": "देसी खेल",
-  "short_name": "देसी खेल",
+  "name": "Desi Khel",
+  "short_name": "Desi",
   "description": "Bagh Bachhur aur Sholo Guti — desi board games",
   "start_url": "./desi_games.html",
   "display": "standalone",
