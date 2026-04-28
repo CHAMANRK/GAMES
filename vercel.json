@@ -1,8 +1,14 @@
 {
   "rewrites": [
     { "source": "/api/chat", "destination": "/api/chat" },
-    { "source": "/api/auth", "destination": "/api/auth" },
     { "source": "/api/imggen", "destination": "/api/imggen" },
     { "source": "/api/auth", "destination": "/api/auth" }
-  ]
+  ],
+  "env": {
+    "OPENROUTER_API_KEY": "@openrouter_api_key",
+    "GROQ_API_KEY": "@groq_api_key",
+    "CF_API_TOKEN": "@cf_api_token",
+    "CF_ACCOUNT_ID": "@cf_account_id",
+    "OWNER_PASSKEY": "@owner_passkey"
+  }
 }
