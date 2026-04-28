@@ -1,7 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/chat", "destination": "/api/chat.js" },
-    { "source": "/api/imggen", "destination": "/api/imggen.js" },
-    { "source": "/api/auth", "destination": "/api/auth.js" }
-   ] 
+    { "source": "/api/chat", "destination": "/api/chat" },
+    { "source": "/api/auth", "destination": "/api/auth" },
+    { "source": "/api/imggen", "destination": "/api/imggen" },
+    { "source": "/api/auth", "destination": "/api/auth" }
+  ]
 }
