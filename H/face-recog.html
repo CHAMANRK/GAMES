@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FACETRACK</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--cyan:#00f5ff;--green:#00ff88;--red:#ff3366;--amber:#ffb400;--bg:#020810;}
+body{background:var(--bg);color:var(--cyan);font-family:'Share Tech Mono',monospace;height:100vh;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.035) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+/* LANDING */
+#page-landing{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;z-index:10;transition:opacity 0.6s;}
+#page-landing.hide{opacity:0;pointer-events:none;}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(36px,10vw,64px);letter-spacing:8px;color:var(--cyan);text-shadow:0 0 40px var(--cyan);animation:pulse-logo 3s ease-in-out infinite;text-align:center;}
+.logo span{color:var(--green);text-shadow:0 0 40px var(--green);}
+.tagline{font-size:10px;letter-spacing:4px;color:rgba(0,245,255,0.35);margin-top:4px;text-align:center;}
+.face-icon{font-size:64px;animation:float 2.5s ease-in-out infinite;filter:drop-shadow(0 0 20px var(--cyan));}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+@keyframes pulse-logo{0%,100%{text-shadow:0 0 40px var(--cyan),0 0 80px rgba(0,245,255,0.3);}50%{text-shadow:0 0 70px var(--cyan),0 0 130px rgba(0,245,255,0.55);}}
+#start-btn{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:4px;padding:18px 52px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:4px;cursor:pointer;position:relative;overflow:hidden;transition:all 0.3s;box-shadow:0 0 24px rgba(0,245,255,0.15);}
+#start-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,245,255,0.15),transparent);transition:left 0.5s;}
+#start-btn:hover::before{left:100%;}
+#start-btn:hover{background:rgba(0,245,255,0.08);box-shadow:0 0 40px rgba(0,245,255,0.4);}
+#start-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.hint{font-size:10px;letter-spacing:2px;color:rgba(0,245,255,0.22);text-align:center;line-height:2.6;}
+#load-wrap{width:260px;}
+#load-bar-bg{height:2px;background:rgba(0,245,255,0.1);border-radius:2px;overflow:hidden;margin-bottom:8px;}
+#load-bar{height:100%;width:0%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);transition:width 0.4s;}
+#load-txt{font-size:9px;letter-spacing:3px;color:rgba(0,245,255,0.4);text-align:center;}
+
+/* TRACKER PAGE */
+#page-tracker{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity 0.6s;z-index:5;}
+#page-tracker.show{opacity:1;pointer-events:all;}
+#video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);}
+#overlay{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1);}
+#page-tracker::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);pointer-events:none;z-index:20;}
+
+.corner{position:absolute;width:28px;height:28px;border-color:var(--cyan);border-style:solid;z-index:25;opacity:0.55;}
+.corner.tl{top:14px;left:14px;border-width:2px 0 0 2px;}
+.corner.tr{top:14px;right:14px;border-width:2px 2px 0 0;}
+.corner.bl{bottom:14px;left:14px;border-width:0 0 2px 2px;}
+.corner.br{bottom:14px;right:14px;border-width:0 2px 2px 0;}
+
+#back-btn{position:absolute;top:18px;left:50%;transform:translateX(-50%);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:6px 20px;background:rgba(0,0,0,0.65);border:1px solid rgba(0,245,255,0.25);color:rgba(0,245,255,0.45);border-radius:2px;cursor:pointer;z-index:30;transition:all 0.3s;}
+#back-btn:hover{color:var(--cyan);border-color:var(--cyan);}
+
+#mode-badge{position:absolute;top:18px;right:16px;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:6px 14px;background:rgba(0,0,0,0.72);border:1px solid rgba(0,245,255,0.3);color:var(--cyan);border-radius:2px;z-index:30;}
+
+/* REGISTER PANEL */
+#register-panel{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:30;}
+#reg-input{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;padding:8px 14px;background:rgba(0,0,0,0.72);border:1px solid rgba(0,245,255,0.3);color:var(--cyan);border-radius:2px;outline:none;width:160px;}
+#reg-input::placeholder{color:rgba(0,245,255,0.25);}
+#reg-input:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,245,255,0.2);}
+#reg-btn{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;padding:8px 16px;background:transparent;border:1px solid var(--green);color:var(--green);border-radius:2px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+#reg-btn:hover{background:rgba(0,255,136,0.1);box-shadow:0 0 14px rgba(0,255,136,0.3);}
+
+/* KNOWN FACES LIST */
+#faces-list{position:absolute;top:60px;left:16px;z-index:30;display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto;}
+.face-chip{font-size:9px;letter-spacing:2px;padding:5px 10px;background:rgba(0,0,0,0.72);border:1px solid rgba(0,255,136,0.3);color:var(--green);border-radius:2px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;}
+.face-chip:hover{border-color:var(--red);color:var(--red);}
+.face-chip .del{opacity:0.5;font-size:11px;}
+
+#status-bar{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:2px;color:rgba(0,245,255,0.3);z-index:30;white-space:nowrap;text-align:center;transition:color 0.3s;}
+#status-bar.match{color:var(--green);text-shadow:0 0 10px var(--green);}
+#status-bar.unknown{color:var(--red);text-shadow:0 0 10px var(--red);}
+#status-bar.scanning{color:var(--amber);}
+</style>
+</head>
+<body>
+
+<!-- LANDING PAGE -->
+<div id="page-landing">
+  <div>
+    <div class="logo">FACE<span>TRACK</span></div>
+    <div class="tagline">AI FACE RECOGNITION — NEURAL ID</div>
+  </div>
+  <div class="face-icon">🫥</div>
+  <div id="load-wrap">
+    <div id="load-bar-bg"><div id="load-bar"></div></div>
+    <div id="load-txt">LOADING AI MODELS...</div>
+  </div>
+  <button id="start-btn" onclick="startCamera()" disabled>⚡ INITIALIZING...</button>
+  <div class="hint">
+    📸 REGISTER KARO — NAAM + SNAP<br>
+    🔍 CAMERA KHUD PEHCHANEGI<br>
+    ✦ MULTIPLE FACES SIMULTANEOUSLY
+  </div>
+</div>
+
+<!-- TRACKER PAGE -->
+<div id="page-tracker">
+  <video id="video" playsinline autoplay muted></video>
+  <canvas id="overlay"></canvas>
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <button id="back-btn" onclick="goBack()">← EXIT</button>
+  <div id="mode-badge">⬡ SCANNING</div>
+  <div id="faces-list"></div>
+  <div id="status-bar">POSITION FACE IN FRAME</div>
+  <div id="register-panel">
+    <input id="reg-input" type="text" placeholder="NAAM LIKHO..." maxlength="20" />
+    <button id="reg-btn" onclick="registerFace()">📸 REGISTER</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script>
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+
+const video   = document.getElementById('video');
+const overlay = document.getElementById('overlay');
+const ctx     = overlay.getContext('2d');
+
+// Known faces: [{name, descriptor}]
+let knownFaces = JSON.parse(localStorage.getItem('facetrack_faces') || '[]').map(f => ({
+  name: f.name,
+  descriptor: new Float32Array(f.descriptor)
+}));
+
+let modelsLoaded = false;
+let running = false;
+let faceMatcher = null;
+
+function buildMatcher() {
+  if (knownFaces.length === 0) { faceMatcher = null; return; }
+  const labeledDescriptors = [];
+  const byName = {};
+  knownFaces.forEach(f => {
+    if (!byName[f.name]) byName[f.name] = [];
+    byName[f.name].push(f.descriptor);
+  });
+  for (const [name, descs] of Object.entries(byName)) {
+    labeledDescriptors.push(new faceapi.LabeledFaceDescriptors(name, descs));
+  }
+  faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.5);
+}
+
+function saveFaces() {
+  localStorage.setItem('facetrack_faces', JSON.stringify(
+    knownFaces.map(f => ({ name: f.name, descriptor: Array.from(f.descriptor) }))
+  ));
+}
+
+function renderFaceChips() {
+  const list = document.getElementById('faces-list');
+  list.innerHTML = '';
+  const names = [...new Set(knownFaces.map(f => f.name))];
+  names.forEach(name => {
+    const count = knownFaces.filter(f => f.name === name).length;
+    const chip = document.createElement('div');
+    chip.className = 'face-chip';
+    chip.innerHTML = `✦ ${name} <span style="opacity:0.4">(${count})</span><span class="del" title="Delete">✕</span>`;
+    chip.querySelector('.del').onclick = () => {
+      knownFaces = knownFaces.filter(f => f.name !== name);
+      saveFaces(); buildMatcher(); renderFaceChips();
+    };
+    list.appendChild(chip);
+  });
+}
+
+// Load models
+async function loadModels() {
+  const bar = document.getElementById('load-bar');
+  const txt = document.getElementById('load-txt');
+  const btn = document.getElementById('start-btn');
+  txt.style.display = 'block';
+  try {
+    txt.textContent = 'LOADING FACE DETECTOR...';
+    bar.style.width = '10%';
+    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+    bar.style.width = '40%';
+    txt.textContent = 'LOADING LANDMARK MODEL...';
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    bar.style.width = '70%';
+    txt.textContent = 'LOADING RECOGNITION MODEL...';
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+    bar.style.width = '100%';
+    txt.textContent = 'MODELS READY ✓';
+    modelsLoaded = true;
+    btn.disabled = false;
+    btn.textContent = '⚡ START CAMERA';
+    buildMatcher();
+  } catch(e) {
+    txt.textContent = 'MODEL LOAD FAILED: ' + e.message;
+    btn.textContent = '⚠ RETRY';
+    btn.disabled = false;
+    btn.onclick = () => { bar.style.width='0%'; loadModels(); };
+  }
+}
+
+async function startCamera() {
+  if (!modelsLoaded) return;
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}});
+  } catch(e) { alert('Camera error: ' + e.message); return; }
+  video.srcObject = stream;
+  await video.play();
+  document.getElementById('page-landing').classList.add('hide');
+  document.getElementById('page-tracker').classList.add('show');
+  renderFaceChips();
+  running = true;
+  resize();
+  detectLoop();
+}
+
+function goBack() {
+  running = false;
+  if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+  document.getElementById('page-tracker').classList.remove('show');
+  document.getElementById('page-landing').classList.remove('hide');
+}
+
+function resize() {
+  overlay.width  = window.innerWidth;
+  overlay.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+
+// Register current face
+async function registerFace() {
+  const nameRaw = document.getElementById('reg-input').value.trim().toUpperCase();
+  if (!nameRaw) { flashStatus('NAAM LIKHO PEHLE!', 'unknown'); return; }
+  flashStatus('SCANNING FACE...', 'scanning');
+  const detection = await faceapi
+    .detectSingleFace(video, new faceapi.SsdMobilenetv1Options({minConfidence:0.5}))
+    .withFaceLandmarks()
+    .withFaceDescriptor();
+  if (!detection) { flashStatus('FACE NAHI MILA — SEEDHA DEKHO', 'unknown'); return; }
+  knownFaces.push({ name: nameRaw, descriptor: detection.descriptor });
+  saveFaces(); buildMatcher(); renderFaceChips();
+  document.getElementById('reg-input').value = '';
+  flashStatus(`✓ ${nameRaw} REGISTERED!`, 'match');
+}
+document.getElementById('reg-input').addEventListener('keydown', e => { if(e.key==='Enter') registerFace(); });
+
+function flashStatus(msg, cls) {
+  const el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.className = cls || '';
+}
+
+// Detection loop
+const COLORS = ['#00f5ff','#00ff88','#ff00cc','#ffb400','#ff3366'];
+
+async function detectLoop() {
+  if (!running) return;
+  resize();
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+  const W = overlay.width, H = overlay.height;
+
+  try {
+    const detections = await faceapi
+      .detectAllFaces(video, new faceapi.SsdMobilenetv1Options({minConfidence:0.45}))
+      .withFaceLandmarks()
+      .withFaceDescriptors();
+
+    // Resize detections to canvas
+    const resized = faceapi.resizeResults(detections, {width: video.videoWidth || W, height: video.videoHeight || H});
+
+    // Scale to canvas
+    const scaleX = W / (video.videoWidth || W);
+    const scaleY = H / (video.videoHeight || H);
+
+    if (detections.length === 0) {
+      flashStatus('POSITION FACE IN FRAME', '');
+    }
+
+    detections.forEach((det, i) => {
+      const col = COLORS[i % COLORS.length];
+      const box = det.detection.box;
+
+      // Mirror the X coords (canvas is mirrored via CSS scaleX(-1))
+      const bx = box.x * scaleX;
+      const by = box.y * scaleY;
+      const bw = box.width * scaleX;
+      const bh = box.height * scaleY;
+
+      // Match
+      let label = 'UNKNOWN';
+      let matchColor = '#ff3366';
+      let confidence = '';
+      if (faceMatcher) {
+        const match = faceMatcher.findBestMatch(det.descriptor);
+        if (match.label !== 'unknown') {
+          label = match.label;
+          matchColor = col;
+          confidence = Math.round((1 - match.distance) * 100) + '%';
+        }
+      } else {
+        label = 'REGISTER KARO ↓';
+        matchColor = '#ffb400';
+      }
+
+      // Glowing box
+      ctx.save();
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = matchColor;
+      ctx.strokeStyle = matchColor;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(bx, by, bw, bh);
+
+      // Corner accents
+      const cs = 14;
+      ctx.lineWidth = 3;
+      ctx.shadowBlur = 24;
+      // TL
+      ctx.beginPath(); ctx.moveTo(bx, by+cs); ctx.lineTo(bx, by); ctx.lineTo(bx+cs, by); ctx.stroke();
+      // TR
+      ctx.beginPath(); ctx.moveTo(bx+bw-cs, by); ctx.lineTo(bx+bw, by); ctx.lineTo(bx+bw, by+cs); ctx.stroke();
+      // BL
+      ctx.beginPath(); ctx.moveTo(bx, by+bh-cs); ctx.lineTo(bx, by+bh); ctx.lineTo(bx+cs, by+bh); ctx.stroke();
+      // BR
+      ctx.beginPath(); ctx.moveTo(bx+bw-cs, by+bh); ctx.lineTo(bx+bw, by+bh); ctx.lineTo(bx+bw, by+bh-cs); ctx.stroke();
+      ctx.restore();
+
+      // Face mesh dots (landmarks)
+      ctx.save();
+      ctx.fillStyle = matchColor + '88';
+      ctx.shadowBlur = 4; ctx.shadowColor = matchColor;
+      det.landmarks.positions.forEach(pt => {
+        ctx.beginPath();
+        ctx.arc(pt.x * scaleX, pt.y * scaleY, 1.5, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.restore();
+
+      // Label tag
+      const tag = label + (confidence ? '  ' + confidence : '');
+      ctx.save();
+      ctx.font = 'bold 12px "Share Tech Mono", monospace';
+      const tw = ctx.measureText(tag).width;
+      const tx = bx;
+      const ty = by > 28 ? by - 8 : by + bh + 20;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.fillRect(tx - 4, ty - 16, tw + 16, 22);
+
+      ctx.shadowBlur = 10; ctx.shadowColor = matchColor;
+      ctx.fillStyle = matchColor;
+      ctx.fillText(tag, tx + 4, ty);
+      ctx.restore();
+
+      // Status bar
+      if (i === 0) {
+        if (label === 'UNKNOWN') flashStatus('⚠ UNKNOWN FACE DETECTED', 'unknown');
+        else if (label === 'REGISTER KARO ↓') flashStatus('📸 REGISTER KARO — NAAM LIKHO NEECHE', 'scanning');
+        else flashStatus(`✦ IDENTIFIED: ${label}  ${confidence}`, 'match');
+      }
+    });
+
+    // Scan line animation
+    const t = Date.now() % 3000 / 3000;
+    const scanY = t * H;
+    const grad = ctx.createLinearGradient(0, scanY-30, 0, scanY+30);
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(0.5, 'rgba(0,245,255,0.08)');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, scanY-30, W, 60);
+
+  } catch(e) { /* ignore frame errors */ }
+
+  requestAnimationFrame(detectLoop);
+}
+
+// Boot
+loadModels();
+</script>
+</body>
+</html>
