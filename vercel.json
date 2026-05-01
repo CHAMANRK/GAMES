@@ -1,9 +1,4 @@
 {
-  "rewrites": [
-    { "source": "/api/chat", "destination": "/api/chat" },
-    { "source": "/api/imggen", "destination": "/api/imggen" },
-    { "source": "/api/auth", "destination": "/api/auth" }
-  ],
   "env": {
     "OPENROUTER_API_KEY": "@openrouter_api_key",
     "GROQ_API_KEY": "@groq_api_key",
