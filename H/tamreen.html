@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ترجمہ مشق — امتحان کی تیاری</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12162a;
+    --bg-2: #191f3a;
+    --surface: #212850;
+    --surface-2: #2a3162;
+    --surface-hover: #323a72;
+    --gold: #d8b34a;
+    --gold-soft: #e8cd7a;
+    --gold-dim: #7a6530;
+    --text: #f3efe4;
+    --text-dim: #a9afd0;
+    --text-faint: #6b7099;
+    --sage: #5fa382;
+    --sage-soft: #2a4438;
+    --terracotta: #cb6d63;
+    --terracotta-soft: #452a2a;
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(216,179,74,0.08), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(95,163,130,0.06), transparent 45%),
+      var(--bg);
+  }
+  .arabic{font-family:'Amiri', serif; direction:rtl;}
+  .urdu{font-family:'Noto Nastaliq Urdu', serif; direction:rtl; line-height:2.4;}
+  bdi.num{direction:ltr; unicode-bidi:isolate; font-family:'Inter',sans-serif;}
+  #app{max-width:480px; margin:0 auto; min-height:100vh; padding-bottom:40px; position:relative;}
+  ::-webkit-scrollbar{display:none;}
+
+  /* ---------- header ---------- */
+  .topbar{position:sticky; top:0; z-index:20; background:linear-gradient(180deg, var(--bg) 70%, transparent); padding:18px 18px 8px; backdrop-filter: blur(6px);}
+  .brand-row{display:flex; align-items:center; justify-content:space-between;}
+  .brand h1{font-family:'Noto Nastaliq Urdu',serif; font-size:22px; margin:0; font-weight:700; color:var(--gold-soft);}
+  .brand p{margin:2px 0 0; font-size:12px; color:var(--text-dim); font-family:'Inter';}
+  .countdown{background:var(--surface); border:1px solid var(--gold-dim); border-radius:14px; padding:8px 12px; text-align:center; min-width:64px;}
+  .countdown .n{font-size:20px; font-weight:800; color:var(--gold); font-family:'Inter';}
+  .countdown .l{font-size:10px; color:var(--text-dim); margin-top:1px;}
+  .progress-track{height:6px; background:var(--surface); border-radius:6px; margin-top:14px; overflow:hidden;}
+  .progress-fill{height:100%; background:linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius:6px; transition:width .4s ease;}
+
+  /* ---------- tasbih beads (signature element) ---------- */
+  .tasbih{display:flex; align-items:center; gap:6px; overflow-x:auto; padding:16px 4px 6px; margin-top:4px;}
+  .bead{flex:0 0 auto; width:16px; height:16px; border-radius:50%; background:var(--surface-2); border:1.5px solid var(--text-faint); cursor:pointer; transition:transform .15s;}
+  .bead.marker{width:22px; height:22px; border-width:2px;}
+  .bead.done{background:var(--gold); border-color:var(--gold-soft); box-shadow:0 0 8px rgba(216,179,74,0.5);}
+  .bead.progress{background:var(--surface-2); border-color:var(--gold); border-width:2.5px;}
+  .bead:active{transform:scale(0.85);}
+  .thread{flex:0 0 10px; height:1.5px; background:var(--text-faint); opacity:.4;}
+
+  /* ---------- cards / dashboard ---------- */
+  .section-label{font-size:12px; color:var(--text-faint); margin:20px 18px 8px; letter-spacing:.05em;}
+  .continue-card{margin:0 18px 6px; background:linear-gradient(135deg, var(--surface-2), var(--surface)); border:1px solid var(--gold-dim); border-radius:var(--radius); padding:16px; cursor:pointer;}
+  .continue-card .cc-title{font-size:13px; color:var(--gold-soft); font-weight:600;}
+  .continue-card .cc-sub{font-family:'Noto Nastaliq Urdu'; font-size:16px; margin-top:4px;}
+  .list{padding:0 18px; display:flex; flex-direction:column; gap:10px;}
+  .card{background:var(--surface); border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; border:1px solid transparent; transition:border-color .15s, background .15s;}
+  .card:active{background:var(--surface-hover);}
+  .card.locked{opacity:.45; cursor:not-allowed;}
+  .card .idx{width:34px; height:34px; border-radius:10px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; color:var(--gold-soft); flex:0 0 auto;}
+  .card .body{flex:1; min-width:0;}
+  .card .title{font-family:'Noto Nastaliq Urdu'; font-size:16px;}
+  .card .meta{font-size:11px; color:var(--text-dim); margin-top:3px;}
+  .badge{font-size:10px; padding:4px 9px; border-radius:20px; flex:0 0 auto; font-weight:600;}
+  .badge.new{background:var(--surface-2); color:var(--text-dim);}
+  .badge.learning{background:#2a3a5e; color:#9fc1f0;}
+  .badge.test{background:#4a3b1e; color:var(--gold-soft);}
+  .badge.done{background:var(--sage-soft); color:#a6e0c4;}
+  .revision-card{background:linear-gradient(135deg, #2a2050, #1e1a3c); border:1px dashed var(--gold-dim);}
+  .revision-card .idx{background:var(--gold-dim); color:#1a1400;}
+
+  /* ---------- generic screen w/ header ---------- */
+  .screen-head{display:flex; align-items:center; gap:12px; padding:16px 18px 8px; position:sticky; top:0; background:var(--bg); z-index:20;}
+  .back-btn{width:36px; height:36px; border-radius:10px; background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; flex:0 0 auto;}
+  .screen-title{flex:1;}
+  .screen-title h2{font-family:'Noto Nastaliq Urdu'; font-size:18px; margin:0;}
+  .screen-title p{font-size:11px; color:var(--text-dim); margin:2px 0 0;}
+  .qcounter{font-size:12px; color:var(--text-dim); background:var(--surface); padding:5px 10px; border-radius:20px;}
+
+  /* ---------- learn view ---------- */
+  .qcard{background:var(--surface); border-radius:var(--radius); padding:20px; margin:14px 18px;}
+  .qcard .src{font-size:22px; line-height:2.1; margin-bottom:14px;}
+  .qcard .chunk-btn{display:inline-block; background:var(--surface-2); color:var(--gold-soft); border:1px solid var(--gold-dim); padding:8px 16px; border-radius:20px; font-size:13px; cursor:pointer; margin-bottom:10px;}
+  .divider{height:1px; background:var(--surface-2); margin:14px 0;}
+  .qcard .tgt{font-size:17px; color:var(--text-dim); line-height:2.2;}
+  .qcard .tgt.urdu{color:var(--text);}
+  .kw-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:12px;}
+  .kw{font-family:'Amiri'; font-size:13px; background:var(--surface-2); color:var(--gold-soft); padding:3px 10px; border-radius:10px;}
+  .diff-dot{width:7px; height:7px; border-radius:50%; display:inline-block; margin-left:6px;}
+  .diff-easy{background:var(--sage);} .diff-medium{background:var(--gold);} .diff-hard{background:var(--terracotta);}
+
+  .footer-bar{position:sticky; bottom:0; padding:14px 18px 22px; background:linear-gradient(0deg, var(--bg) 60%, transparent); margin-top:10px;}
+  .btn{display:block; width:100%; text-align:center; padding:15px; border-radius:16px; font-size:15px; font-weight:700; font-family:'Noto Nastaliq Urdu'; cursor:pointer; border:none;}
+  .btn-primary{background:linear-gradient(135deg, var(--gold-soft), var(--gold)); color:#241d05;}
+  .btn-secondary{background:var(--surface); color:var(--text); margin-top:8px; border:1px solid var(--surface-2);}
+  .btn-row{display:flex; gap:10px;}
+  .btn-row .btn{flex:1;}
+  .btn-correct{background:var(--sage-soft); color:#c9f0da; border:1px solid var(--sage);}
+  .btn-wrong{background:var(--terracotta-soft); color:#f3cac6; border:1px solid var(--terracotta);}
+  .btn-partial{background:#4a3b1e; color:var(--gold-soft); border:1px solid var(--gold-dim);}
+  .btn-row-3{display:flex; gap:8px;}
+  .btn-row-3 .btn{flex:1; padding:14px 6px; font-size:12.5px; line-height:1.6;}
+
+  /* ---------- test view ---------- */
+  .test-card{background:var(--surface); border-radius:var(--radius); padding:30px 22px; margin:20px 18px; min-height:160px; display:flex; align-items:center; justify-content:center; text-align:center;}
+  .test-card .src{font-size:24px; line-height:2.2;}
+  .reveal{background:var(--surface); border-radius:var(--radius); padding:22px; margin:0 18px 14px; border:1px solid var(--gold-dim);}
+  .reveal .lbl{font-size:11px; color:var(--gold-soft); margin-bottom:8px;}
+  .reveal .tgt{font-size:19px; line-height:2.2;}
+
+  /* ---------- summary ---------- */
+  .summary-hero{text-align:center; padding:30px 20px 10px;}
+  .score-ring{width:130px; height:130px; margin:0 auto 14px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; border:4px solid var(--gold); position:relative;}
+  .score-ring .pct{font-size:30px; font-weight:800; font-family:'Inter';}
+  .summary-hero h3{font-family:'Noto Nastaliq Urdu'; font-size:18px; margin:6px 0 0;}
+  .wrong-list{padding:0 18px; display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+  .wrong-item{background:var(--surface); border-radius:14px; padding:12px 14px; border-right:3px solid var(--terracotta);}
+  .wrong-item.partial-item{border-right-color:var(--gold);}
+  .wrong-item .src{font-size:15px; margin-bottom:5px;}
+  .wrong-item .tgt{font-size:13px; color:var(--text-dim);}
+  .wrong-item .status-badge{display:inline-block; font-size:10.5px; padding:2px 9px; border-radius:8px; margin-bottom:6px; font-family:'Inter';}
+  .status-badge.wrong{background:var(--terracotta-soft); color:#f3cac6;}
+  .status-badge.partial{background:#4a3b1e; color:var(--gold-soft);}
+
+  .empty{text-align:center; padding:60px 30px; color:var(--text-dim); font-family:'Noto Nastaliq Urdu'; font-size:16px;}
+
+  /* ---------- exam intro ---------- */
+  .intro-wrap{min-height:82vh; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .intro-card{background:var(--surface); border:1px solid var(--gold-dim); border-radius:24px; padding:30px 22px; text-align:center; max-width:380px; animation: popIn .5s cubic-bezier(.2,.8,.2,1);}
+  .intro-icon{font-size:42px; margin-bottom:8px; animation: floaty 2.2s ease-in-out infinite;}
+  .intro-card h2{font-family:'Noto Nastaliq Urdu'; font-size:20px; margin:0 0 4px; color:var(--gold-soft);}
+  .intro-sub{font-size:12px; color:var(--text-dim); margin-bottom:18px;}
+  .intro-rules{text-align:right; display:flex; flex-direction:column; gap:9px; margin-bottom:22px;}
+  .rule{background:var(--surface-2); border-radius:12px; padding:10px 14px; font-size:13px; font-family:'Noto Nastaliq Urdu'; line-height:1.9;}
+  @keyframes popIn{ from{opacity:0; transform:scale(.9) translateY(14px);} to{opacity:1; transform:scale(1) translateY(0);} }
+  @keyframes floaty{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+  .settings-row{padding:24px 18px 10px; text-align:center;}
+  .settings-row span{font-size:12px; color:var(--text-faint); text-decoration:underline; cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const APP_DATA = [{"tamreen_no": 1, "title": "التمرین (1)", "type": "translation", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 20, "questions": [{"id": 1, "arabic": "إِنَّ اللهَ يَقْبَلُ دَعَوَاتِ الصَّالِحِيْنَ", "urdu": "یقیناً اللہ تعالیٰ نیک لوگوں کی دعا کو قبول فرماتا ہے۔", "keywords": ["إِنَّ", "يَقْبَلُ", "دَعَوَاتِ"], "difficulty": "easy"}, {"id": 2, "arabic": "أَوَدُّ أَنَّكَ فَائِزٌ فِي الْمُسَابَقَةِ.", "urdu": "میں چاہتا ہوں کہ تو مقابلے میں کامیاب ہو۔", "keywords": ["أَوَدُّ", "فَائِزٌ", "الْمُسَابَقَةِ"], "difficulty": "easy"}, {"id": 3, "arabic": "لَيْتَ أَخَاكَ ذُو مَنْطِقٍ عَذْبٍ.", "urdu": "کاش تیرا بھائی شیریں کلام ہوتا۔", "keywords": ["لَيْتَ", "ذُو", "عَذْبٍ"], "difficulty": "easy"}, {"id": 4, "arabic": "كَأَنَّ عِصَامًا يَحْمِلُ جَبَلًا.", "urdu": "گویا کہ عصام پہاڑ کو اٹھا لیتا ہے۔", "keywords": ["كَأَنَّ", "يَحْمِلُ", "جَبَلًا"], "difficulty": "easy"}, {"id": 5, "arabic": "لَعَلَّكَ نَدْمَانُ عَلَى خَطِيْئَتِكَ.", "urdu": "شاید کہ تو اپنی غلطی پر شرمندہ ہے۔", "keywords": ["لَعَلَّكَ", "نَدْمَانُ", "خَطِيْئَتِكَ"], "difficulty": "easy"}, {"id": 6, "arabic": "إِنَّ الْمَقْدُرَةَ تُذْهِبُ الْحَفِيْظَةَ.", "urdu": "بے شک طاقت و ہمت غصہ کو لے جاتی ہے۔", "keywords": ["الْمَقْدُرَةَ", "تُذْهِبُ", "الْحَفِيْظَةَ"], "difficulty": "easy"}, {"id": 7, "arabic": "سَمِعْتُ أَنَّكَ تَعْتَزِمُ السَّفَرَ.", "urdu": "میں نے سنا کہ تو سفر کا ارادہ رکھتا ہے۔", "keywords": ["سَمِعْتُ", "تَعْتَزِمُ", "السَّفَرَ"], "difficulty": "easy"}, {"id": 8, "arabic": "إِنَّ لِلْعُلَمَاءِ دَوْرًا عَظِيْمًا فِي نَهْضَةِ الْمُجْتَمَعِ.", "urdu": "بلا شبہ معاشرہ کی ترقی میں علماء کا اہم کردار ہے۔", "keywords": ["دَوْرًا", "عَظِيْمًا", "نَهْضَةِ"], "difficulty": "easy"}, {"id": 9, "arabic": "كَأَنَّ الْمُثَقَّفِيْنَ قَنَادِيْلُ تُضِيْءُ طَرِيْقَ الْجُهَلَاءِ.", "urdu": "گویا کہ تعلیم یافتہ لوگ ایسے چراغ ہیں جو جاہلوں کے راستہ کو روشن کرتے ہیں۔", "keywords": ["الْمُثَقَّفِيْنَ", "قَنَادِيْلُ", "تُضِيْءُ"], "difficulty": "easy"}, {"id": 10, "arabic": "إِنَّ أَخَاكَ صَغِيْرُ السِّنِّ لَكِنَّ تَفْكِيْرَهُ نَاضِجٌ.", "urdu": "یقیناً تیرا بھائی کم عمر ہے لیکن اس کی سوچ پختہ ہے۔", "keywords": ["صَغِيْرُ السِّنِّ", "تَفْكِيْرَهُ", "نَاضِجٌ"], "difficulty": "easy"}, {"id": 11, "arabic": "كَأَنَّ الْمُقَاتِلِيْنَ أُسُودٌ تَزْأَرُ فِي الْمَعْرَكَةِ.", "urdu": "گویا کہ جنگجو ایسے شیر ہیں جو لڑائی میں دھاڑتے ہیں۔", "keywords": ["الْمُقَاتِلِيْنَ", "أُسُودٌ", "تَزْأَرُ"], "difficulty": "easy"}, {"id": 12, "arabic": "لَيْتَ هَذِهِ الْمَلَايِيْنَ تُنْفَقُ لِإِسْعَادِ الْبَشَرِيَّةِ.", "urdu": "کاش یہ لاکھوں روپے نسل انسانی کی خوش حالی کے لیے خرچ کیے جاتے۔", "keywords": ["الْمَلَايِيْنَ", "تُنْفَقُ", "إِسْعَادِ"], "difficulty": "easy"}, {"id": 13, "arabic": "إِنَّ رِسَالَاتِ الْأَنْبِيَاءِ تَدْعُو جَمِيْعًا إِلَى تَوْقِيْرِ الْكِبَارِ.", "urdu": "بے شک نبیوں کے پیغامات تمام لوگوں کو بڑوں کی تعظیم کی طرف بلاتے ہیں۔", "keywords": ["رِسَالَاتِ", "تَدْعُو", "تَوْقِيْرِ"], "difficulty": "easy"}, {"id": 14, "arabic": "قِمَّةُ الْجَبَلِ عَالِيَةٌ وَ كَأَنَّهَا تَصِلُ إِلَى عَنَانِ السَّمَاءِ.", "urdu": "پہاڑ کی چوٹی بلند ہے گویا کہ وہ آسمان کی بلندی تک پہنچتی ہے۔", "keywords": ["قِمَّةُ", "عَالِيَةٌ", "عَنَانِ"], "difficulty": "easy"}, {"id": 15, "arabic": "يَكْفِيْكَ أَنِّي تَغَاضَيْتُ عَنْ أَخْطَائِكَ السَّابِقَةِ.", "urdu": "تجھے یہ بات کافی ہے کہ میں نے تیری گزشتہ غلطیوں سے چشم پوشی کرلی۔", "keywords": ["يَكْفِيْكَ", "تَغَاضَيْتُ", "أَخْطَائِكَ"], "difficulty": "easy"}, {"id": 16, "arabic": "إِنَّ مِنَ الشِّعْرِ لَحِكْمَةً وَإِنَّ مِنَ الْبَيَانِ لَسِحْرًا.", "urdu": "بلا شبہ کچھ اشعار حکمت و دانش مندی ہیں اور یقیناً بعض بیان سحر انگیز ہوتے ہیں۔", "keywords": ["الشِّعْرِ", "لَحِكْمَةً", "لَسِحْرًا"], "difficulty": "easy"}, {"id": 17, "arabic": "الزُّجَاجَةُ كَأَنَّهَا كَوْكَبٌ دُرِّيٌّ. [النور: ٣٥]", "urdu": "فانوس گویا کہ ایک چمک دار ستارہ ہے۔", "keywords": ["الزُّجَاجَةُ", "كَوْكَبٌ", "دُرِّيٌّ"], "difficulty": "easy"}, {"id": 18, "arabic": "أَلَا إِنَّ أَوْلِيَاءَ اللهِ لَا خَوْفٌ عَلَيْهِمْ وَلَا هُمْ يَحْزَنُوْنَ [یونس: ٦٢]", "urdu": "سن لو بے شک اللہ کے ولیوں پر نہ کچھ خوف ہے نہ کچھ غم۔", "keywords": ["أَوْلِيَاءَ", "خَوْفٌ", "يَحْزَنُوْنَ"], "difficulty": "easy"}, {"id": 19, "arabic": "إِنَّ اللهَ يَأْمُرُكُمْ أَنْ تُؤَدُّوا الْأَمَانَاتِ إِلَى أَهْلِهَا [النساء: ٥٨]", "urdu": "بے شک اللہ تمہیں حکم دیتا ہے کہ امانتیں امانت والوں کے سپرد کرو۔", "keywords": ["يأْمُرُكُمْ", "تُؤَدُّوا", "الْأَمَانَاتِ"], "difficulty": "easy"}, {"id": 20, "arabic": "أُحِبُّ الصَّالِحِيْنَ وَ لَسْتُ مِنْهُمْ. لَعَلَّ اللهَ يَرْزُقُنِي صَلَاحًا.", "urdu": "میں نیک لوگوں سے محبت کرتا ہوں حالانکہ میں ان میں سے نہیں ہوں شاید کہ اللہ تعالیٰ مجھے نیکی کی توفیق عطا فرمائے۔", "keywords": ["الصَّالِحِيْنَ", "يَرْزُقُنِي", "صَلَاحًا"], "difficulty": "easy"}]}, {"tamreen_no": 2, "title": "التمرین (2)", "type": "translation", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 15, "questions": [{"id": 1, "arabic": "لَعَلَّ الْعُمَّالَ مُتْعَبُوْنَ.", "urdu": "شاید مزدور تھکے ہوئے ہیں۔", "keywords": ["لَعَلَّ", "الْعُمَّالَ", "مُتْعَبُوْنَ"], "difficulty": "easy"}, {"id": 2, "arabic": "لَيْتَ كُلَّ طَالِبٍ مُجْتَهِدٌ.", "urdu": "کاش ہر طالب علم محنتی ہوتا۔", "keywords": ["لَيْتَ", "طَالِبٍ", "مُجْتَهِدٌ"], "difficulty": "easy"}, {"id": 3, "arabic": "كَأَنَّ الْجَهَالَةَ ظُلْمَةٌ.", "urdu": "گویا جہالت اندھیرا ہے۔", "keywords": ["كَأَنَّ", "الْجَهَالَةَ", "ظُلْمَةٌ"], "difficulty": "easy"}, {"id": 4, "arabic": "لَعَلَّ هَؤُلَاءِ النَّاسَ مُهَنْدِسُو الْحَاسُوْبِ.", "urdu": "شاید یہ لوگ کمپیوٹر انجینئر ہیں۔", "keywords": ["الناس", "مُهَنْدِسُو", "الْحَاسُوْبِ"], "difficulty": "easy"}, {"id": 5, "arabic": "عَلِمْتُ أَنَّ الْكُلِّيَّةَ تُغْلَقُ أُسْبُوْعَيْنِ.", "urdu": "مجھے معلوم ہوا کہ کالج دو ہفتہ بند رہے گا۔", "keywords": ["عَلِمْتُ", "الْكُلِّيَّةَ", "تُغْلَقُ"], "difficulty": "easy"}, {"id": 6, "arabic": "إِنَّ النَّظَافَةَ تَحْفَظُ الْجِسْمَ.", "urdu": "یقیناً صفائی ستھرائی جسم کی حفاظت کرتی ہے۔", "keywords": ["النَّظَافَةَ", "تَحْفَظُ", "الْجِسْمَ"], "difficulty": "easy"}, {"id": 7, "arabic": "كَأَنَّ الشَّمْسَ قُرْصٌ مِنَ الذَّهَبِ.", "urdu": "ایسا لگتا ہے کہ سورج سونے کی ٹکیا ہے۔", "keywords": ["الشَّمْسَ", "قُرْصٌ", "الذَّهَبِ"], "difficulty": "easy"}, {"id": 8, "arabic": "كَأَنَّ نُجُومَ السَّمَاءِ قَنَادِيْلُ مُعَلَّقَةٌ.", "urdu": "گویا آسمان کے ستارے لٹکتی ہوئی قندیلیں ہیں۔", "keywords": ["نُجُومَ", "قَنَادِيْلُ", "مُعَلَّقَةٌ"], "difficulty": "easy"}, {"id": 9, "arabic": "إِنَّ فِي الْبَحْرِ أَقْسَامًا مُتَنَوِّعَةً مِنَ الْأَسْمَاكِ.", "urdu": "بے شک سمندر میں مچھلیوں کی گوناگوں قسمیں ہیں۔", "keywords": ["الْبَحْرِ", "أَقْسَامًا", "الْأَسْمَاكِ"], "difficulty": "easy"}, {"id": 10, "arabic": "إِنَّ هَذَا الْكِتَابَ جَيِّدٌ لَكِنَّ سِعْرَهُ غَالٍ جِدًّا.", "urdu": "بلا شبہ یہ کتاب عمدہ ہے لیکن اس کی قیمت بہت گراں ہے۔", "keywords": ["الْكِتَابَ", "سِعْرَهُ", "غَالٍ"], "difficulty": "easy"}]}, {"tamreen_no": 3, "title": "التمرین (3)", "type": "translation", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 11, "questions": [{"id": 1, "arabic": "إِنَّ أَسْرَعَ الدُّعَاءِ إِجَابَةً دَعْوَةُ غَائِبٍ لِغَائِبٍ.", "urdu": "بے شک سب سے جلد قبول ہونے والی دعا کسی غائب شخص کی غائب کے لئے دعا کرنا ہے۔", "keywords": ["أَسْرَعَ", "إِجَابَةً", "غَائِبٍ"], "difficulty": "medium"}, {"id": 2, "arabic": "إِنَّ الصَّدَقَةَ لَتُطْفِئُ غَضَبَ الرَّبِّ وَتَدْفَعُ مِيْتَةَ السُّوءِ.", "urdu": "بے شک صدقہ اللہ تعالیٰ کے غضب کو بجھا دیتا ہے اور بری موت کو دور کرتا ہے۔", "keywords": ["الصَّدَقَةَ", "لَتُطْفِئُ", "غَضَبَ"], "difficulty": "medium"}, {"id": 3, "arabic": "إِنَّ أَبْغَضَ الرِّجَالِ إِلَى اللهِ الْأَلَدُّ الْخَصِمُ.", "urdu": "بے شک اللہ کے نزدیک زیادہ ناپسندیدہ لوگ بڑے جھگڑالو ہیں۔", "keywords": ["أَبْغَضَ", "الرِّجَالِ", "الْخَصِمُ"], "difficulty": "medium"}, {"id": 4, "arabic": "إِنَّ أَحَبَّ الْأَعْمَالِ إِلَى اللهِ عَزَّ وَجَلَّ الْحُبُّ فِي اللهِ، وَالْبُغْضُ فِي اللهِ.", "urdu": "بے شک اللہ کے نزدیک سب سے افضل عمل اللہ کے لیے محبت کرنا اور اللہ کے لیے نفرت کرنا ہے۔", "keywords": ["أَحَبَّ", "الْأَعْمَالِ", "الْبُغْضُ"], "difficulty": "medium"}, {"id": 5, "arabic": "إِنَّ شَرَّ النَّاسِ مَنْزِلَةً عِنْدَ اللهِ يَوْمَ الْقِيَامَةِ مَنْ تَرَكَهُ النَّاسُ اتِّقَاءَ فُحْشِهِ.", "urdu": "یقیناً قیامت کے دن اللہ کے نزدیک سب سے بدتر وہ شخص ہوگا جسے لوگوں نے اس کی بد زبانی سے بچنے کی خاطر چھوڑ دیا۔", "keywords": ["شَرَّ", "الْقِيَامَةِ", "فُحْشِهِ"], "difficulty": "hard"}, {"id": 6, "arabic": "إِنَّمَا شِفَاءُ الْعِيِّ السُّؤَالُ.", "urdu": "جاہل انسان کا علاج سوال کرنا ہے۔", "keywords": ["شِفَاءُ", "الْعِيِّ", "السُّؤَالُ"], "difficulty": "easy"}, {"id": 7, "arabic": "إِنَّمَا الْأَعْمَالُ بِالْخَوَاتِيمِ.", "urdu": "اعمال کا دار و مدار خاتمہ کے اعتبار سے ہے۔", "keywords": ["الْأَعْمَالُ", "بِالْخَوَاتِيمِ"], "difficulty": "easy"}, {"id": 8, "arabic": "إِنَّمَا الْقَبْرُ رَوْضَةٌ مِنْ رِيَاضِ الْجَنَّةِ أَوْ حُفْرَةٌ مِنْ حُفَرِ النَّارِ.", "urdu": "قبر جنت کے باغوں میں سے ایک باغ ہے یا جہنم کے گڑھوں میں سے ایک گڑھا۔", "keywords": ["الْقَبْرُ", "رَوْضَةٌ", "حُفْرَةٌ"], "difficulty": "medium"}, {"id": 9, "arabic": "إِنَّ لِرَبِّكَ عَلَيْكَ حَقًّا، وَإِنَّ لِأَهْلِكَ عَلَيْكَ حَقًّا، وَإِنَّ لِبَدَنِكَ عَلَيْكَ حَقًّا، فَأَعْطِ كُلَّ ذِي حَقٍّ حَقَّهُ.", "urdu": "بے شک تم پر تمہارے رب کا حق ہے اور یقیناً بیوی بچوں کا حق ہے اور یقیناً تم پر بدن کا حق ہے تو ہر حق والے کو اس کا حق دو۔", "keywords": ["حَقًّا", "لِأَهْلِكَ", "لِبَدَنِكَ"], "difficulty": "medium"}, {"id": 10, "arabic": "فَلَعَلَّكَ بَاخِعٌ نَفْسَكَ عَلَى آثَارِهِمْ إِنْ لَم| يُؤْمِنُوا بِهَذَا الْحَدِيثِ أَسَفًا.", "urdu": "تو کہیں تم غم سے اپنی جان پر کھیل جاؤ گے ان کے پیچھے اگر وہ اس بات پر ایمان نہ لائیں۔", "keywords": ["بَاخِعٌ", "آثَارِهِمْ", "أَسَفًا"], "difficulty": "hard"}, {"id": 11, "arabic": "قَالَ يَلَيْتَ بَيْنِي وَبَيْنَكَ بُعْدَ الْمَشْرِقَيْنِ فَبِئْسَ الْقَرِينُ.", "urdu": "کہے گا ہائے کسی طرح مجھ میں تجھ میں پورب پچھم کا فاصلہ ہوتا تو کیا ہی برا ساتھی ہے۔", "keywords": ["يَلَيْتَ", "الْمَشْرِقَيْنِ", "الْقَرِينُ"], "difficulty": "hard"}]}, {"tamreen_no": 4, "title": "التمرین (4)", "type": "translation", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 15, "questions": [{"id": 1, "arabic": "الْأَسَاتِذَةُ كَأَنَّهُمْ آبَاءٌ عَطُوفُونَ.", "urdu": "اساتذہ گویا مہربان باپ ہیں۔", "keywords": ["الْأَسَاتِذَةُ", "آبَاءٌ", "عَطُوفُونَ"], "difficulty": "easy"}, {"id": 2, "arabic": "مَاءُ هَذِهِ الْبِرْكَةِ كَأَنَّهُ مِرْآةٌ صَافِيَةٌ.", "urdu": "اس تالاب کا پانی گویا کہ صاف آئینہ ہے۔", "keywords": ["الْبِرْكَةِ", "مِرْآةٌ", "صَافِيَةٌ"], "difficulty": "easy"}, {"id": 3, "arabic": "إِنَّ الْحَسَنَاتِ يُذْهِبْنَ السَّيِّئَاتِ.", "urdu": "یقیناً نیکیاں برائیوں کو لے جاتی ہیں۔", "keywords": ["الْحَسَنَاتِ", "يُذْهِبْنَ", "السَّيِّئَاتِ"], "difficulty": "easy"}, {"id": 4, "arabic": "لَيْتَ هَذِهِ التَّجَارِبَ الْعِلْمِيَّةَ تَنْجَحُ.", "urdu": "کاش یہ سائنسی تجربات کامیاب ہوتے۔", "keywords": ["التَّجَارِبَ", "الْعِلْمِيَّةَ", "تَنْجَحُ"], "difficulty": "medium"}, {"id": 5, "arabic": "إِنَّ الْحَيَاةَ الْعَمَلِيَّةَ طَرِيقٌ مَمْلُوءٌ بِالْأَشْوَاكِ.", "urdu": "یقیناً عملی زندگی کانٹوں سے بھرا ہوا راستہ ہے۔", "keywords": ["الْحَيَاةَ", "الْعَمَلِيَّةَ", "بِالْأَشْوَاكِ"], "difficulty": "medium"}, {"id": 6, "arabic": "يَعْلَمُ كُلُّ رَجُلٍ أَنَّ الْكَهْرُبَاءَ تَجْرِي فِي الْأَسْلَاكِ.", "urdu": "ہر شخص جانتا ہے کہ بجلی تاروں میں دوڑتی ہے۔", "keywords": ["الْكَهْرُبَاءَ", "تَجْرِي", "الْأَسْلَاكِ"], "difficulty": "medium"}, {"id": 7, "arabic": "هَؤُلَاءِ النَّاسُ مُخْلِصُونَ فِي نِيَّاتِهِمْ لَكِنَّهُمْ آثِمُونَ.", "urdu": "یہ لوگ اپنی نیتوں میں مخلص ہیں مگر خطا کار ہیں۔", "keywords": ["مُخْلِصُونَ", "نِيَّاتِهِمْ", "آثِمُونَ"], "difficulty": "medium"}, {"id": 8, "arabic": "قَبَضَ الشُّرْطَةُ عَلَى هَؤُلَاءِ النَّاسِ لَكِنَّهُمْ أَبْرِيَاءُ.", "urdu": "پولیس نے ان لوگوں کو گرفتار کیا لیکن یہ بے قصور ہیں۔", "keywords": ["قَبَضَ", "الشُّرْطَةُ", "أَبْرِيَاءُ"], "difficulty": "medium"}, {"id": 9, "arabic": "إِنَّ الزَّرَافَةَ أَطْوَلُ عُنُقًا مِنَ الْجَمَلِ.", "urdu": "یقیناً زرافہ کی گردن اونٹ کی گردن سے زیادہ لمبی ہے۔", "keywords": ["الزَّرَافَةَ", "أَطْوَلُ", "عُنُقًا"], "difficulty": "medium"}, {"id": 10, "arabic": "إِنَّ الْأَغْنِيَاءَ كَثِيرُونَ لَكِنَّهُمْ لَا يُرَاعُونَ الْفُقَرَاءَ.", "urdu": "یقیناً مالدار بہت ہیں لیکن وہ غریبوں کا خیال نہیں کرتے۔", "keywords": ["الْأَغْنِيَاءَ", "يُرَاعُونَ", "الْفُقَرَاءَ"], "difficulty": "medium"}, {"id": 11, "arabic": "يَعْلَمُ كُلُّ رَجُلٍ أَنَّ التَّدْخِينَ مُضِرٌّ لِلصِّحَّةِ.", "urdu": "ہر شخص جانتا ہے کہ سگریٹ نوشی صحت کے لیے مضر ہے۔", "keywords": ["التَّدْخِينَ", "مُضِرٌّ", "لِلصِّحَّةِ"], "difficulty": "medium"}, {"id": 12, "arabic": "لَيْتَنِي كُنْتُ أَذْهَبُ لِزِيَارَةِ الْحَرَمَيْنِ هَذَا الْعَامَ.", "urdu": "کیا ہی اچھا ہوتا کہ میں اس سال زیارت حرمین کے لیے جاتا۔", "keywords": ["لَيْتَنِي", "زِيَارَةِ", "الْحَرَمَيْنِ"], "difficulty": "medium"}, {"id": 13, "arabic": "وَقَعَ الْحَرِيقُ فِي هَذَا الْبَيْتِ أَمْسِ لَكِنَّ رِجَالَ الْمَطَافِئِ أَطْفَئُوا النَّارَ.", "urdu": "کل اس گھر میں آگ لگی لیکن فائر بریگیڈ کے عملے نے آگ بجھا دی۔", "keywords": ["الْحَرِيقُ", "الْمَطَافِئِ", "أَطْفَئُوا"], "difficulty": "hard"}, {"id": 14, "arabic": "أُخْبِرْتُ بِالْهَاتِفِ أَنَّ الشُّرْطَةَ قَبَضَ عَلَى نَهَّابٍ خَطِيرٍ.", "urdu": "مجھے فون پر بتایا گیا کہ پولیس نے ایک خطرناک ڈاکو کو گرفتار کیا ہے۔", "keywords": ["الْهَاتِفِ", "قَبَضَ", "نَهَّابٍ"], "difficulty": "hard"}, {"id": 15, "arabic": "إِنَّ الْأَطِبَّاءَ يَسْتَخْدِمُونَ الْكَهْرُبَاءَ فِي عِلَاجِ أَمْرَاضِ الْعِظَامِ وَالْجِلْدِ.", "urdu": "یقیناً ڈاکٹر ہڈی اور چمڑے کی بیماریوں کے علاج میں بجلی استعمال کرتے ہیں۔", "keywords": ["الْأَطِبَّاءَ", "الْعِظَامِ", "الْجِلْدِ"], "difficulty": "hard"}]}, {"tamreen_no": 5, "title": "التمرین (5)", "type": "translation", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 20, "questions": [{"id": 1, "arabic": "لَا طَالِبَ حَقٍّ مَخْذُولٌ.", "urdu": "حق کا کوئی طلب گار رسوا نہیں ہے۔", "keywords": ["طَالِبَ", "حَقٍّ", "مَخْذُولٌ"], "difficulty": "easy"}, {"id": 2, "arabic": "لَا سَاعِيًا فِي الْخَيْرِ مَذْمُومٌ.", "urdu": "بھلائی میں کوئی کوشش کرنے والا برا نہیں ہے۔", "keywords": ["سَاعِيًا", "الْخَيْرِ", "مَذْمُومٌ"], "difficulty": "easy"}, {"id": 3, "arabic": "لَا رَاضِيًا عَنِ الذُّلِّ حُرٌّ.", "urdu": "بے عزتی سے راضی رہنے والا آزاد نہیں ہے۔", "keywords": ["رَاضِيًا", "الذُّلِّ", "حُرٌّ"], "difficulty": "easy"}, {"id": 4, "arabic": "لَا مُؤَدِّيًا وَاجِبَهُ نَادِمٌ.", "urdu": "اپنی ذمہ داری کو ادا کرنے والا شرمندہ نہیں ہے۔", "keywords": ["مُؤَدِّيًا", "وَاجِبَهُ", "نَادِمٌ"], "difficulty": "easy"}, {"id": 5, "arabic": "لَا مُعَلِّمَاتِ فِي الْمَدْرَسَةِ.", "urdu": "مدرسہ میں استانیاں نہیں ہیں۔", "keywords": ["مُعَلِّمَاتِ", "الْمَدْرَسَةِ"], "difficulty": "easy"}, {"id": 6, "arabic": "لَا ضِدَّيْنِ يَجْتَمِعَانِ.", "urdu": "کوئی دو متضاد چیزیں ایک ساتھ جمع نہیں ہو سکتیں۔", "keywords": ["ضِدَّيْنِ", "يَجْتَمِعَانِ"], "difficulty": "easy"}, {"id": 7, "arabic": "لَا شَاهِدَ زُورٍ مَحْبُوبٌ.", "urdu": "جھوٹ کی گواہی دینے والا پیارا نہیں ہے۔", "keywords": ["شَاهِدَ", "زُورٍ", "مَحْبُوبٌ"], "difficulty": "easy"}, {"id": 8, "arabic": "لَا فَقْرَ أَضَرُّ مِنَ الْجَهْلِ.", "urdu": "جہالت سے زیادہ نقصان دہ کوئی غربت نہیں ہے۔", "keywords": ["فَقْرَ", "أَضَرُّ", "الْجَهْلِ"], "difficulty": "easy"}, {"id": 9, "arabic": "لَا الرَّجُلُ كَرِيمٌ وَلَا ابْنُهُ.", "urdu": "نہ آدمی شریف ہے اور نہ اس کا بیٹا۔", "keywords": ["الرَّجُلُ", "كَرِيمٌ", "ابْنُهُ"], "difficulty": "easy"}, {"id": 10, "arabic": "لَا خَيْرَ فِي وُدِّ امْرِئٍ مُتَقَلِّبٍ.", "urdu": "غیر مستقل مزاج آدمی کی محبت میں کوئی بھلائی نہیں ہے۔", "keywords": ["خَيْرَ", "وُدِّ", "مُتَقَلِّبٍ"], "difficulty": "medium"}, {"id": 11, "arabic": "لَا مُكْثِرَ مُزَاحٍ مَهِيبٌ.", "urdu": "زیادہ مذاق کرنے والا بارعب نہیں ہے۔", "keywords": ["مُكْثِرَ", "مُزَاحٍ", "مَهِيبٌ"], "difficulty": "medium"}, {"id": 12, "arabic": "لَا مُتَشَارِكَيْنِ فِي نَافِعٍ مُحْتَقَرَانِ.", "urdu": "کسی نفع میں شریک ہونے والے دو لوگ حقیر نہیں ہیں۔", "keywords": ["مُتَشَارِكَيْنِ", "نَافِعٍ", "مُحْتَقَرَانِ"], "difficulty": "medium"}, {"id": 13, "arabic": "لَا مُطِيعًا وَالِدَيْهِ مَحْرُومٌ مِنْ رَحْمَةِ اللهِ.", "urdu": "اپنے والدین کی اطاعت کرنے والا اللہ کی رحمت سے محروم نہیں ہے۔", "keywords": ["مُطِيعًا", "وَالِدَيْهِ", "مَحْرُومٌ"], "difficulty": "medium"}, {"id": 14, "arabic": "لَا نَهْضَةَ مَعَ الْجَهْلِ وَلَا تَقَدُّمَ بِغَيْرِ الْعِلْمِ.", "urdu": "جہالت کے ساتھ کوئی بیداری نہیں اور علم کے بغیر کوئی ترقی نہیں۔", "keywords": ["نَهْضَةَ", "الْجَهْلِ", "تَقَدُّمَ"], "difficulty": "medium"}, {"id": 15, "arabic": "لَا حِلْيَةَ أَثْمَنُ مِنْ مَكَارِمِ الْأَخْلَاقِ.", "urdu": "عمدہ اخلاق سے زیادہ قیمتی کوئی زیور نہیں۔", "keywords": ["حِلْيَةَ", "أَثْمَنُ", "الْأَخْلَاقِ"], "difficulty": "medium"}, {"id": 16, "arabic": "لَا سَبِيلَ إِلَى السَّلَامَةِ مِنْ أَلْسِنَةِ الْعَامَّةِ.", "urdu": "عام لوگوں کی زبانوں سے سلامتی کی کوئی راہ نہیں", "keywords": ["سَبِيلَ", "السَّلَامَةِ", "أَلْسِنَةِ"], "difficulty": "medium"}, {"id": 17, "arabic": "وَصَلْتُ فِي نِقَاشِي مَعَكُمْ إِلَى لَا شَيْءٍ.", "urdu": "میں تمہارے ساتھ بحث و مباحثہ میں کسی نتیجہ تک نہیں پہنچا۔", "keywords": ["نِقَاشِي", "وَصَلْتُ", "شَيْءٍ"], "difficulty": "hard"}, {"id": 18, "arabic": "لَا مُدَخِّنَ أَوْ شَارِبَ خَمْرٍ بَيْنَنَا.", "urdu": "ہمارے درمیان کوئی سگریٹ نوشی کرنے والا اور کوئی شرابی نہیں ہے۔", "keywords": ["مُدَخِّنَ", "شَارِبَ", "خَمْرٍ"], "difficulty": "hard"}, {"id": 19, "arabic": "لَا عَقْلَ كَالتَّدْبِيرِ، وَلَا حَسَبَ كَحُسْنِ الْخُلُقِ، وَلَا وَرَعَ كَالْكَفِّ.", "urdu": "تدبیر کی طرح کوئی عقل نہیں، اچھے اخلاق کی طرح کوئی حسب نہیں اور پرہیزگاری کی طرح کوئی تقویٰ نہیں۔", "keywords": ["عَقْلَ", "التَّدْبِيرِ", "الْخُلُقِ"], "difficulty": "hard"}, {"id": 20, "arabic": "لَا فَقْرَ أَشَدُّ مِنَ الْجَهْلِ، وَلَا مَالَ أَعَزُّ مِنَ الْعَقْلِ، وَلَا وَحْشَةَ مِنَ الْعُجْبِ.", "urdu": "جہالت سے زیادہ سخت کوئی افلاس نہیں، عقل سے زیادہ محبوب کوئی مال نہیں اور خود پسندی سے زیادہ سخت کوئی خوف نہیں۔", "keywords": ["أَشَدُّ", "الْعَقْلِ", "الْعُجْبِ"], "difficulty": "hard"}]}, {"tamreen_no": 6, "title": "التمرین (6)", "type": "translation", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 15, "questions": [{"id": 1, "arabic": "لَا مُكْثِرَ مُزَاحٍ جَادٌّ.", "urdu": "کوئی زیادہ مذاق کرنے والا باوقار نہیں۔", "keywords": ["مُكْثِرَ", "مُزَاحٍ", "جَادٌّ"], "difficulty": "easy"}, {"id": 2, "arabic": "لَا شَعْبَ أَكْثَرُ إِثَارَةً لِلْفِتَنِ مِنَ الْيَهُودِ.", "urdu": "یہود سے بڑھ کر کوئی فتنہ پرور قوم نہیں۔", "keywords": ["شَعْبَ", "إِثَارَةً", "الْيَهُودِ"], "difficulty": "medium"}, {"id": 3, "arabic": "لَا النِّسَاءُ فِي هَذَا الْمُنْتَزَهِ وَلَا الصِّبْيَانُ.", "urdu": "اس پارک میں نہ عورتیں ہیں نہ بچے۔", "keywords": ["النِّسَاءُ", "الْمُنْتَزَهِ", "الصِّبْيَانُ"], "difficulty": "easy"}, {"id": 4, "arabic": "لَا رَاكِبَ حِصَانٍ تَعْبَانُ.", "urdu": "کوئی گھوڑا سوار تھکا ماندہ نہیں ہے۔", "keywords": ["رَاكِبَ", "حِصَانٍ", "تَعْبَانُ"], "difficulty": "easy"}, {"id": 5, "arabic": "لَا طِفْلَيْنِ نَائِمَانِ عَلَى الْفِرَاشِ.", "urdu": "بستر پر کوئی دو بچے سوئے ہوئے نہیں ہیں۔", "keywords": ["طِفْلَيْنِ", "نَائِمَانِ", "الْفِرَاشِ"], "difficulty": "easy"}, {"id": 6, "arabic": "لَا سُكَّانَ شِبْهِ الْقَارَّةِ جَبَانَةٌ.", "urdu": "برصغیر کے باشندے ڈرپوک نہیں ہیں۔", "keywords": ["سُكَّانَ", "شِبْهِ الْقَارَّةِ", "جَبَانَةٌ"], "difficulty": "medium"}, {"id": 7, "arabic": "لَا مُشَغِّلَ الْحَاسُوبِ بَارِعًا فِي هَذِهِ الدَّائِرَةِ.", "urdu": "اس آفس میں کوئی ماہر کمپیوٹر آپریٹر نہیں ہے۔", "keywords": ["مُشَغِّلَ", "الْحَاسُوبِ", "الدَّائِرَةِ"], "difficulty": "medium"}, {"id": 8, "arabic": "لَا دُكَّانَ أَثْمَارٍ قَرِيبٌ مِنْ هَهُنَا.", "urdu": "پھلوں کی کوئی دکان یہاں سے قریب نہیں ہے۔", "keywords": ["دُكَّانَ", "أَثْمَارٍ", "قَرِيبٌ"], "difficulty": "easy"}, {"id": 9, "arabic": "لَا لِبَاسًا قُطْنِيًّا عِنْدَ هَؤُلَاءِ النَّاسِ.", "urdu": "ان ملازمین کے پاس کوئی سوتی لباس نہیں ہے۔", "keywords": ["لِبَاسًا", "قُطْنِيًّا", "النَّاسِ"], "difficulty": "medium"}, {"id": 10, "arabic": "لَا عَاصِيًا وَالِدَيْهِ كَشَاهِدٍ.", "urdu": "شاہد کی طرح کوئی اپنے والدین کا نافرمان نہیں ہے۔", "keywords": ["عَاصِيًا", "وَالِدَيْهِ", "شَاهِدٍ"], "difficulty": "medium"}, {"id": 11, "arabic": "لَا نَبِيَّ آخِرَ غَيْرَ نَبِيِّنَا.", "urdu": "ہمارے نبی کے سوا کوئی آخری نبی نہیں ہے۔", "keywords": ["نَبِيَّ", "آخِرَ", "نَبِيِّنَا"], "difficulty": "easy"}, {"id": 12, "arabic": "لَا الْعَصَبِيَّةُ فِي الْإِسْلَامِ وَلَا ضِيقُ الْفِكْرِ.", "urdu": "اسلام میں نہ کوئی تعصب ہے اور نہ تنگ نظری۔", "keywords": ["الْعَصَبِيَّةُ", "الْإِسْلَامِ", "ضِيقُ الْفِكْرِ"], "difficulty": "medium"}, {"id": 13, "arabic": "لَا مُسْرِفِينَ فِي الْأَعْرَاسِ مَحْبُوبُونَ.", "urdu": "شادیوں میں فضول خرچی کرنے والے پسندیدہ آدمی نہیں ہیں۔", "keywords": ["مُسْرِفِينَ", "الْأَعْرَاسِ", "مَحْبُوبُونَ"], "difficulty": "medium"}, {"id": 14, "arabic": "لَا كَانِسًا فِي فُصُولِ هَذِهِ الْجَامِعَةِ.", "urdu": "اس یونیورسٹی کی درس گاہوں میں کوئی جھاڑو لگانے والا نہیں ہے۔", "keywords": ["كَانِسًا", "فُصُولِ", "الْجَامِعَةِ"], "difficulty": "medium"}, {"id": 15, "arabic": "لَا مُقْتَصِدًا فِي الْمَصَارِيفِ مَلُومٌ.", "urdu": "اخراجات میں میانہ روی اختیار کرنے والا قابل مذمت نہیں ہے۔", "keywords": ["مُقْتَصِدًا", "الْمَصَارِيفِ", "مَلُومٌ"], "difficulty": "medium"}]}, {"tamreen_no": 7, "title": "التمرین (7)", "type": "translation", "instruction": "درج ذیل جملوں کا ترجمہ کرو اور ان کی نحوی ترکیب لکھو۔", "total_questions": 10, "questions": [{"id": 1, "arabic": "لَا حَارِسَيْنِ فِي الْبُسْتَانِ.", "urdu": "باغ میں محافظ نہیں ہیں۔", "keywords": ["حَارِسَيْنِ", "الْبُسْتَانِ"], "difficulty": "easy"}, {"id": 2, "arabic": "لَا مَعَ الْمُسَافِرِ مَاءٌ وَلَا زَادٌ.", "urdu": "مسافر کے پاس نہ پانی ہے اور نہ توشہ۔", "keywords": ["الْمُسَافِرِ", "مَاءٌ", "زَادٌ"], "difficulty": "easy"}, {"id": 3, "arabic": "لَا مُسْتَشِيرًا فِي أُمُورِهِ نَادِمٌ.", "urdu": "اپنے معاملات میں کوئی مشورہ کرنے والا شرمندہ نہیں ہے۔", "keywords": ["مُسْتَشِيرًا", "أُمُورِهِ", "نَادِمٌ"], "difficulty": "easy"}, {"id": 4, "arabic": "لَا مُؤْمِنَيْنِ مُتَخَاصِمُونَ.", "urdu": "مومن آپس میں جھگڑالو نہیں ہیں۔", "keywords": ["مُؤْمِنَيْنِ", "مُتَخَاصِمُونَ"], "difficulty": "easy"}, {"id": 5, "arabic": "لَا فَرْقَدَيْنِ مُفْتَرِقَانِ.", "urdu": "کوئی دو ستارے جدا نہیں ہیں۔", "keywords": ["فَرْقَدَيْنِ", "مُفْتَرِقَانِ"], "difficulty": "easy"}, {"id": 6, "arabic": "لَا سَاعِيًا فِي الصُّلْحِ مَكْرُوهٌ.", "urdu": "صلح میں کوئی کوشش کرنے والا قابل مذمت نہیں ہے۔", "keywords": ["سَاعِيًا", "الصُّلْحِ", "مَكْرُوهٌ"], "difficulty": "easy"}, {"id": 7, "arabic": "لَا دَفْتَرِي مَعِي وَلَا قَلَمِي.", "urdu": "میرے پاس نہ میری نوٹ بک ہے اور نہ میرا قلم۔", "keywords": ["دَفْتَرِي", "مَعِي", "قَلَمِي"], "difficulty": "easy"}, {"id": 8, "arabic": "لَا مُتَنَزَّهٌ فِي الْمَدِينَةِ بَلْ مُتَنَزَّهَاتٌ.", "urdu": "شہر میں ایک پارک نہیں بلکہ کئی پارک ہیں۔", "keywords": ["مُتَنَزَّهٌ", "الْمَدِينَةِ", "مُتَنَزَّهَاتٌ"], "difficulty": "medium"}, {"id": 9, "arabic": "لَا مُتَهَاوِنِينَ فِي أَدَاءِ وَاجِبَاتِهِمْ مَمْدُوحُونَ.", "urdu": "اپنے فرائض کی ادائیگی میں سستی کرنے والے قابل تعریف نہیں ہیں۔", "keywords": ["مُتَهَاوِنِينَ", "وَاجِبَاتِهِمْ", "مَمْدُوحُونَ"], "difficulty": "medium"}, {"id": 10, "arabic": "لَا طَاعَةَ لِمَخْلُوقٍ فِي مَعْصِيَةِ الْخَالِقِ.", "urdu": "اللہ تعالیٰ کی نافرمانی میں کسی مخلوق کی اطاعت و فرمانبرداری نہیں ہے۔", "keywords": ["طَاعَةَ", "مَخْلُوقٍ", "مَعْصِيَةِ"], "difficulty": "medium"}]}, {"tamreen_no": 8, "title": "التمرین (8)", "type": "passage", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 1, "questions": [{"id": 1, "arabic": "تَدِبُّ فِي مِصْرَ حَيَاةٌ لَم| تُعْهَدْ فِيْهَا مِنْ قَبْلُ، حَيَاةٌ كُلُّهَا خَيْرٌ وَ بَرَكَةٌ، فَفِي كُلِّ الْمَجَالَاتِ تَجِدُ الْحَيَوِيَّةَ الْمُتَدَفِّقَةَ، وَ النَّشَاطَ الْمَوْفُورَ، وَ التَّعَاوُنَ الصَّادِقَ فَلَا صَانِعَ مُهْمِلٌ، وَلَا صَاحِبَ مَصْنَعٍ مُسْتَغِلٌّ، وَلَا طَالِبًا لِلْعِلْمِ مُقَصِّرٌ، وَلَا فَلَّاحِيْنَ مُتَهَاوِنُونَ، وَلَا مَالِكِيْ أَرْضٍ مُسْتَبِدُّونَ، وَلَا رَبَّاتِ بُيُوتٍ مُسْرِفَاتٍ فِي إِنْفَاقِ دَخْلِهِنَّ، وَلَا سَيِّدَاتٍ غَافِلَاتٍ عَنْ أَدَاءِ وَاجِبِهِنَّ، فَالْكُلُّ يَعْمَلُ بِجِدٍّ وَ نَشَاطٍ، شِعَارُنَا يَدٌ تَحْمِلُ السِّلَاحَ وَ يَدٌ تَبْنِي، فَلَا بَيْنَنَا كَسُولٌ وَلَا مُتَعَطِّلٌ، وَالْفَرْدُ يَعْمَلُ لِصَالِحِ الْجَمَاعَةِ، وَالْجَمَاعَةُ تَعْمَلُ لِصَالِحِ الْفَرْدِ، فَلَا الْأَثَرَةُ تُسَيْطِرُ عَلَيْنَا، وَلَا الْمَصَالِحُ الشَّخْصِيَّةُ، وَهَذَا بِلَا شَكٍّ سَيُحَقِّقُ الْأَمَلَ، وَ يُوصِلُ إِلَى الْغَايَةِ الْمَنْشُودَةِ لَا مَحَالَةَ.", "urdu": "مصر میں ایسی زندگی رواں دواں ہے جو اس سے پہلے اس میں نہیں پائی گئی، پوری زندگی خیر و برکت سے، تو تم ہر فیلڈ میں مصروف زندگی، کامل چستی اور سچا تعاون پاؤ گے، تو کوئی کاریگر بیکار نہیں ہے، کوئی کارخانہ والا استحصال کرنے والا نہیں ہے، کوئی علم کا طلب کرنے والا کوتاہی کرنے والا نہیں ہے، کسان لاپرواہ نہیں ہیں، زمین والے ظالم نہیں ہیں، گھر والیاں اپنی آمدنی کے خرچ میں فضول خرچی کرنے والی نہیں ہیں، خواتین اپنی ذمہ داریوں کی ادائیگی سے غافل نہیں ہیں، تو ہر ایک محنت اور چستی سے کام کرتا ہے، ہماری نشانی ایسا ہاتھ ہے جو ہتھیار اٹھاتا ہے اور ایسا ہاتھ ہے جو تعمیر کرتا ہے، تو ہمارے درمیان نہ کوئی سست ہے اور نہ بے کار، فرد جماعت کی بھلائی کے لیے کام کرتا ہے اور جماعت فرد کی بھلائی کے لیے کام کرتی ہے، نہ ہم پر خود غرضی مسلط ہوتی ہے اور نہ شخصی مصلحتیں، اور یہ چیز بلاشبہ عنقریب امید کو پورا کر دے گی اور یقیناً مطلوبہ مقصد تک پہنچا دے گی۔", "keywords": ["مِصْرَ", "الْمُتَدَفِّقَةَ", "الْمَنْشُودَةِ"], "difficulty": "hard"}]}, {"tamreen_no": 9, "title": "التمرین (9)", "type": "translation", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 15, "questions": [{"id": 1, "arabic": "أُحِبُّ تَسَلُّقَ الْجِبَالِ وَلَا سِيَّمَا الشَّاهِقَةِ.", "urdu": "مجھے پہاڑوں کی چڑھائی پسند ہے خاص کر بلند پہاڑوں کی۔", "keywords": ["تَسَلُّقَ", "الْجِبَالِ", "الشَّاهِقَةِ"], "difficulty": "medium"}, {"id": 2, "arabic": "يُنْفِقُ الْعَاقِلُ مَالَهُ فِي وُجُوهِ الْخَيْرِ وَلَا سِيَّمَا مُسَاعَدَةِ الْفُقَرَاءِ.", "urdu": "عقلمند اپنا مال بھلائی کے راستوں میں خرچ کرتا ہے خصوصاً فقیروں کی مدد کرنے میں۔", "keywords": ["يُنْفِقُ", "الْعَاقِلُ", "الْفُقَرَاءِ"], "difficulty": "medium"}, {"id": 3, "arabic": "يُكَافَأُ الْمُجِدُّونَ وَلَا سِيَّمَا مُجِدٌّ خُلُقُهُ كَرِيمٌ.", "urdu": "محنتی لوگوں کو بدلہ دیا جاتا ہے بالخصوص اس محنتی کو جس کے اخلاق اچھے ہوں۔", "keywords": ["يُكَافَأُ", "الْمُجِدُّونَ", "كَرِيمٌ"], "difficulty": "medium"}, {"id": 4, "arabic": "أُحِبُّ سُكْنَى الْقُرَى وَلَا سِيَّمَا قَرْيَةً بِوِلَايَةِ كَشْمِيرَ.", "urdu": "میں گاؤں کی رہائش پسند کرتا ہوں خاص طور پر صوبہ کشمیر کے گاؤں کی رہائش۔", "keywords": ["سُكْنَى", "الْقُرَى", "كَشْمِيرَ"], "difficulty": "medium"}, {"id": 5, "arabic": "رَبِحَ تُجَّارُ الْمَدِينَةِ وَلَا سِيَّمَا تُجَّارُ الْقُطْنِ.", "urdu": "شہر کے تاجروں نے فائدہ اٹھایا خاص طور پر روئی کے تاجروں نے۔", "keywords": ["رَبِحَ", "تُجَّارُ", "الْقُطْنِ"], "difficulty": "medium"}, {"id": 6, "arabic": "يَضُرُّ السَّهَرُ كُلَّ طِفْلٍ وَلَا سِيَّمَا طِفْلٌ جِسْمُهُ ضَعِيفٌ.", "urdu": "بے خوابی ہر بچہ کو نقصان دیتی ہے بالخصوص اس بچہ کو جس کا جسم کمزور ہے۔", "keywords": ["السَّهَرُ", "طِفْلٌ", "ضَعِيفٌ"], "difficulty": "medium"}, {"id": 7, "arabic": "زُرْتُ حَدِيقَةً فَزَاعَنِي كُلُّ شَيْءٍ لَا سِيَّمَا حُسْنُ الْوُرُودِ الْمُخْتَلِفَةِ الْأَلْوَانِ.", "urdu": "میں نے ایک باغ کی سیر کی تو مجھے ہر چیز نے خوش کر دیا بالخصوص مختلف رنگوں کے پھولوں کی خوبصورتی نے۔", "keywords": ["حَدِيقَةً", "الْوُرُودِ", "الْأَلْوَانِ"], "difficulty": "hard"}, {"id": 8, "arabic": "إِسْتَشِيْرِ الْأَصْدِقَاءَ وَلَا سِيَّمَا صَدِيْقًا عَاقِلًا.", "urdu": "دوستوں سے مشورہ کر خاص طور پر عقل مند دوست سے۔", "keywords": ["إِسْتَشِيْرِ", "الْأَصْدِقَاءَ", "عَاقِلًا"], "difficulty": "medium"}, {"id": 9, "arabic": "الْفَاكِهَةُ غِذَاءٌ مُفِيْدٌ وَلَا سِيَّمَا الْبُرْتُقَالُ.", "urdu": "میوہ فائدہ مند غذا ہے بالخصوص سنترا۔", "keywords": ["الْفَاكِهَةُ", "غِذَاءٌ", "الْبُرْتُقَالُ"], "difficulty": "easy"}, {"id": 10, "arabic": "اِسْتَمْتَعْتُ بِقِرَاءَةِ هَذَا الدِّيْوَانِ وَلَا سِيَّمَا هَاتَيْنِ الْقَصِيْدَتَيْنِ.", "urdu": "میں نے اس دیوان کا پڑھنا غور سے سنا خاص طور پر یہ دو قصیدے۔", "keywords": ["اِسْتَمْتَعْتُ", "الدِّيْوَانِ", "الْقَصِيْدَتَيْنِ"], "difficulty": "hard"}, {"id": 11, "arabic": "كَثْرَةُ الْأَكْلِ تَضُرُّ الْأَجْسَامَ وَلَا سِيَّمَا الْمِعْدَةَ.", "urdu": "زیادہ کھانا جسموں کو نقصان دیتا ہے خاص طور پر معدہ کو۔", "keywords": ["كَثْرَةُ", "الْأَجْسَامَ", "الْمِعْدَةَ"], "difficulty": "medium"}, {"id": 12, "arabic": "اِتَّقُوا الْمُزَاحَ وَلَا سِيَّمَا مُزَاحٌ يُؤَدِّي إِلَى الْخِصَامِ.", "urdu": "مذاق سے پرہیز کرو بالخصوص ایسی مذاق سے جو جھگڑے کا سبب بنتی ہو۔", "keywords": ["اِتَّقُوا", "الْمُزَاحَ", "الْخِصَامِ"], "difficulty": "medium"}, {"id": 13, "arabic": "طَالِعُوا الْكُتُبَ فِي الْإِجَازَةِ السَّنَوِيَّةِ وَلَا سِيَّمَا كُتُبَ الْأَدَبِ.", "urdu": "سالانہ چھٹی میں کتابوں کا مطالعہ کرو خاص طور پر ادب کی کتابوں کا۔", "keywords": ["طَالِعُوا", "الْإِجَازَةِ", "الْأَدَبِ"], "difficulty": "medium"}, {"id": 14, "arabic": "أَلْقَى رَئِيْسُ الْجَامِعَةِ الْأَشْرَفِيَّةِ مُحَاضَرَةً فَاسْتَفَادَ مِنْهَا جَمِيْعُ الطُّلَّابِ وَلَا سِيَّمَا هَاشِمٌ.", "urdu": "الجامعۃ الاشرفیہ کے پرنسپل نے ایک لکچر دیا جس سے تمام طلبہ نے فائدہ حاصل کیا خاص کر ہاشم نے۔", "keywords": ["الْجَامِعَةِ", "مُحَاضَرَةً", "فَاسْتَفَادَ"], "difficulty": "hard"}, {"id": 15, "arabic": "ذَهَبْتُ إِلَى الْمُسْتَشْفَى وَعُدْتُ الْمَرْضَى وَلَا سِيَّمَا جَارِي حَامِدٌ.", "urdu": "میں ہاسپٹل گیا اور مریضوں کی عیادت کی بالخصوص اپنے پڑوسی حامد کی۔", "keywords": ["الْمُسْتَشْفَى", "الْمَرْضَى", "جَارِي"], "difficulty": "hard"}]}, {"tamreen_no": 10, "title": "التمرین (10)", "type": "translation", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 13, "questions": [{"id": 1, "arabic": "أُسَاعِدُ الطُّلَّابَ مِنَ الْمَدَارِسِ الدِّيْنِيَّةِ وَلَا سِيَّمَا الْمُجِدُّونَ.", "urdu": "میں دینی مدارس کے طلبہ کی مدد کرتا ہوں، خصوصاً محنتی طلبہ کی۔", "keywords": ["أُسَاعِدُ", "الْمَدَارِسِ", "الْمُجِدُّونَ"], "difficulty": "medium"}, {"id": 2, "arabic": "قَبَضَ الْبُوْلِيْسُ عَلَى الْقُطَّاعِ وَعَاقَبَهُمْ وَلَا سِيَّمَا سَيِّدَهُمْ.", "urdu": "پولیس نے ڈاکوؤں کو گرفتار کیا اور انہیں سزا دی، خصوصاً ان کے سردار کو۔", "keywords": ["الْبُوْلِيْسُ", "الْقُطَّاعِ", "سَيِّدَهُمْ"], "difficulty": "hard"}, {"id": 3, "arabic": "أَعْجَبَنِي غُرُفَاتُ بَيْتِكَ وَلَا سِيَّمَا قَاعَةُ الْإِسْتِقْبَالِ.", "urdu": "مجھے تمہارے گھر کے کمرے پسند آئے، بالخصوص نشست کا کمرہ۔", "keywords": ["أَعْجَبَنِي", "غُرُفَاتُ", "قَاعَةُ"], "difficulty": "medium"}, {"id": 4, "arabic": "تَسِيْرُ الْقُطُرُ بِسُرْعَةٍ فَائِقَةٍ وَلَا سِيَّمَا الْقُطُرُ الَّتِي تَسِيْرُ بِالْكَهْرُبَاءِ.", "urdu": "ریل گاڑیاں بڑی برق رفتاری سے چلتی ہیں، خصوصاً بجلی سے چلنے والی۔", "keywords": ["الْقُطُرُ", "بِسُرْعَةٍ", "الْكَهْرُبَاءِ"], "difficulty": "hard"}, {"id": 5, "arabic": "يَأْكُلُ مَحْمُوْدٌ الْفَوَاكِهَ كُلَّهَا، وَلَا سِيَّمَا الْأَنْبَجَ وَالْبُرْتُقَالَ.", "urdu": "محمود سارے پھل کھاتا ہے، خصوصاً آم اور سنترا۔", "keywords": ["مَحْمُوْدٌ", "الْأَنْبَجَ", "الْبُرْتُقَالَ"], "difficulty": "medium"}, {"id": 6, "arabic": "جَلَّدْتُمْ جَمِيْعَ الْكُتُبِ وَلَا سِيَّمَا الْكُتُبَ الْقَدِيْمَةَ.", "urdu": "تم لوگوں نے ساری کتابوں کی جلد سازی کی، خصوصاً پرانی کتابوں کی۔", "keywords": ["جَلَّدْتُمْ", "الْكُتُبِ", "الْقَدِيْمَةَ"], "difficulty": "medium"}, {"id": 7, "arabic": "طَالِعُوا الْكُتُبَ الْإِسْلَامِيَّةَ فِي الْإِجَازَةِ السَّنَوِيَّةِ وَلَا سِيَّمَا الْكُتُبَ الْفِقْهِيَّةَ.", "urdu": "سالانہ چھٹی میں اسلامی کتابوں کا مطالعہ کرو اور خاص طور پر فقہی کتابوں کا۔", "keywords": ["طَالِعُوا", "الْإِجَازَةِ", "الْفِقْهِيَّةَ"], "difficulty": "hard"}, {"id": 8, "arabic": "صَنَّفَ الْإِمَامُ أَحْمَد رِضَا الْقَادِرِيُّ الْبَرَيْلَوِيُّ الْكُتُبَ فِي الْعُلُوْمِ الْمُخْتَلِفَةِ وَلَا سِيَّمَا فِي عِلْمِ الْفِقْهِ.", "urdu": "امام احمد رضا قادری بریلوی نے مختلف علوم وفنون میں کتابیں لکھیں، خصوصاً علم فقہ میں۔", "keywords": ["صَنَّفَ", "الْعُلُوْمِ", "الْفِقْهِ"], "difficulty": "hard"}, {"id": 9, "arabic": "جَمِيْعُ الْمُؤَلَّفَاتِ لِلْإِمَامِ الْغَزَالِيِّ مُفِيْدَةٌ وَلَا سِيَّمَا \"إِحْيَاءُ عُلُوْمِ الدِّيْنِ\".", "urdu": "امام غزالی کی تمام تصنیفات مفید ہیں، اور خاص طور پر \"احیاء علوم الدین\"۔", "keywords": ["الْمُؤَلَّفَاتِ", "مُفِيْدَةٌ", "إِحْيَاءُ"], "difficulty": "hard"}, {"id": 10, "arabic": "أَصْلَحَ الْغَوْثُ الْأَعْظَمُ الشَّيْخُ عَبْدُ الْقَادِرِ الْجِيْلَانِيُّ عَلَيْهِ الرَّحْمَةُ الْمُجْتَمَعَ الْفَاسِدَ بِمَوَاهِبِهِ وَلَا سِيَّمَا بِخُطَبِهِ الْمُؤَثِّرَةِ.", "urdu": "غوث اعظم شیخ عبدالقادر جیلانی علیہ الرحمہ نے اپنی خداداد صلاحیتوں سے بگڑے ہوئے معاشرے کی اصلاح کی، خصوصاً اپنی موثر تقریروں کے ذریعے۔", "keywords": ["أَصْلَحَ", "الْمُجْتَمَعَ", "الْمُؤَثِّرَةِ"], "difficulty": "hard"}, {"id": 11, "arabic": "يَرَى النَّاسُ الْهِلَالَ وَلَا سِيَّمَا هِلَالَ عِيْدِ الْفِطْرِ.", "urdu": "لوگ نیا چاند دیکھتے ہیں اور خاص طور سے عید الفطر کا چاند۔", "keywords": ["الْهِلَالَ", "عِيْدِ الْفِطْرِ"], "difficulty": "medium"}, {"id": 12, "arabic": "دَارَ الْمُفَتِّشُ الْمَدَارِسَ الرَّسْمِيَّةَ وَلَا سِيَّمَا مَدْرَسَةَ قَرْيَتِي.", "urdu": "انسپکٹر نے سرکاری اسکولوں کا دورہ کیا، خاص طور سے میرے گاؤں کے اسکول کا۔", "keywords": ["الْمُفَتِّشُ", "الرَّسْمِيَّةَ", "قَرْيَتِي"], "difficulty": "hard"}, {"id": 13, "arabic": "يُكْرِمُ الْوِلْدَانُ الْمُجِدُّوْنَ كِبَارَهُمْ وَلَا سِيَّمَا الْوَالِدَيْنِ وَالْأَسَاتِذَةَ.", "urdu": "اچھے لڑکے اپنے بڑوں کا احترام کرتے ہیں، اور خاص طور سے والدین اور اساتذہ کا۔", "keywords": ["الْوِلْدَانُ", "كِبَارَهُمْ", "الْوَالِدَيْنِ"], "difficulty": "hard"}]}, {"tamreen_no": 11, "title": "التمرین (11)", "type": "translation", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 20, "questions": [{"id": 1, "arabic": "رَأَيْتُ الْقَمَرَ مُضِيْئًا.", "urdu": "میں نے چاند کو روشن جانا۔", "keywords": ["رَأَيْتُ", "الْقَمَرَ", "مُضِيْئًا"], "difficulty": "easy"}, {"id": 2, "arabic": "عَلِمْتُكَ صَادِقَ الْوُدِّ.", "urdu": "میں نے تجھے سچی محبت والا جانا۔", "keywords": ["عَلِمْتُكَ", "صَادِقَ", "الْوُدِّ"], "difficulty": "easy"}, {"id": 3, "arabic": "زَعَمَ سُهَيْلٌ عَامِرًا طَبِيْبًا.", "urdu": "سہیل نے عامر کو طبیب گمان کیا۔", "keywords": ["زَعَمَ", "عَامِرًا", "طَبِيْبًا"], "difficulty": "easy"}, {"id": 4, "arabic": "ظَنَنْتُكَ مُقَصِّرًا فِي عَمَلِكَ.", "urdu": "میں نے تجھے اپنے کام میں کوتاہی کرنے والا پایا۔", "keywords": ["ظَنَنْتُكَ", "مُقَصِّرًا", "عَمَلِكَ"], "difficulty": "easy"}, {"id": 5, "arabic": "وَجَدْتُ كَلَامَكَ مَعْسُوْلًا.", "urdu": "میں نے تیرے کلام کو شیریں پایا۔", "keywords": ["وَجَدْتُ", "كَلَامَكَ", "مَعْسُوْلًا"], "difficulty": "easy"}, {"id": 6, "arabic": "لَا تَظُنَّ سُكُوْتِي عَجْزًا.", "urdu": "میرے خاموشی کو مجبوری گمان نہ کر۔", "keywords": ["تَظُنَّ", "سُكُوْتِي", "عَجْزًا"], "difficulty": "easy"}, {"id": 7, "arabic": "أَعُدُّ زِيَارَتَكَ لَنَا الْيَوْمَ عِيْدًا.", "urdu": "میں آج تیری ملاقات کو اپنے لیے عید سمجھتا ہوں۔", "keywords": ["أَعُدُّ", "زِيَارَتَكَ", "عِيْدًا"], "difficulty": "easy"}, {"id": 8, "arabic": "حَسِبْتُ أَنَّ سَيَصِيْرُ الْحَقُّ سَائِدًا.", "urdu": "میرا گمان ہے کہ حق عام ہو جائے گا۔", "keywords": ["حَسِبْتُ", "الْحَقُّ", "سَائِدًا"], "difficulty": "medium"}, {"id": 9, "arabic": "يُخَالُ الْجَبَانُ فِرَارَهُ مُطِيْلًا لِعُمْرِهِ.", "urdu": "بزدل اپنے بھاگنے کو اپنی عمر کو دراز کرنے والا گمان کرتا ہے۔", "keywords": ["الْجَبَانُ", "فِرَارَهُ", "لِعُمْرِهِ"], "difficulty": "hard"}, {"id": 10, "arabic": "عَلِمَ الْمُدَرِّسُ الطُّلَّابَ فَاهِمِيْنَ.", "urdu": "استاد نے طلبہ کو سمجھنے والا گمان کیا۔", "keywords": ["الْمُدَرِّسُ", "الطُّلَّابَ", "فَاهِمِيْنَ"], "difficulty": "medium"}, {"id": 11, "arabic": "وَجَدْتُ الدِّرَاسَاتِ الْحُرَّةَ فِي الْعُطْلَةِ نَافِعَةً لِلْغَايَةِ.", "urdu": "میں نے آزاد مطالعہ کو چھٹی کے دنوں میں بے حد نفع بخش پایا۔", "keywords": ["الدِّرَاسَاتِ", "الْعُطْلَةِ", "نَافِعَةً"], "difficulty": "hard"}, {"id": 12, "arabic": "دَرَيْتُ الْعِلْمَ نَافِعًا وَالْجَهْلَ ضَارًّا.", "urdu": "میں نے علم کو نفع بخش اور جہل کو نقصان دہ جانا۔", "keywords": ["دَرَيْتُ", "الْعِلْمَ", "الْجَهْلَ"], "difficulty": "medium"}, {"id": 13, "arabic": "هَبْ نَفْسَكَ صَاحِبَ الْقَضِيَّةِ ثُم| تَصَرَّفْ.", "urdu": "خود کو مقدمہ والا سمجھ پھر تصرف کر۔", "keywords": ["نَفْسَكَ", "الْقَضِيَّةِ", "تَصَرَّفْ"], "difficulty": "hard"}, {"id": 14, "arabic": "يُظَنُّ أَنَّ أَوَّلَ مَنْ تَكَلَّمَ الْعَرَبِيَّةَ يَعْرُبُ بْنُ قَحْطَانَ.", "urdu": "پہلی مرتبہ عربی میں بات کرنے والے کو یعرب بن قحطان گمان کیا جاتا ہے۔", "keywords": ["تَكَلَّمَ", "الْعَرَبِيَّةَ", "يَعْرُبُ"], "difficulty": "hard"}, {"id": 15, "arabic": "وَجَدْتُ أَنَّ الْإِسْلَامَ سَبَقَ الْعَالَمَ فِي إِعْلَانِ حُقُوقِ الْإِنْسَانِ.", "urdu": "میں نے پایا کہ اسلام انسان کے حقوق کا اعلان کرنے میں دنیا سے بڑھ گیا۔", "keywords": ["الْإِسْلَامَ", "حُقُوقِ", "الْإِنْسَانِ"], "difficulty": "hard"}, {"id": 16, "arabic": "تَرَى أَنَّ الطُّفُولَةَ صَانِعَةُ الْمُسْتَقْبَلِ وَأَنَّ رِعَايَةَ الْأَطْفَالِ ضَمَانٌ لِلنَّهْضَةِ وَالتَّقَدُّمِ.", "urdu": "ہم سمجھتے ہیں کہ بچپن مستقبل کو سنوارنے والا ہے، اور بچوں کی نگرانی بیداری اور ترقی کی ضامن ہے۔", "keywords": ["الطُّفُولَةَ", "الْمُسْتَقْبَلِ", "ضَمَانٌ"], "difficulty": "hard"}, {"id": 17, "arabic": "لَتَجِدَنَّ أَشَدَّ النَّاسِ عَدَاوَةً لِلَّذِينَ آمَنُوا الْيَهُودَ وَالَّذِينَ أَشْرَكُوا وَلَتَجِدَنَّ أَقْرَبَهُمْ مَوَدَّةً لِلَّذِينَ آمَنُوا الَّذِينَ قَالُوا إِنَّا نَصَارَى.", "urdu": "ضرور تم مسلمانوں کا سب سے بڑھ کر دشمن یہودیوں اور مشرکوں کو پاؤ گے اور ضرور تم مسلمانوں کی دوستی میں سب سے زیادہ قریب ان کو پاؤ گے جو کہتے تھے ہم نصاریٰ ہیں۔", "keywords": ["عَدَاوَةً", "الْيَهُودَ", "نَصَارَى"], "difficulty": "hard"}, {"id": 18, "arabic": "وَلَا تَحْسَبَنَّ اللهَ غَافِلًا عَمَّا يَعْمَلُ الظَّالِمُونَ.", "urdu": "اور ہرگز اللہ کو بے خبر نہ جاننا ظالموں کے کام سے۔", "keywords": ["تَحْسَبَنَّ", "غَافِلًا", "الظَّالِمُونَ"], "difficulty": "medium"}, {"id": 19, "arabic": "وَتَرَى كَثِيرًا مِنْهُمْ يُسَارِعُونَ فِي الْإِثْمِ وَالْعُدْوَانِ.", "urdu": "اور ان میں سے تم اکثر کو دیکھو گے کہ گناہ اور زیادتی اور حرام خوری پر دوڑتے ہیں۔", "keywords": ["يُسَارِعُونَ", "الْإِثْمِ", "الْعُدْوَانِ"], "difficulty": "hard"}, {"id": 20, "arabic": "ظَنَنْتُمْ أَنَّ اللهَ لَا يَعْلَمُ كَثِيرًا مِمَّا تَعْمَلُونَ.", "urdu": "تم تو سمجھ بیٹھے تھے کہ اللہ تمہارے بہت سے کام نہیں جانتا۔", "keywords": ["ظَنَنْتُمْ", "يَعْلَمُ", "تَعْمَلُونَ"], "difficulty": "medium"}]}, {"tamreen_no": 12, "title": "التمرین (12)", "type": "translation", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 16, "questions": [{"id": 1, "arabic": "ظَنَّ عَامِرٌ السَّرَابَ اللَّامِعَ مَاءً.", "urdu": "عامر نے چمکتے ہوئے سراب کو پانی سمجھا۔", "keywords": ["عَامِرٌ", "السَّرَابَ", "مَاءً"], "difficulty": "easy"}, {"id": 2, "arabic": "حَسِبَ عُلَمَاءُ الطَّبِيْعَةِ أَنَّ الْأَرْضَ تَدُوْرُ حَوْلَ الشَّمْسِ.", "urdu": "سائنس دانوں کا گمان ہے کہ زمین، سورج کے گرد چکر لگاتی ہے۔", "keywords": ["عُلَمَاءُ", "الْأَرْضَ", "تَدُوْرُ"], "difficulty": "medium"}, {"id": 3, "arabic": "كَانَ الْإِمَامُ أَحْمَد رِضَا الْبَرَيْلَوِيُّ يَرَى حُبَّ الرَّسُولِ رَأْسَ الْإِيْمَانِ.", "urdu": "امام احمد رضا بریلوی عشق رسول کو روح ایمان سمجھتے تھے۔", "keywords": ["الْبَرَيْلَوِيُّ", "يَرَى", "الْإِيْمَانِ"], "difficulty": "hard"}, {"id": 4, "arabic": "إِعْلَمُوا أَنَّ الرِّ يَا وَالْمُظَاهَرَةَ يُحْرِقُ الْأَعْمَالُ الصَّالِحَةُ فَيُحَوِّلُهَا إِلَى الرَّمَادِ.", "urdu": "یہ یقین جانو کہ ریا اور دکھاوا اعمال صالحہ کو جلا کر راکھ کر دیتا ہے۔", "keywords": ["الرِّ يَا", "الْمُظَاهَرَةَ", "الرَّمَادِ"], "difficulty": "hard"}, {"id": 5, "arabic": "هَبْ أَنَّ جَارَكَ شِرِّيْرٌ فَأَحْسِنْ إِلَيْهِ.", "urdu": "مان لو کہ تمہارا پڑوسی شریر ہے، پھر بھی اس کے ساتھ اچھا سلوک کرو۔", "keywords": ["هَبْ", "جَارَكَ", "شِرِّيْرٌ"], "difficulty": "medium"}, {"id": 6, "arabic": "لَا يَسْتَكْبِرُ عِبَادُ اللهِ الصَّالِحُوْنَ وَلَا يَحْسَبُوْنَ أَنْفُسَهُمْ خَيْرًا مِنَ الْآخَرِيْنَ.", "urdu": "اللہ کے نیک بندے تکبر نہیں کرتے اور خود کو دوسروں سے برتر نہیں جانتے۔", "keywords": ["يَسْتَكْبِرُ", "يَحْسَبُوْنَ", "الْآخَرِيْنَ"], "difficulty": "hard"}, {"id": 7, "arabic": "سَقَطَتْ فَنَاجِيْنُ الشَّايِ مِنْ يَدِ الْجَارِيَةِ عَلَى الْأَرْضِ وَظَنَّتْ أَنَّهَا كُسِرَتْ.", "urdu": "خادمہ کے ہاتھ سے چائے کی پیالیاں زمین پر گریں اور اس نے سمجھا کہ وہ ٹوٹ گئیں۔", "keywords": ["فَنَاجِيْنُ", "الْجَارِيَةِ", "كُسِرَت|"], "difficulty": "hard"}, {"id": 8, "arabic": "يَحْسَبُ بَع| بَعْضُ الطُّلَّابِ مِنَ الْمَدَارِسِ الْحُكُوْمِيَّةِ أَنْفُسَهُمْ أَحْرَارًا مِنَ الْقَوَانِيْنِ الدِّرَاسِيَّةِ.", "urdu": "سرکاری اسکول کے کچھ طلبہ اپنے آپ کو تمام تعلیمی قوانین سے آزاد سمجھتے ہیں۔", "keywords": ["الْمَدَارِسِ", "ال| الْحُكُوْمِيَّةِ", "أَحْرَارًا"], "difficulty": "hard"}, {"id": 9, "arabic": "إِخْدِمُوا الْوَالِدَيْنِ وَعُدُّوْهُمَا نِعْمَةَ اللهِ.", "urdu": "والدین کی خدمت کرو اور انہیں اللہ کی نعمت سمجھو۔", "keywords": ["إِخْدِمُوا", "الْوَالِدَيْنِ", "نِعْمَةَ"], "difficulty": "medium"}, {"id": 10, "arabic": "إِشْتَرَى سَمِيْرٌ الْأَحْذِيَةَ فِي سُوْقِ كَانْفُوْرَ وَظَنَّهَا مَصْنُوْعَةً مِنَ الْجِلْدِ.", "urdu": "سمیر نے کانپور کے بازار میں جوتے خریدے اور انہیں چمڑے کا بنا ہوا گمان کیا۔", "keywords": ["الْأَحْذِيَةَ", "كَانْفُوْرَ", "الْجِلْدِ"], "difficulty": "hard"}, {"id": 11, "arabic": "يُعَدُّ الْكَهْرُبَاءُ وَالْحَاسُوْبُ لِكُلِّ دَائِرَةٍ وَدُكَّانٍ كَبِيْرٍ ضَرُوْرِيًّا فِي هَذَا الْعَصْرِ.", "urdu": "اس وقت بجلی اور کمپیوٹر ہر آفس اور بڑی دکان کے لیے ضروری سمجھا جاتا ہے۔", "keywords": ["الْكَهْرُبَاءُ", "الْحَاسُوْبُ", "الْعَصْرِ"], "difficulty": "hard"}, {"id": 12, "arabic": "ظَنَنْتُ إِطَارَ النَّظَّارَةِ مَتِيْنًا وَقَد| وَقَدْ كَانَ وَاهِنًا جِدًّا.", "urdu": "میں نے چشمے کے فریم کو مضبوط سمجھا، جب کہ وہ نہایت کمزور نکلا۔", "keywords": ["إِطَارَ", "النَّظَّارَةِ", "وَاهِنًا"], "difficulty": "hard"}, {"id": 13, "arabic": "ظَنَّ الْبُوْلِيْسُ الْجَالِسِيْنَ سَارِقِيْنَ فِي ظُلْمَةِ اللَّيْلِ وَ قَبَضَ عَلَيْهِمَا.", "urdu": "پولیس نے رات کے اندھیرے میں بیٹھنے والے دو آدمیوں کو چور سمجھا اور گرفتار کر لیا۔", "keywords": ["الْبُوْلِيْسُ", "سَارِقِيْنَ", "قَبَضَ"], "difficulty": "hard"}, {"id": 14, "arabic": "مَنْ عَلِمَ بِالْجَزْمِ أَنَّهُ مُلَاقِي اللهِ بَعْدَ الْمَوْتِ يَمْتَثِلُ الْأَحْكَامَ الشَّرْعِيَّةَ.", "urdu": "جو یقین کے ساتھ جانتا ہے کہ مجھے مرنے کے بعد اللہ تعالیٰ سے ملنا ہے وہ شرعی احکام کی بجا آوری کرتا ہے۔", "keywords": ["مُلَاقِي", "الْمَوْتِ", "الْأَحْكَامَ"], "difficulty": "hard"}, {"id": 15, "arabic": "يَرَى أَهْلُ السُّنَّةِ مِنَ الْعَالَمِ كُلِّهِ سَيِّدَنَا الشَّيْخَ عَبْدَ الْقَادِرِ الْجِيْلَانِيَّ رَحْمَةُ اللهِ عَلَيْهِ سُلْطَانَ الْأَوْلِيَاءِ الْكِرَامِ.", "urdu": "دنیا بھر کے اہل سنت سیدنا شیخ عبدالقادر جیلانی رحمتہ اللہ تعالیٰ علیہ کو اولیائے کرام کا سردار سمجھتے ہیں۔", "keywords": ["السُّنَّةِ", "الْجِيْلَانِيَّ", "سُلْطَانَ"], "difficulty": "hard"}, {"id": 16, "arabic": "نَصَحَ رَئِيْسُ الْجَامِعَةِ الْمُتَخَرِّجِيْنَ مِنْ صَفِّ الْفَضِيْلَةِ وَقَالَ: اِعْمَلُوْا عَمَلَ التَّدْرِيْسِ خَالِصًا لِوَجْهِ اللهِ بِجِدٍّ وَشَغَفٍ كَامِلٍ وَعُدُّوْا مَا تَيَسَّرَ مِنَ الرَّاتِبِ جَائِزَةً لَكُمْ.", "urdu": "حضرت شیخ الجامعہ نے درجہ فضیلت سے فارغ ہونے والوں کو نصیحت کی اور فرمایا: تدریس کا کام پوری محنت اور لگن کے ساتھ صرف اللہ تعالیٰ کی خوشنودی کے لیے کرو اور تنخواہ کے نام پر جو ملے اسے انعام سمجھو۔", "keywords": ["الْجَامِعَةِ", "التَّدْرِيْسِ", "الرَّاتِبِ"], "difficulty": "hard"}]}, {"tamreen_no": 13, "title": "التَّمْرِينُ (١٣)", "type": "ترجمہ اور اعراب", "instruction": "اعراب لگاؤ اور اردو میں ترجمہ کرو۔", "total_questions": 6, "questions": [{"id": 1, "arabic": "إِذَا هَبْطْتَ مَدِينَةً مِنَ الْمُدْنِ ، أَوْ ذَهَبْتَ إِلَى قَرْيَةٍ مِنَ الْقُرَى تَجِدُ أَبْنَاءَهَا خَادِمِينَ وَتَخْدُوْمِينَ ، كُلُّ وَاحِدٍ مِنْهُمْ عُضْوٌ فِي الْمُجْتَمَعِ الَّذِي يَعِيشُ فِيهِ ، وَخَادِمٌ لِأَخِيهِ ، وَإِنْ كَانَ يَبْدُوْ فِي الظَّاهِرِ أَنَّهُ لَا يَخْدَمُ إِلَّا نَفْسَهُ .", "urdu": "جب تم کسی شہر میں اترو یا کسی گاؤں میں جاؤ گے تو اس کے باشندوں کو تم خدمت گار و نوکر پاؤ گے ، ان میں سے ہر ایک اس معاشرہ کا ایک فرد ہے جس میں وہ زندگی گزارتا ہے ، اپنے بھائی کا خادم ہے اگر چہ بظاہر ایسا لگتا ہے کہ وہ صرف اپنے آپ کا خادم ہے۔", "keywords": ["شہر", "گاؤں", "خدمت گار", "معاشرہ", "خادم"], "difficulty": "medium"}, {"id": 2, "arabic": "فَسَيَّارَةُ الأَجْرَةِ الْمُنْتَظِرَةُ فِي مَوْقِفِهَا تَخْدِمُ سَائِقَهَا وَتَخْدِمُ رَاكِبَهَا ، وَالْعَامِلُ فِي مَصْنَعِه يَخْدَمُ نَفْسَهُ وَيَخْدَمُ غَيْرَهُ ، وَالتَّاجِرُ فِي مَتْجَرِهِ وَاللَّاعِبُ فِي مَلْعَبِهِ وَالصَّحْفِي فِي مَكْتَبِهِ ، وَالْعَالِمُ فِي مَعْمَلِهِ ... وَهُكَذَ نَجِدُ كُلَّ إِنْسَانٍ خَادِمًا وَمَخْدُوْمًا .", "urdu": "موٹر اسٹینڈ میں موجود کرایہ کی گاڑی اپنے ڈرائیور اور اپنے سوار کی خدمت کرتی ہے ، مزدور اپنے کارخانہ میں اپنی اور دوسرے کی مدد کرتا ہے ، تاجر اپنی دکان میں ، کھلاڑی اپنے میدان میں ، صحافی اپنے آفس میں سائنس داں اپنے لیب میں خود کی خدمت کرتا ہے اور اسی طرح ہم ہر انسان کو خدمت گار اور نوکر پاتے ہیں۔", "keywords": ["موٹر اسٹینڈ", "ڈرائیور", "مزدور", "تاجر", "خلاڑی"], "difficulty": "medium"}, {"id": 3, "arabic": "هُوَ لَوْنٌ جَدِيدٌ مِنَ الْمُحَارِ بِيْنَ لَيْسَ لَهُ مَثِيلٌ بَيْنَ الْجُيُوشِ فِي الْعَالَمَ فِي الْعَصْرِ الْحَدِيْثِ . وَ يَتَأَلَّفُ مِنْ مَجْمُوعَاتٍ كَبِيرَةٍ مِنْ رِجَالِ الْقَبَائِلِ الْعَرَبِيَّةِ الْمُخْتَتَلِفَةِ الَّذِيْنَ نَذَرُوْا أَنْفُسَهُمْ لِلْجِهَادِ فِي سَبِيلِ اللَّهِ .", "urdu": "وہ جنگجوؤں کی ایک نئی قسم ہے جس کی نظیر دور حاضر میں دنیا کی فوجوں کے درمیان نہیں ہے، اور وہ مختلف عربی قبیلوں کے مردوں کی بڑی تعداد پر مشتمل ہے جنھوں نے اپنے آپ کو اللہ کی راہ میں جہاد کے لیے وقف کر دیا۔", "keywords": ["جنگجو", "فوج", "عربی قبیلہ", "جہاد"], "difficulty": "medium"}, {"id": 4, "arabic": "وَ يَتَمَيَّزُ أَفْرَادُ هَذَا الْجَيْشِ بِمَظَاهِرَ كَثِيرَةٍ ، مِنْهَا تَمَسُّكُهُمْ بِمَلَابِسِهِمْ الْعَرَبِيَّةِ الأَصْلِيَّهِ وَعَدْمِ اِرْتِدَاهِمْ الزَيَّ الْعَسْكَرِيِّ وَمِنْهَا أَنَّهُ لَا تَجْمَعُ بَيْنَ أَفْرَادِهِ مِنْ مُعَيَّنَةٌ ، فَنَجِدُ بَيْنَ صُفُوفِهِ الْغُلَامَ اليَافِعَ ، وَالشَّابَ الْقَوِيُّ ، وَالْكَهْلَ الصَّارِمَ ، وَالشَّيْخَ الْعَجُوْزَ.", "urdu": "اس فوج کے افراد بہت سی شکلوں سے ممتاز ہوتے ہیں ان میں ایک یہ ہے کو وہ اپنے اصلی عربی لباس میں ملبوس رہتے ہیں اور فوجی ڈریس نہیں پہنتے ہیں، ان میں سے ایک یہ ہے کہ اس فوج کے افراد کے درمیان متعین عمر نہیں ہوتی ہے تو ہم ان کی صفوں میں نوخیز لڑکا ، طاقت ور جوان، بہادر ادھیڑ اور بے بس بوڑھا بھی پاتے ہیں۔", "keywords": ["فوج", "عربی لباس", "جوان", "بوڑھا"], "difficulty": "hard"}, {"id": 5, "arabic": "هؤُلَاءِ الْجُنُودُ وَإِنْ تَفَاوَتُوْا فِي السِّنِّ - لَا تَجِدُ بَيْنَهُمْ تَفَاوُتَ فِي الشَّجَاعَةِ وَالإِقْدَامِ ، فَقَدْ وَخَدَتْ بَيْنَهُمْ الْعَقِيدَةُ السَّلِيْمَةُ ، وَرَبَطَتْ بَيْنَهُمْ الشَّجَاعَةُ الْمُتَحَدِرَةُ فِي دِمَائِهِمْ عَبْرَ مِئَاتِ السِّنِينَ مِنْ جَدُوْدِهِمُ الْمَغَاوِيْنِ.", "urdu": "یہ فوجیں اگر چہ عمر میں مختلف ہوں لیکن تم ان کے درمیان بہادری پیش قدمی میں کوئی فرق نہ پاؤ گے ، کیوں کہ درست عقیدے نے انھیں آپس میں ایک بنا دیا ہے ، بہادر آبا و اجداد سے ملنے والی بہادری نے ان کو جوڑ دیا ہے جو صدیوں سے ان کے خونوں میں گردش کر رہی ہے۔", "keywords": ["فوج", "بہادری", "عقیدہ", "آبا و اجداد"], "difficulty": "hard"}, {"id": 6, "arabic": "وَ يُدَرَبُ هَؤُلَاءِ الْجُنُودُ عَلَى اسْتِعْمَالِ الأَسْلِحَةِ الْحَدِيثَةِ، وَتُلْقَى عَلَيْهِمْ مُحَاضَرَاتٌ يَوْمِيَّةٌ فِي تَشْكِيْلَاتِ الْحُرُوْبِ وَطُرُقِ الْهُجُوْمِ وَالدَّفَاعِ . إِنَّ هَؤُلَاءِ الْجُنُودَ أَجْسَامُهُمْ قَوِيَّةٌ ، وَسَوَاعِدُهُمْ مَفْتُوْلَةٌ ، فَمَا أَقْوَاهُمْ فِي الْحُرُوبِ ، وَمَا أَشَدَّهُتَا فَاتِهِمُ الْمُجَلْجَلَةِ بِكَلْمَةِ التَّوْحِيدِ.", "urdu": "یہ فوجیں نئے ہتھیاروں کے استعمال کی مشقیں کرتی ہیں اور انھیں جنگ بندیوں حملہ اور دفاع سے متعلق یومیہ لکچرس دئے جاتے ہیں۔ ان فوجوں کے جسم قوی ہیں ان کے بازو مضبوط ہیں تو جنگوں میں ان کی طاقتیں کیا ہی خوب ہیں اور کلمہ توحید سے گونجنے والے ان کے نعرے کیا ہی زبردست ہیں۔", "keywords": ["ہتھیار", "فوج", "جنگ", "کلمہ توحید"], "difficulty": "hard"}]}, {"tamreen_no": 14, "title": "التَّمْرِينُ (١٤)", "type": "ترجمہ", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 4, "questions": [{"id": 1, "arabic": "رَسَالَةُ تَهْنِئَةٍ إِلَى الْأُمِّ بِمُنَاسَبَةِ حُلُولِ عِيْدِ مِيلَادِهَا أُمي الحنون ...... تَحِيَّةً إِسْلَامِيَّةً وَسَلَامًا مُبَارَكًا يَحْمِلُ إِلَى هَذَا الْيَوْمُ ذِكْرِى سَعِيدَةً، فَأَنْتَقَلَ بِالرُّوْحِ مِنْ غُرْفَةِ دَرْسِي، وَأَرْتَمِي بَيْنَ ذِرَاعَيْكِ ، مُقَدِّمًا لَكِ تَهْنِئَتِي بِعِيْدِكِ الْمَيْمُوْنَ . مُتَمَنِيًّا لَكِ حَيَاةً هَانِئَةً وَصِحَةً طَيِّبَةً .", "urdu": "ماں کی جانب اس کی جشن ولادت کے موقع پر ایک تہنیت نامہ میری انتہائی مشفق ماں ۔۔۔۔ اسلامی با برکت سلام یہ دن میرے لئے ایک نیک یاد گار لے کر آتا ہے تو میں اپنے مطالعہ کے کمرے سے روح کے ساتھ نکلتا ہوں تیری گود میں گرتا ہوں (ماں ) تیرے لئے خوش گوار زندگی اور اچھی صحت کی آرزو کرتے ہوئے تیرے با برکت جشن پر تجھے اپنی تہنیت پیش کرتا ہوں۔", "keywords": ["ماں", "تہنیت", "جشن ولادت", "سلام"], "difficulty": "medium"}, {"id": 2, "arabic": "حَقًّا يَا أُمَّاه ! إِنَّهُ لَمَنْ أَصْعَبِ الأُمُورِ عَلَى قَلْبِي أَنْ أَكُوْنَ بَعِيدًا عَنْكِ فِي مِثْلِ هَذَا الْيَوْمَ ، وَأَحْرُمَ لَذَةً يَتَمَتَّعُ بِهَا إِخْوَتِي الأَحْبَاءُ . لَكُمْ أَتَمَنَّى مِنْ صَمِيمِ قَلْبِي أَنْ أَشَارِكَهُمْ أَفْرَاحَهُمْ ، وَأَقَاسِمَهُمْ هَنَاءَهُمْ !.", "urdu": "بلا شبہ میری ماں میرے دل پر سب سے مشکل معاملہ یہ ہے کہ میں اس جیسے دن میں تجھ سے دور ہوتا ہوں اور میں اس لذت سے محروم رہتا ہوں جس سے میرے پیارے بھائی لطف اندوز ہوتے ہیں ، یقینا کئی مرتبہ میں دلی کی گہرائی سے آرزو کرتا ہوں کہ میں ان کی خوشیوں میں شریک ہو جاؤں اور ان کی شادمانی کو بانٹوں۔", "keywords": ["ماں", "دل", "خوشی", "آرزو"], "difficulty": "medium"}, {"id": 3, "arabic": "وَأَرَى أَنْ أَجْمَلَ هَدِيَّةٍ تَنْتَظِرِيْنَهَا مِنِّي هِيَ نَتِيْجَةُ امْتِحَانَاتِي ، فَثِقَيْ مِنَ الْآنَ أَنَّهَا سَتَكُوْنُ بِعَوْنِ اللهِ مِمَّا يَتَلِجُ صَدْرَكِ وَيُرِيْحُ بَالَكِ فَأَنَا مَا أَزَالُ أَعْمَلُ بِنَصَائِحِكِ الثَّمِينَةِ ، وَإِرْشَادَاتِكِ الْغَالِيَةِ ، وَاضِعًا نَصْبَ عَيْنِي الْمُسْتَقْبِلَ الَّذِي زَيَّنَتِهِ لِي .", "urdu": "اور میں سمجھتا ہوں کہ سب سے خوب صورت تحفہ جس کا تو میری جانب سے انتظار کر رہی ہے وہ میرے امتحانات کا رزلٹ ہے تو اب سے بھروسہ کر کہ وہ اللہ کی مدد سے تیرے دل کو ٹھنڈا کرے گا اور تیرا دل آرام پا جائے گا تو اب میں تیری قیمتی نصیحتوں اور گراں ہدایات پر عمل کر رہا ہوں اپنی آنکھوں کے سامنے اس مستقبل کے حصے کو رکھتے ہوئے جسے تو نے میرے لیے آراستہ کیا ہے۔", "keywords": ["تحفہ", "امتحان", "نصیحت", "مستقبل"], "difficulty": "medium"}, {"id": 4, "arabic": "فَازِرِيْنِي يَا أُمِّي ! بِدُعَائِكِ الصَّالِحِ لِأَتَمَكَّنَ مِنَ الْقِيَامِ بِوَاجِبَاتِي وَإِنَّنِي أَسْأَلُ اللهَ أَنْ بَيْنَ عَلَيْكِ بِالصَّحَةِ وَالْهَنَاءِ ، لِتَظَلَّ حَيَاتُكِ مَمْلُوْعَةٌ بِالأَعْيَادِ ، فَيَزْدَادُ بِذَلِكِ سُرُورِي ، وَ يَلَدُّ عَيْشِي.", "urdu": "اے میری ماں ! اپنی نیک دعا کے ذریعہ مجھے تقویت پہنچا تاکہ میں اپنے فرائض کو انجام دے سکوں، اور میں اللہ سے سوال کرتا ہوں کہ تجھ پر صحت و خوش گواری کے ذریعہ احسان فرمائے تاکہ تیری زندگی خوشیوں سے بھری رہے تو اس کے ذریعہ میری خوشی بڑھ جائے گی اور میری زندگی خوش ذائقہ ہو جائے گی۔", "keywords": ["ماں", "دعا", "صحت", "زندگی"], "difficulty": "medium"}]}, {"tamreen_no": 15, "title": "التَّمْرِينُ (١٥)", "type": "ترجمہ", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 17, "questions": [{"id": 1, "arabic": "صَيَّرَ الصَّائِعُ الذَّهَبَ سِوَارًا وَالْفِضَّةَ خَلْخَالًا.", "urdu": "سنار نے سونے کو کنگن اور چاندی کو پازیب بنا دیا۔", "keywords": ["سنار", "سونا", "چاندی", "کنگن"], "difficulty": "easy"}, {"id": 2, "arabic": "رَدَّ الأَمَلُ النُّفُوسَ الْيَائِسَةَ مُسْتَبْشِرَةً.", "urdu": "امید نے ناامید لوگوں کو خوش کر دیا۔", "keywords": ["امید", "ناامید", "خوش"], "difficulty": "easy"}, {"id": 3, "arabic": "اتَّخَذَ الصَّانِعُ الْحَدِيدَ مِدْفَعًا.", "urdu": "کاریگر نے لوہے کو توپ بنا دیا۔", "keywords": ["کاریگر", "لوہا", "توپ"], "difficulty": "easy"}, {"id": 4, "arabic": "وَهَبَ الْعَامِلُ الدَّقِيْقَ عَجِيْنَا .", "urdu": "مزدور نے آٹے کو گوندھا ہوا آٹا بنا دیا۔", "keywords": ["مزدور", "آٹا", "گوندھا ہوا"], "difficulty": "easy"}, {"id": 5, "arabic": "صَيَّرَتِ الْحَرْبُ الدَّامِيَةُ سُكَانَ الْبِلَادِ فُقَرَاءَ.", "urdu": "خوں ریز جنگ نے شہر کے باشندوں کو فقیر بنا دیا۔", "keywords": ["جنگ", "شہر", "فقیر"], "difficulty": "easy"}, {"id": 6, "arabic": "الْعَزِيمَةُ تَجْعَلُ الصَّعْبَ سَهْلًا .", "urdu": "حوصلہ مشکل کو آسان بنا دیتا ہے۔", "keywords": ["حوصلہ", "مشکل", "آسان"], "difficulty": "easy"}, {"id": 7, "arabic": "تَرَكَتِ الْعَاصِفَةُ الْأَشْجَارَ عَارِ يَةً مِنَ الثَّمَارِ وَالْأَوْرَاقِ.", "urdu": "آندھی نے درختوں کو پھلوں اور پتوں سے ننگا کر کے چھوڑ دیا۔", "keywords": ["آندھی", "درخت", "پھل", "پتے"], "difficulty": "medium"}, {"id": 8, "arabic": "تَخِذَتْ أُوْرُ نَا الْعُلُوْمَ وَالْتَّكْنَوْلُوْجِيَّةِ وَسِيْلَةَ الرَيِّ وَالْإِزْدِهَارِ.", "urdu": "یوروپ نے سائنس اور ٹکنالوجی کو آب باشی اور ترقی کا ذریعہ بنا دیا۔", "keywords": ["یوروپ", "سائنس", "ٹکنالوجی", "ترقی"], "difficulty": "medium"}, {"id": 9, "arabic": "اتَّخَذَ الحِبُّ الْحَدِيثُ الأَشِعَةَ عِلَاجًا لِبَعْضِ الأَمْرَاضِ.", "urdu": "نیے طب نے کرنوں کو کچھ بیماریوں کا علاج بنایا۔", "keywords": ["طب", "کرنیں", "بیماری", "علاج"], "difficulty": "medium"}, {"id": 10, "arabic": "جَعَلَتْ جُهُودُ الْقُوَّاتِ الْحَقِّ يَةِ انْسِحَابَ الْعَدُوِّ مِنْ أَرْضِنَا وَاقِعًا.", "urdu": "فضائی فوجوں کی کوششوں نے دشمن کا ہماری زمین سے پیچھے ہٹنا یقینی بنا دیا۔", "keywords": ["فضائی فوج", "دشمن", "زمین", "پیچھے ہٹنا"], "difficulty": "medium"}, {"id": 11, "arabic": "مَنْ جُعِلَ قَاضِيَّا بَيْنَ النَّاسِ فَقَدْ ذُبِحَ بِغَيْرِ سِكِينٍ.", "urdu": "جسے لوگوں کے درمیان قاضی بنایا گیا تو بغیر چھری کے ذبح کیا گیا۔", "keywords": ["قاضی", "لوگ", "ذبح", "چھری"], "difficulty": "medium"}, {"id": 12, "arabic": "وَقَدِمْنَا إِلَى مَا عَمِلُوا مِنْ عَمَلٍ فَجَعَلْتُهُ هَبَاءً مَّنْثُورًا - [الفرقان : ۲۳]", "urdu": "اور جو کچھ انھوں نے کام کئے تھے ہم نے قصد فرما کر انھیں بار یک بار یک غبار کے بکھرے ہوئے ذرے کر دیا کہ روزن کی دھوپ میں نظر آتے ہیں۔", "keywords": ["قرآن", "عمل", "غبار", "ذرے"], "difficulty": "medium"}, {"id": 13, "arabic": "يَأَيُّهَا الَّذِينَ آمَنُوا لَا تَتَّخِذُوا الْكَفِرِينَ أَوْلِيَاءَ مِنْ دُونِ الْمُؤْمِنِينَ اَتُرِيدُونَ أَنْ تَجْعَلُوا لِلهِ عَلَيْكُمْ سُلْطَنَا مُّبِينًا [النساء : ۱۴۴]", "urdu": "اے ایمان والو ! کافروں کو دوست نہ بناؤ مسلمانوں کے سوا کیا یہ چاہتے ہو کہ اپنے اوپر اللہ کے لیے صریح حجت کر لو۔", "keywords": ["قرآن", "ایمان", "کافر", "دوست"], "difficulty": "medium"}, {"id": 14, "arabic": "مَا جَعَلَ اللهُ لِرَجُلٍ مِّنْ قَلْبَيْنِ فِي جَوْفِهِ وَمَا جَعَلَ أَزْوَجَكُمُ الَّتِي تُظهِرُوْنَ مِنْهُنَّ أُمَّهُتِكُمْ وَمَا جَعَلَ أَدْعِيَاءَكُمْ ابْنَاءَكُمْ ذَلِكُمْ قَوْلُكُمْ بِأَفْوَاهِكُمْ وَ اللهُ يَقُوْلُ الْحَقَّ وَهُوَ يَهْدِي السَّبِيلَ [الأحزاب: ٢]", "urdu": "اللہ نے کسی آدمی کے اندر دو دل نہ رکھے اور تمھاری ان عورتوں کو جنھیں تم ماں کے برابر کہ دو تمھاری ماں نہ بنایا اور نہ تمھارے لیے پالکوں کو تمھارا بیٹا بنایا۔", "keywords": ["قرآن", "دل", "عورت", "بیٹا"], "difficulty": "hard"}, {"id": 15, "arabic": "قَالَ الْأُسْتَاذُ إِنِّي مُوَجِّهُ إِلَيْكَ سُؤَالًا آخَرَ لَأَزْدَادَ ثِقَةٌ بِكَ وَ بِعِلْمِكَ. لَقَدْ حَدَّثْتَنِي عَنِ النَّحْلِ وَعَنْ عِلْمِهَا وَتَدْبِيْرِهَا لِشُؤْنِ نَفْسِهَا ، فَهَلْ لَكَ أَنْ تُحَدِّثَنِي عَنِ النَّمْلِ ؟", "urdu": "استاذ نے کہا: بلا شبہ میں تم سے ایک دوسرا سوال کر رہا ہوں تاکہ تمھاری ذات اور تمھارے علم سے متعلق میرے بھروسے میں اضافہ ہو جائے تم نے مجھے شہد تم نے مجھے شہد کی مکھی ، اس کے علم ، اپنے کاموں کے لیے اس کی تدبیر کے تعلق سے بتایا تو کیا تم مجھے چیونٹی کے بارے میں بتاؤ گے ؟", "keywords": ["استاذ", "سوال", "شہد کی مکھی", "چیونٹی"], "difficulty": "hard"}, {"id": 16, "arabic": "فَأَجَابَ الطَّالِبُ : إِنَّ النَّمْلَ تَتَّخِذُ مِنْ بَاطِنِ الْأَرْضِ مَنَازِلَ وَأَزِقَةً وَدَهَالِينَ وَغُرُفًا وَتَجْعَلُ بَعْضَ بُيُوتِهَا مُنْخَفِضًا كَيْ تَجْرِيَ إِلَيْهِ الْيَاهُ ، وَ بَعْضَهَا مُرْتَفِعًا وَتَجْعَلُ الْحَبَّ فِي الْبُيُوتِ الْمُرْتَفِعَةِ حَدْرًا عَلَيْهَا مِنَ الْمَطَرِ، وَتَقَطَّعُ الْحَبَّةَ نِصْفَيْنِ ، وَتَقْشُرُ الشَّعِيرَ وَالْبَاقِلَا وَالْعَدَسِ لِعِلْمِهَا أَنَّهَا لَا تَنْبُتُ مِنَ التَّقْشِيرِ .", "urdu": "طالب علم نے جواب دیا: یقینا چیونٹی زمین کے اندر مکانات گلیاں ڈیوڑھیاں اور کمرے بناتی ہے، اور کچھ اپنے گھر اتار چڑھاؤ والے بناتی ہے تاکہ اس تک پانی پہنچ جائے کچھ گھر بلند بناتی ہے اور بارش سے بچنے کے لیے دانہ کو اونچے گھروں میں رکھتی ہے اور دانہ کو دو حصوں میں کاٹتی ہے اور جو، باقلہ اور دال کو چھیلتی ہے کیوں کہ اسے معلوم ہے کہ یہ چھیلنے سے نہیں اگتے ہیں۔", "keywords": ["چیونٹی", "مکان", "بارش", "دانہ"], "difficulty": "hard"}, {"id": 17, "arabic": "قَالَ الْأُسْتَاذُ لِتِلْمِيذِهِ : بَارَكَ اللَّهُ فِيكَ ، فَمَا أَغْزَرَ عِلْمَكَ وَمَا أَفْصَحَ لِسَانَكَ وَمَا أَبْلَغَ عِبَارَتَكَ . (قواعد اللغة العربية، الثالث المتوسط ،ص:٢٨٥،٢٨٦)", "urdu": "استاذ نے اپنے شاگرد سے کہا اللہ تعالی تم میں برکت عطا فرمائے تمھارا علم کتنا زیادہ ہے تمھاری زبان کتنی فصیح ہے اور تمھاری عبارت کتنی ہی بلیغ ہے۔", "keywords": ["استاذ", "شاگرد", "برکت", "علم"], "difficulty": "easy"}]}, {"tamreen_no": 16, "title": "التَّمْرِينُ (١٦)", "type": "عربی میں ترجمہ", "instruction": "عربی بناؤ۔", "total_questions": 15, "questions": [{"id": 1, "arabic": "جَعَلَ الصَّانِعُ بِقِطَعِ الْحَدِيْدِ سَكَاكِيْنَ وَمَعَاوِلَ وَمَحَاوِرَ .", "urdu": "کاریگر نے لوہے کے ٹکڑوں سے چاقو، پھاوڑا اور کدال بنائے۔", "keywords": ["کاریگر", "لوہا", "چاقو", "پھاوڑا"], "difficulty": "medium"}, {"id": 2, "arabic": "جَعَلَتِ الْحَمَائِمُ الْوَحْشِيَّةُ نَوَافِذَ الْمَنَازِلِ الْمُرْتَفِعَةِ عُشُوشًا لَهَا .", "urdu": "جنگلی نگلی کبوتروں نے بلند بالا عمارت کے جھروکوں کو اپنا ٹھکانا بنایا۔", "keywords": ["کبوتر", "عمارت", "جھروکہ", "ٹھکانا"], "difficulty": "medium"}, {"id": 3, "arabic": "أَكْرِ مُوا الْكُتُبَ وَلَا تَجْعَلُوْهَا وِسَادَتَكُمْ.", "urdu": "کتابوں کا احترام کرو، اور انھیں اپنا تکیہ نہ بناؤ۔", "keywords": ["کتاب", "احترام", "تکیہ"], "difficulty": "easy"}, {"id": 4, "arabic": "جَعَلَتِ الشَّمْسُ الشَّدِيدَةُ وَالْحَرَارَةُ النَّاسَ كَالْمَيِّتِ.", "urdu": "تیز دھوپ اور گرمی نے لوگوں کو نیم مردہ کر دیا۔", "keywords": ["دھوپ", "گرمی", "لوگ", "نیم مردہ"], "difficulty": "medium"}, {"id": 5, "arabic": "جَعَلَ اللهُ النَّهَارَ مُنَوَّرًا وَاللَّيْلَ مُظْلِمًا .", "urdu": "اللہ تعالی نے دن کو روشن اور رات کو تاریک بنایا۔", "keywords": ["اللہ", "دن", "روشن", "رات"], "difficulty": "easy"}, {"id": 6, "arabic": "رَدَّ الْكَهْرَبَاءُ تَحْرِيْكَ الْمَاكِيْنَاتِ وَالْمَصَائِعِ وَالْعَامِلِ سَهْلًا جِدًّا.", "urdu": "بجلی نے مشینوں ، ملوں اور کارخانوں کا چلانا بہت آسان کر دیا۔", "keywords": ["بجلی", "مشین", "کارখানা", "آسان"], "difficulty": "medium"}, {"id": 7, "arabic": "لَا تَتَّخِذُوا التَّعْلِيمَ الدِّينِيَّ وَسِيْلَةً لِكَسْبِ الدُّنْيَا وَلَا تَجْعَلُوا الْأَحْكَامَ الإِسْلَامِيَّةَ لُعْبَةً.", "urdu": "دینی تعلیم کو دنیا حاصل کرنے کا ذریعہ اور اسلامی احکام کو کھلواڑ نہ بناؤ۔", "keywords": ["دینی تعلیم", "دنیا", "ذریعہ", "اسلامی احکام"], "difficulty": "medium"}, {"id": 8, "arabic": "صَيَّرَتِ الْعُلُومُ اِسْتِيْرَادَ الْأَشْيَاءِ وَتَصْدِيْرِهَا سَهْلًا جِدًّا بِوَسَائِلِ الإِعْلَامِ الْجَدِيدَةِ وَوَسَائِلِ النَّقْلِ .", "urdu": "سائنس نے جدید ذرائع ابلاغ حمل و نقل کے ذریعہ اشیا کی درآمد و برآمد کو نہایت آسان بنا دیا۔", "keywords": ["سائنس", "ذرائع ابلاغ", "آمد و رفت", "آسان"], "difficulty": "hard"}, {"id": 9, "arabic": "جَعَلَتِ الْجَرِيدَةُ وَالْمُدْيَاعُ وَالتِّلْفَازُ إِذَاعَةَ الْأَنْبَاءِ سَهْلَةً.", "urdu": "اخبار ، ریڈیو اور ٹیلی ویزن نے خبر رسانی کو آسان کر دیا۔", "keywords": ["اخبار", "ریڈیو", "ٹیلی ویژن", "خبر"], "difficulty": "medium"}, {"id": 10, "arabic": "جَعَلَ الْبَنَّاءُ أَعْمِدَةَ هَذَا الْمَنْزِلِ مَتِينَةٌ جَمِيلَةٌ ثَابِتَةً .", "urdu": "معمار نے اس عمارت کے ستون ، مضبوط ، خوب صورت اور دیر پا بنائے۔", "keywords": ["معمار", "عمارت", "ستون", "مضبوط"], "difficulty": "medium"}, {"id": 11, "arabic": "جَعَلَ اللَّهُ الْكَوَاكِبَ زِيْنَةٌ لِلسَّمَاءِ.", "urdu": "اللہ تعالی نے ستاروں کو آسمان کے لیے آرائش کا سامان بنایا۔", "keywords": ["اللہ", "ستارے", "آسمان", "آرائش"], "difficulty": "easy"}, {"id": 12, "arabic": "صَيَّرَ الْحَاسُوبُ شَبَكَةُ الْإِتَصَالَاتِ وَوَسَائِلُ الْأَعْلَامِ الْحَدِيثَةِ الدُّنْيَا قَرْيَةً", "urdu": "کمپیوٹر، انٹر نیٹ اور جدید ذرائع ابلاغ نے دنیا کو ایک گاؤں میں تبدیل کر دیا ہے۔", "keywords": ["کمپیوٹر", "انٹرنیٹ", "دنیا", "گاؤਂ"], "difficulty": "medium"}, {"id": 13, "arabic": "يَجْعَلُ الْجِدُّ وَالشَّغَفُ الرَّجُلَ الْفَقِيْرَ غَنِيًّا وَ يُصَيِّرُ عُسْرَهُ يُسْرًا.", "urdu": "محنت اور لگن غریب آدمی کو مال دار بنا دیتی ہے اور اس کی بدحالی کو خوش حالی میں تبدیل کر دیتی ہے .", "keywords": ["محنت", "لگن", "غریب", "مالدار"], "difficulty": "medium"}, {"id": 14, "arabic": "كَانَ الإِسْلَامُ جَعَلَ الزَّوَاجَ سَهْلًا جِدًّا وَلَكِنْ صَيَّرْنَاهُ صَعْبًا بِالتَّقَالِيدِ.", "urdu": "اسلام نے شادی کو بہت آسان بنایا تھا، لیکن ہم نے رسم و رواج کے ذریعہ اسے مشکل بنا دیا۔", "keywords": ["اسلام", "شادی", "آسان", "رسم و رواج"], "difficulty": "medium"}, {"id": 15, "arabic": "صَيَّرَ سَيِّدُنَا الْغَوْثُ الْأَعْظَمُ الْمُجْتَمَعَ الْفَاسِدَ مُجْتَمِعًا صَالِحًا بِخْطَبِهِ الْمُؤَثَّرَةِ.", "urdu": "سیدنا غوث اعظم نے اپنے اثر انگیز خطبات کے ذریعہ بگڑے ہوئے معاشرے کو صالح معاشرے میں تبدیل کر دیا۔", "keywords": ["غوث اعظم", "معاشرہ", "خطبہ", "اصلاح"], "difficulty": "medium"}]}, {"tamreen_no": 17, "title": "التَّمْرِينُ (١٧)", "type": "ترجمہ اور مفعول مطلق", "instruction": "آنے والے جملوں کا اردو میں ترجمہ کرو اور رسم الخط کے ذریعہ مفعول مطلق کی تعیین کرو۔", "total_questions": 13, "questions": [{"id": 1, "arabic": "قُلْ قَوْلَ الْعُقَلَاءِ وَافْعَلْ فِعْلَ التَّبَلَاءَ.", "urdu": "عقل مند لوگوں کی طرح بات کہ اور شرفالوگوں کی طرح کام کر۔", "keywords": ["عقل مند", "بات", "کام"], "difficulty": "easy"}, {"id": 2, "arabic": "سَعَى الْحَاجُ بَيْنَ الصَّفَا وَالْمَرْوَةَ الهَرْوَلَةَ .", "urdu": "حاجی صفا اور مروہ کے درمیان تیز دوڑا۔", "keywords": ["حاجی", "صفا", "مروہ", "دوڑنا"], "difficulty": "easy"}, {"id": 3, "arabic": "قَلِقَ الْمُوَظَّفُ مِنْ مُقَابَلَةِ مُدِيرِهِ اضْطِرَابًا.", "urdu": "مزدور اپنے مینیجر کا سامنا کرنے سے بے چین ہو گیا۔", "keywords": ["مزدور", "مینیجر", "بے چین"], "difficulty": "medium"}, {"id": 4, "arabic": "يُدَافِعُ الْجُنُودُ عَنِ الْوَطَنِ دِفَاعَ الشَّجْعَانِ.", "urdu": "فوجی بہادروں کی طرح وطن کا دفاع کرتے ہیں۔", "keywords": ["فوجی", "وطن", "دفاع", "بہادر"], "difficulty": "easy"}, {"id": 5, "arabic": "لَا تَفْرَحْ فَرَحًا مُسْرِفًا وَلَا تَحْزَنْ حُزْنًا مُفْرِطًا.", "urdu": "حد سے زیادہ خوش نہ ہو اور حد سے زیادہ رنجیدہ نہ ہو۔", "keywords": ["خوش", "رنجیدہ", "حد"], "difficulty": "easy"}, {"id": 6, "arabic": "أَعْطِفُ عَلَى ابْنِي عَطَفًا لَا أَعْطِفُهُ عَلَى أَحَدٍ سِوَاهُ.", "urdu": "میں اپنے بیٹے پر ایسی شفقت کرتا ہوں کہ اس جیسی شفقت اس کے علاوہ کسی پر نہیں کرتا ہوں۔", "keywords": ["بیٹا", "شفقت", "محبت"], "difficulty": "medium"}, {"id": 7, "arabic": "يَرْتَفِعُ الْهَرَمُ ارْتِفَاعًا ، وَ يَصْمُدُ لِلزَّمَنِ صُمُوْدَ الْجِبَالِ.", "urdu": "واقعی بوڑھا بہت بلند ہوتا ہے اور زمانے کے لیے پہاڑوں کی طرح ثابت قدم رہتا ہے۔", "keywords": ["ہرم", "بلند", "زمانه", "پہاڑ"], "difficulty": "medium"}, {"id": 8, "arabic": "أَتْقَنَ الْعَامِلُ عَمَلَهُ إِثْقَانًا ، وَأَخْلَصَ فِيهِ إِخْلَا صَا عَظِيمًا.", "urdu": "کاریگر نے اپنے کام کو مضبوطی سے کیا اور اس میں اس نے بڑے اخلاص سے کام لیا۔", "keywords": ["کاریگر", "کام", "مضبوطی", "اخلاص"], "difficulty": "medium"}, {"id": 9, "arabic": "حَافَظْتُ عَلَى الْبِيِّنَةِ مُحَافَظَةً ، وَمَنَعْتُ الضَّوْضَاءَ مَنْعًا بَاتًا.", "urdu": "میں نے ماحول کی اچھی طرح حفاظت کی اور شور و شغب کو پورے طور پر روک دیا۔", "keywords": ["ماحول", "حفاظت", "شور"], "difficulty": "medium"}, {"id": 10, "arabic": "أُعَاتِبُ صَدِيقِي عَتَابًا رَقِيقًا، وَأَصْفَحُ عَنهُ الصَّفْحَ الْجَمِيلَ.", "urdu": "میں اپنے دوست کو معمولی ملامت کرتا ہوں اور اچھی طرح در گزر کرتا ہوں۔", "keywords": ["دوست", "ملامت", "درگزر"], "difficulty": "medium"}, {"id": 11, "arabic": "يَعْتَمِدُ الْمُؤْمِنُ عَلَى اللهِ اِعْتِمَادًا كَبِيرًا ، بَعْدَ أَنْ يُخَطِطَ لِعَمَلِهِ تَخْطِيطًا سَلِيمًا.", "urdu": "مومن اپنے کام کا درست منصوبہ بنانے کے اللہ تعالی پر مکمل بھروسا کرتا ہے۔", "keywords": ["مومن", "اللہ", "بھروسہ", "منصوبہ"], "difficulty": "medium"}, {"id": 12, "arabic": "أَمْسَكَ الشَّرْطِيُّ بِاللَّضِ إِمْسَاكًا، فَدَفَعَ يَدَهُ عَنْهُ دَفْعَتَيْنِ، فَصَبَرَ عَلَى مُحَاوَلَتِهِ فِي الْهَرْبِ صَبْرًا جَمِيلًا.", "urdu": "پولیس والے نے چور کو مضبوطی سے پکڑ لیا، پھر اس نے دو مرتبہ اپنا ہاتھ اس سے ہٹالیا ، تو اس نے اس کے بھاگنے کے ارادے پر اچھی طرح صبر کیا۔", "keywords": ["پولیس", "چور", "پکڑنا", "صبر"], "difficulty": "hard"}, {"id": 13, "arabic": "تَفُورُ الْبَرَاكِينُ فِي بَعْضِ الْجِهَاتِ ثَوَرَانًا شَدِيدًا ، فَتَهْدِمُ الْمَنَازِلَ هَدَمًا ، وَتَدُلُّ الْمُبَانِي دَكَّا، وَتَقْذُفُ الْنِيْرَانَ قَذَفًا مُسْتَمِرًا ، فَيَخَافُ السُّكَّانُ خَوْفًا عَظِيمًا ، فَلَا تَسْمَعُ غَيْرَ نِسَاءِ تَصِبْحِ صِبَاحًا، وَأَطْفَالٍ تَصْرُحْ صُرَاحًا ، وَلَا تَرى إِلَّا رِجَالًا نَكَبَهُمُ الدَّهْرُ نَكْبَتَيْنِ: مَاتَ أَوْلَادُهُمْ وَ ضَاعَتْ أَمْوَالُهُمْ.", "urdu": "بعض علاقوں میں کوہ آتش فشاں، زبردست طریقے سے پھٹ جاتے ہیں تو مکانات کو پوری طرح ڈھا دیتے ہیں، عمارتوں کو بالکل مسمار کر دیتے ہیں اور سلسل آگ نکالتے رہتے ہیں تو باشندے بڑے خوف زدہ ہو جاتے ہیں، تو تم زور زور سے چلانے والی عورتوں اور چیچنے والے بچوں کے علاوہ کسی کو نہیں سنو گے اور تم صرف ایسے لوگ دیکھو گے جنھیں زمانے نے دوہری پریشانی میں ڈال دیا ان کی اولادیں مر گئیں اور مال برباد ہو گیے۔", "keywords": ["آتش فشاں", "مکان", "عمارت", "خوف"], "difficulty": "hard"}]}, {"tamreen_no": 18, "title": "التَّمْرِينُ (١٨)", "type": "عربی میں ترجمہ", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 15, "questions": [{"id": 1, "arabic": "نَجَحَ الطَّلَابُ الْمُجْتَهِدُوْنَ فِي الْإِمْتِحَانِ السَّنَوِي نَجَا حَارَائِعًا.", "urdu": "محنتی طلبہ نے سالانہ امتحان میں شاندار کامیابی حاصل کی۔", "keywords": ["طالب علم", "امتحان", "کامیابی"], "difficulty": "medium"}, {"id": 2, "arabic": "جَاءَ سَاعِي الْبَرِيدِ بَيْتَ أَحْمَدَ بِالرِّسَالَةِ وَطَرَقَ الْبَابَ طَرْقًا .", "urdu": "ڈاکیا احمد کے گھر خط لے کر آیا اور زور سے دروازہ کھٹکھٹایا۔", "keywords": ["ڈاکیا", "خط", "دروازہ"], "difficulty": "medium"}, {"id": 3, "arabic": "قَالَ قَائِدُ الْجَيْشِ لِجُيُوشِهِ اهْجِمُوا عَلَى مَرَاكِزِ الْعَدُوِّ هَجُوْمًا شَدِيدًا، وَلَا تَخَافُوْا الْأَعْدَاءَ خَوْفَ الْجُبَنَاءِ.", "urdu": "سپہ سالار نے اپنے فوجیوں سے کہا دشمن کی چوکیوں پر زور دار حملہ کرو اور بزدلوں کی طرح دشمنوں سے نہ ڈرو۔", "keywords": ["سپہ سالار", "فوجী", "حملہ", "دشمن"], "difficulty": "medium"}, {"id": 4, "arabic": "ضَرَبَ خَالِدٌ الْكَلْبَ فَغَضِبَ غَضَبًا شَدِيدًا وَعَضَ فِي رِجْلِهِ عَضًا .", "urdu": "خالد نے کتے کو مارا تو وہ بہت زیادہ غضب ناک ہو گیا اور اس کی ٹانگ میں زور سے کاٹ لیا۔", "keywords": ["خالد", "کتا", "غصہ", "کاٹنا"], "difficulty": "medium"}, {"id": 5, "arabic": "لَمَّا سَمِعَ عَبْدُ الرَّحْمَنِ خَيْرَ نَجَاحِهِ فِي الإِمْتِحَانِ أَشْرَقَ وَجْهُهُ إِشْرَاقَ الْبَدْرِ.", "urdu": "جب عبدالرحمن نے امتحان میں اپنی کامیابی کی خبر سنی تو اس کا چہرہ چاند کی طرح چمک اٹھا۔", "keywords": ["عبدالرحمن", "امتحان", "کامیابی", "چہرہ"], "difficulty": "medium"}, {"id": 6, "arabic": "الْيَوْمَ قَدْ وَصَلَ الْإِنْسَانُ إِلَى الْفَضَاءِ وَنَجَحَ نَجَاحًا عَظِيمًا فِي فَنَّ الطَّيَرَانِ.", "urdu": "آج انسان خلا تک پہنچ گیا ہے اور ہوا بازی کے فن میں زبردست کامیابی حاصل کر چکا ہے۔", "keywords": ["انسان", "خلا", "ہوا بازی", "کامیابی"], "difficulty": "medium"}, {"id": 7, "arabic": "يَخْدِمُ النَّاسَ خِدْمَةٌ عَظِيمَةٌ وَيُوَفِّرُ لَهُمْ فِي السَّفَرِ تَسْهِيْلَاتٍ تَوْفِيرًا .", "urdu": "وہ لوگوں کی زبر دست خدمت کرتا ہے اور سفر میں ان کے لیے واقعی ، سہولتیں فراہم کرتا ہے۔", "keywords": ["خدمت", "سفر", "سہولت"], "difficulty": "medium"}, {"id": 8, "arabic": "رَأَيْتُ أَمْسِ طِفْلًا صَغِيرًا يَجْرِي عَلَى الشَّارِعِ جَرْ يَا بِسُرْعَةٍ وَلَا يُبَالِي أَيَّ مُبَالَاةٍ بِالسَّيَّارَاتِ الْمَارَةِ.", "urdu": "کل میں نے ایک چھوٹے بچے کو دیکھا جو سڑک پر تیزی کے ساتھ دوڑ رہا تھا اور گزرنے والی گاڑیوں کی کچھ پرواہ نہیں کر رہا تھا۔", "keywords": ["بچہ", "سڑک", "دوڑنا", "گاڑی"], "difficulty": "medium"}, {"id": 9, "arabic": "خَالِدَةُ طَالِبَةٌ فِي السَّنَةِ الأُولَى مِنْ بی اے وَ هِيَ تُكْرِمْ مُعْلِّمَاتِهَا إِكْرَامًا عَظِيمًا .", "urdu": "خالدہ بی اے سال اول کی طالبہ ہے ، وہ اپنی استانیوں کا بڑا احترام کرتی ہے۔", "keywords": ["خالدہ", "طالبہ", "استانی", "احترام"], "difficulty": "medium"}, {"id": 10, "arabic": "الْغَوَّاصَةُ مِنْ آلَاتٍ حَرْبِيَّةٍ جَدِيدَةٍ تَسِيرُ فِي الْبَحْرِ فِي دَاخِلِ الْمَاءِ سَيْرَ الْأَسْمَاكِ وَتَقُوْمُ بِدَوْرٍ هَامَ فِي الْحَرْبِ الْبَحْرِي.", "urdu": "پن ڈبی جدید جنگی آلات میں سے ہے جو سمندر میں پانی کے اندر مچھلیوں کی طرح چلتی ہے، اور سمندری لڑائی میں زبردست رول ادا کرتی ہے۔", "keywords": ["پن ڈبی", "جنگی آلہ", "سمندر", "مچھلی"], "difficulty": "hard"}, {"id": 11, "arabic": "إِنَّ الدَّرَاجَةَ الْبُخَارِيَّةَ مَرْكَبَةٌ مُفِيدَةٌ تَسِيرُ عَلَى الشَّوَارِعِ سَيْرَ الْعَرَبَةِ وَتُوَفِّرُ لِلنَّاسِ تَسْهِيْلَاتٍ لَا يُوْجَدُ مَثِيْلٌ لَهَا فِي الْعَصْرِ الْمَاضِي.", "urdu": "موٹر سائگل سچ مچ ایک نفع بخش سواری ہے جو موٹر کی طرح سڑکوں پر تیز چلتی ہے اور لوگوں کے لیے ایسی آسانیاں فراہم کرتی ہے کہ گزشتہ زمانے میں اس کی نظیر نہیں ملتی۔", "keywords": ["موٹر سائیکل", "سواری", "سڑک", "آسانی"], "difficulty": "medium"}, {"id": 12, "arabic": "رَأَيْنَا أَمْسِ أَنَّ قَاطِعَ الطَّرِيْقِ بِالْعَرَبَةِ الْمَسِيْرَةِ أَطْلَقَ الرَّصَاصَ عَلَى تَاجِرٍ بِالْمُسَدَّسِ الَّذِي خَرَجَ نَقْبَ جُنَاحِهِ.", "urdu": "ہم نے کل دیکھا کہ ایک ڈاکو نے چلتی گاڑی سے ایک تاجر پر ریوالور سے ایسا فائر کیا جو اس کے بازو کو چھید کر باہر نکل گیا۔", "keywords": ["ڈاکو", "گاڑی", "تاجر", "گولی"], "difficulty": "hard"}, {"id": 13, "arabic": "الْحَيَّةُ مِنَ الْحَيْوَانَاتِ الْمُؤذِيَةِ إِذَا لَدَغَتْ أَحَدًا تُهْلِكُهُ هَلَاكًا تَامًا .", "urdu": "سانپ ایک موذی جانور ہے جو کسی کو کاٹ لیتا ہے تو اس کا کام بالکل تمام کر دیتا ہے۔", "keywords": ["سانپ", "جانور", "کاٹنا", "ہلاک"], "difficulty": "medium"}, {"id": 14, "arabic": "أَمْطَرَتِ السَّمَاءُ مَطَرًا غَزِيْرًا فِي بَنْغَلَا دَيشَ فِي الْأَسْبُوعِ الْمَاضِي فَهَدَمَ الْمَنَازِلَ الْكَثِيرَةَ هَدْمًا تَانًا وَأَفْنَى الْحُقُوْلَ الْكَثِيرَةَ فَنَاءً كَامِلًا .", "urdu": "گزشتہ ہفتے بنگلہ دیش میں ایسی زور دار بارش ہوئی جس نے بہت سے مکانات کو بالکل ڈھا دیا اور بہت سی کھیتیوں کو پوری طرح تباہ کر دیا۔", "keywords": ["بارش", "بنگلہ دیش", "مکان", "کھیتی"], "difficulty": "hard"}, {"id": 15, "arabic": "يُهْتَمُّ بِالضَّوْءِ فِي الطُّرْقِ وَالأَزِقَةِ فِي الْمُدْنِ اِهْتِمَامًا جِدًّا وَتُوْقَدُ الْمَصَابِيحُ الْكَهْرَ بَائِيَّةُ الَّتِي تُذْهِبُ الظَّلَامَ كُلَّ الْإِذْهَابِ.", "urdu": "شہروں میں راستوں اور گلی کوچوں میں روشنی کا بہت اہتمام کیا جاتا ہے اور ایسے بلب جلائے جاتے ہیں جو اندھیرے کو بالکل کافور کر دیتے ہیں۔", "keywords": ["شہر", "راستہ", "روشنی", "بلب"], "difficulty": "medium"}]}, {"tamreen_no": 19, "title": "التَّمْرِينُ (١٩)", "type": "ترجمہ", "instruction": "عربی کا اردو میں ترجمہ کرو۔", "total_questions": 12, "questions": [{"id": 1, "arabic": "أَقْبَلَ الْعُمَّالُ عَلَى عَمَلِهِمْ كُلَّ الْإِقْبَالِ .", "urdu": "کام کرنے والے اچھی طرح اپنے کام میں لگ گیے۔", "keywords": ["مزدور", "کام"], "difficulty": "easy"}, {"id": 2, "arabic": "أَجَابَ خَالِدٌ عَنِ السُّؤَالِ سَرِيعًا .", "urdu": "خالد نے فور اسوال کا جواب دیا۔", "keywords": ["خالد", "سوال", "جواب"], "difficulty": "easy"}, {"id": 3, "arabic": "مَرَّ الْقِطَارُ مَرَّ السَّحَابِ.", "urdu": "ٹرین بادل کی طرح گزری۔", "keywords": ["ٹرین", "بادل"], "difficulty": "easy"}, {"id": 4, "arabic": "أُقَدِّرُ الْفَنَّ تَقْدِيرًا لَا أُقَدِرُهُ شَيْئًا آخَرَ .", "urdu": "میں آرٹ کی ایسی قدر کرتا ہوں کہ اس طرح دوسری چیز کی نہیں کرتا ہوں.", "keywords": ["آرٹ", "قدر"], "difficulty": "medium"}, {"id": 5, "arabic": "أَقْبَلَ طُلَّابُ الْعِلْمِ عَلَى تَعَلُّمِ اللُّغَةِ الْعَرَبِيَّةِ إِقْبَالًا مَحْمُوْدًا.", "urdu": "طلبہ نے خوب اچھی طرح عربی زبان سیکھنا شروع کیا۔", "keywords": ["طلبہ", "عربی زبان", "سیکھنا"], "difficulty": "medium"}, {"id": 6, "arabic": "وَسْوَسَ الشَّيْطَانُ لِلإِنْسَانِ وَسْوَسَةً ، وَزَخْرَفَ لَهُ الْبَاطِلَ زَخْرَفَةً ، فَمَنْ اسْتَجَابَ لَهُ زَلْزَلَ حَيَاتَهُ زِلْزَالًا شَدِيدًا.", "urdu": "شیطان نے انسان کے لیے وسوسہ ڈالا، اور اس کے لیے جھوٹ کو سجا کر پیش کیا تو جس نے اسے تسلیم کیا اس کی زندگی میں زبر دست زلزلہ پیدا کر دیا.", "keywords": ["شیطان", "وسوسہ", "باطل", "زندگی"], "difficulty": "hard"}, {"id": 7, "arabic": "إِنَّ وَالِدَيَّ قَدْرَ بَيَانِي تَرْبِيَةً كَرِيمَةً وَتَعِبَا فِي سَبِيلِ ذَلِكَ تَعَبًا شَدِيدًا.", "urdu": "واقعی میرے والدین نے میری اچھی تربیت کی اور اس کی راہ میں سخت تھکن برداشت کی .", "keywords": ["والدین", "تربیت", "محنت"], "difficulty": "medium"}, {"id": 8, "arabic": "إِنَّ مَشْرُوْعَ الْقِرَاءَةِ لِلْجَمِيعِ مِنَ الْمَشْرُوعَاتِ الَّتِي أَثَرَتِ الثَّقَافَةَ فِي مِصْرٍ إِثْرَاءً بَالِغَا.", "urdu": "یقینا تمام لوگوں کے لیے تعلیم کا منصوبہ ایسا منصوبہ ہے جس نے شہر میں تہذیب و تمدن میں زبردست اضافہ کر دیا۔", "keywords": ["تعلیم", "منصوبہ", "تہذیب", "مصر"], "difficulty": "medium"}, {"id": 9, "arabic": "أُحْسِنُ إِلَى الْوَالِدَيْنِ إِحْسَانًا وَأَخْفِضُ لَهُمَا جَنَاحَ الذُّلِّ مِنَ الرَّحْمَةِ خَفْضًا.", "urdu": "میں والدین کے ساتھ اچھا سلوک کرتا ہوں اور دونوں کے لیے نرم دلی سے عاجزی کا باز و بچھاتا ہوں .", "keywords": ["والدین", "سلوک", "عاجزی", "رحمت"], "difficulty": "medium"}, {"id": 10, "arabic": "حَجَجْتُ بِهِمَا بَيْتَ اللهِ حَجَاتٍ ثَلَاثًا وَزُرْنَا قَبْرَ الرَّسُولِ صَلَى اللَّهُ عَلَيْهِ وَسَلَّمَ زَوْرَتَيْنِ.", "urdu": "میں نے دونوں کے ساتھ خانہ کعبہ کے تین حج کیے اور دو مرتبہ رسول پاک کے روضہ انور کی زیارت کی۔", "keywords": ["حج", "خانہ کعبہ", "زیارت", "رسول"], "difficulty": "medium"}, {"id": 11, "arabic": "أَثْنَيْتُ عَلَى الْفَائِزِ الْأَوَّلِ ثَنَاءً لَا أُثْنِيْهِ لِأَحَدٍ غَيْرِهُ ، وَأَحْتَرِمُ الْمُتَوَفِّقَ احْتِرَامًا لَمْ أَحْتَرِ مُهُ لِغَيْرِهِ.", "urdu": "پہلے کامیاب ہونے والے کی میں نے ایسی تعریف کی کہ اس کے علاوہ کسی کی ایسی تعریف نہیں کی اور کامیاب ہونے والے کی ایسی عزت و افزائی کرتا ہوں کہ ایسی دوسرے کی نہیں کرتا ہوں۔", "keywords": ["کامیاب", "تعریف", "عزت"], "difficulty": "medium"}, {"id": 12, "arabic": "التَّمْرِيْنَاتُ الْبَدَنِيَّهُ تَزِيْدُ الْعَضَلَاتِ صَلَابَةٌ وَالْقَلْبَ قُوَّةً ، وَ تُسَاعِدُ الْأَمْعَاءَ وَالْكَلِي أَتَمَ مُسَاعَدَةٌ ، فَعَلَى الْإِنْسَانِ أَنْ يُعْنَى بِهَا كُلَّ الْعِنَايَةِ ، وَأَنْ يَجْعَلَ لِنَفْسِهِ حَظًّا مِنْهَا كُلَّ يَوْمٍ ، وَأَفْضَلُ أَنْوَاعِ التَّمْرِيْنِ الْبَدَنِي مَا كَانَ فِي الْهَوَاءِ الطَّلَقِ ، فَيَحْسُنُ بِالإِنْسَانِ أَنْ يَمْشِيَ فِي الْحُقُوْلِ كَثِيرًا، وَأَنْ يَسْبَحَ عَوْمًا ، وَأَنْ يَْمْتَطِيَ صَهَوَاتِ الْخَيْلِ رُكُوبًا، وَأَنْ يَشْتَغِلَ فِي حَدِيقَةِ مَنْزِلِهِ مَرَّتَيْنِ أَوْ ثَلَاثًا كُلَّ أُسْبُوعِ، وَعَلَى الْإِنْسَانِ أَلَّا يُجْهِدَ نَفْسَهُ فِي هَذَا التَّمْرِيْنِ ذَلِكَ الْإِجْهَادِ الَّذِي يَأْتِيهِ الْمُتَنَافِسُوْنَ فِي مَيَادِيْنِ السَّبَاقِ ، فَإِنَّ ذلِكَ قَدْ يَضُرُّ الْحِسْمَ أَكْثَرَ مِمَّا يُفِيدُهُ.", "urdu": "جسمانی ورزش پٹھوں کو زیادہ سخت اور دل کو زیادہ طاقت ور کرتی ہیں ، آنتوں اور گردوں کی مکمل مدد کرتی ہیں، تو انسان کو اس پر پوری توجہ دینی چاہیے اور اپنے لیے اس میں سے ہر دن ایک حصہ مقرر کرے اور جسمانی ورزش کے اقسام میں سے سب سے بہتر وہ ہے جو کھلی ہوا میں ہو، تو انسان کا کھیتوں میں زیادہ چلنا ، تیرنا، گھوڑے کی پیٹھ پر خوب سوار ہونا اور اپنے مکان کے باغ میں ہر ہفتہ دو یا تین مرتبہ مصروف رہنا اچھا ہوتا ہے اور انسان پر ضروری ہے کہ خود کو ورزش کی اس مشقت میں نہ ڈالے جس میں دوڑ کے میدانوں میں مقابلہ کرنے والے لوگ پڑتے ہیں کیوں کہ ایسی ورزش جسم کو فائدہ سے زیادہ نقصان دیتی ہے۔", "keywords": ["ورزش", "جسم", "دل", "صحت"], "difficulty": "hard"}]}, {"tamreen_no": 20, "title": "التَّمْرِينُ (٢٠)", "type": "عربی میں ترجمہ", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 14, "questions": [{"id": 1, "arabic": "خَافُوا اللَّهَ أَيْنَمَا تَكُونُوا وَاذْكُرُوهُ ذِكْرًا كَثِيرًا.", "urdu": "تم جہاں بھی رہو اللہ تعالی سے ڈرتے رہو اور اس کو خوب یاد کرتے رہو۔", "keywords": ["اللہ", "خوف", "ذکر"], "difficulty": "easy"}, {"id": 2, "arabic": "عِنْدَمَا يُسْفِرُ الصُّبْحُ تَخْرُجُ الطُّيُورُ مِنْ أَعْشَاشِهِمْ وَتُغَرِدُ عَلَى أَغْصَانِ الْأَشْجَارِ تَغْرِيدًا.", "urdu": "جب صبح ہوتی ہے پرندے اپنے گھونسلوں سے باہر نکلتے ہیں اور درختوں کی شاخوں پر خوب چہچہاتے ہیں۔", "keywords": ["صبح", "پرندہ", "گھونسلا", "درخت"], "difficulty": "medium"}, {"id": 3, "arabic": "مَسْعُودٌ طَالِبٌ مُجْتَهِدُ الَّذِي يَجْتَهِدُ فِي الْقِرَاءَةِ اِجْتِهَادًا وَ يَكْتُبُ أَجْوِبَةَ الْأَسْئِلَةِ الْإِمْتِحَانِيَّةِ وَاضِحًا عَلَى كُرَاسَتِهِ.", "urdu": "مسعود ایک محنتی طالب علم ہے جو پڑھنے میں خوب محنت کرتا ہے اور امتحانی سوالات کے جوابات صاف صاف اپنی کاپی پر لکھتا ہے۔", "keywords": ["مسعود", "طالب علم", "محنت", "امتحان"], "difficulty": "medium"}, {"id": 4, "arabic": "انْهَدَمَ الْبَارِحَةَ مَنْزِلْ إِنْهِدَامًا تَامَّا بِنُزُولِ الْمَطَرِ الْغَزِيرِ وَسَاعَدَ الْخِثْرَانُ أَصْحَابَ الْبَيْتِ فِي إِخْرَاجِ مَتَاعِ ذَلِكَ الْبَيْتِ مُسَاعَدَةٌ وَسَعِيَ لِذَلِكَ الْبُولِيسُ أَيْضًا.", "urdu": "کل رات تیز بارش کی وجہ سے ایک مکان بالکل ڈھ گیا، پڑوسیوں نے اس گھر کا سامان نکالنے میں گھر والوں کی بہت مدد کی اور پولیس نے بھی اس کے لیے کوشش کی۔", "keywords": ["بارش", "مکان", "پڑوسی", "پولیس"], "difficulty": "hard"}, {"id": 5, "arabic": "تَعْصِفُ الرِّيَاحُ مِنَ صَبَاحِ الْيَوْمِ وَ يَنْزِلُ الْمَطَرُ رَشَاشًا وَقَدْ صَارَ الْجَو رَائِفًا جِدًا ، وَمِمَّا يَنْفَعُ الْحُقُوْلَ كَثِيرًا.", "urdu": "آج صبح سے تیز ہوائیں چل رہی ہیں ، ہلکی ہلکی بارش ہورہی ہے اور موسم نہایت خوشگوار ہو گیا ہے۔ اس سے کھیتوں کا بہت فائدہ ہوگا۔", "keywords": ["ہوا", "بارش", "موسم", "کھیت"], "difficulty": "medium"}, {"id": 6, "arabic": "مَنْ لَا يَعْلَمُ أَنَّ الْيَهُودَ عَدُوٌّ شَدِيدٌ لِلْمُسْلِمِينَ، يُدَبِّرُوْنَ الْمُوَامِرَاتِ تَدْبِيرًا مُسْتَمِرُ الإِلْحَاقِهِمُ الضَّرَرَ، وَلَا يَتَعَهَّدُوْنَ حُقُوْقَ الْإِنْسَانِ شَيْئًا .", "urdu": "کون نہیں جانتا کہ یہودی مسلمانوں کے سخت دشمن ہیں ، وہ انھیں نقصان پہنچانے کے لیے برابر سازشیں کرتے رہتے ہیں اور انسانی حقوق کا کچھ بھی خیال نہیں رکھتے ۔", "keywords": ["یہودی", "مسلمان", "دشمن", "سازش"], "difficulty": "medium"}, {"id": 7, "arabic": "مَرِضَ أَخٌ حَامِدٍ مَرَضًا شَدِيدًا أَمْسِ ، أُصِيْبَ بِوَجَعٍ فِي رَأْسِهِ بِشِدَّةٍ لَمْ يَأْكُلِ الْعَشَاءَ مُطْلَقًا لِأَجَلِهِ .", "urdu": "حامد کا بھائی کل سخت بیمار ہوا، اس کے سر میں زور کا درد اٹھا، جس کی وجہ سے اس نے رات کا کھانا بالکل نہیں کھایا۔", "keywords": ["حامد", "بھائی", "بیمار", "درد"], "difficulty": "medium"}, {"id": 8, "arabic": "عَلَى الْمُسْلِمِينَ أَنْ يَعُدُّوا مَا لَهُمْ مُسْتَمِرًا كُلَّ عَامٍ وَلَا يَتَكَاسَلُوْا فِي أَدَاءِ الزَّكَاتِ كَسْلًا مُطْلَقًا ، إِنْ أَخْلَصُوا فِي أَدَاءِ هَذَا الْوَاجِبِ كُلَّ الْإِخْلَاصِ بَارَكَ اللَّهُ تَعَالَى فِي أَمْوَالِهِمْ بَرَكَةً كَثِيرَةً.", "urdu": "مسلمانوں کو چاہیے کہ وہ برابر ہر سال اپنے مال کا حساب کریں اور زکات کی ادائیگی میں بالکل سستی نہ کریں ، اگر وہ اس فریضے کو پورے اخلاص کے ساتھ ادا کرتے رہیں گے تو اللہ تعالیٰ ان کے مال میں خوب برکت دے گا۔", "keywords": ["مسلمان", "مال", "زکات", "برکت"], "difficulty": "hard"}, {"id": 9, "arabic": "يَجِبُ أَنْ تَكُونَ فِي كُلِّ بَلَدٍ مُؤسَّسَةٌ ثَقَافِيَّةٌ تَنْشُرُ التَّعْلِيمَ نَشْرًا كَثِيرًا وَتَخْدِمُ الدِّينَ خِدْمَةً حَسَنَةً .", "urdu": "ہر شہر میں ایک ایسے تعلیمی ادارے کی ضرورت ہے جو تعلیم کو خوب عام کرے اور دین کی بھی اچھی خدمت کرے۔", "keywords": ["شہر", "تعلیمی ادارہ", "تعلیم", "دین"], "difficulty": "medium"}, {"id": 10, "arabic": "الْغِذَاءُ الصَّحِيحُ ضَرُوْرِيٌّ لِلإِنْسَانِ الَّذِي يَسُدُّ الجُمْعَ وَالْعِظَامَ وَ يُقَوِيْهَا قُوَّةً كَثِيرَةً ، وَ يُعِينُ عَلَى دَمْلِ الْجُرُوْحِ إِعَانَةً أَيْضًا. وَ يُنَمِّي الْأَعْصَابَ", "urdu": "صحت مند غذا انسان کے لیے ضروری ہے جو بھوک مٹاتی ہے ، پٹھوں اور ہڈیوں کو بڑھاتی اور خوب طاقت ور بناتی ہے اور زخموں کو بھرنے میں بھی کافی مدد دیتی ہے۔", "keywords": ["غذا", "انسان", "صحت", "ہڈی"], "difficulty": "hard"}, {"id": 11, "arabic": "إِذَا كُنْتَ تُرِيدُ أَنْ تَفْعَلَ فِعْلًا هَامًا ، فَعَلَيْكَ أَنْ تُفَكِّرَ فِي جَمِيعِ جَوَانِبِهِ تَفْكِيْرًا وَتَسْتَشِيْرَ الْأَصْدِقَاءَ الأَوْفِيَاءَ أَيْضًا كَيْ لَا تُوَاجِهَ الضَّرَرَ.", "urdu": "اگر آپ کو کوئی اہم کام کرنا ہو تو پہلے اس کے تمام گوشوں پر خوب غور کریں اور مخلص دوستوں سے بھی مشورہ لیں تا کہ آپ نقصان سے دوچار نہ ہوں۔", "keywords": ["کام", "مشورہ", "دوست", "نقصان"], "difficulty": "medium"}, {"id": 12, "arabic": "لَمَّا وَصَلَتِ الثَّقَافَةُ الْإِسْلَامِيَّةُ إِلَى شَعْبٍ أَثَرَتْ فِي عَادَاتِهِ وَخُلُقِهِ أَثَرًا بَالغًا.", "urdu": "اسلامی تہذیب جب کسی قوم میں پہنچی تو ان کی عادات و اخلاق پر اس نے گہرا اثر چھوڑا۔", "keywords": ["اسلامی تہذیب", "قوم", "عادت", "اخلاق"], "difficulty": "medium"}, {"id": 13, "arabic": "تَأَثَرَ رِجَالُ الْهِنْدِ وَمَالِيزِيَا وَالصِّينِ بِالتَّجَارِ الْمُسْلِمِينَ وَالسَّائِحِيْنَ تَأْثْرًا كَبِيرًا ، وَعَامَلُوهُمْ مُعَامَلَةً حَسَنَةً.", "urdu": "ہندوستان ، ملیشیا اور چین کے لوگ مسلمان تاجروں اور سیاحوں سے بہت متاثر ہوئے اور ان کے ساتھ بہت اچھا برتاؤ کیا۔", "keywords": ["ہندوستان", "ملیشیا", "چین", "مسلمان تاجر"], "difficulty": "medium"}, {"id": 14, "arabic": "الْجَامِعَةُ الْأَشْرَفِيَّةُ لِأَهْلِ السُّنَّةِ وَالْجَمَاعَةِ مَعْهَدٌ عِلْمِيٌّ وَدِيْنِيٌّ فِي شِبْهِ الْقَارَةِ الَّتِي تَهْتَمُّ بِتَعْلِيمِ اللُّغَةِ الْعَرَبِيَّةِ وَآدَابِهَا إِضَافَةٌ إِلَى الْعُلُوْمِ وَالْفُنُوْنِ الْإِسْلَامِيَّةِ أَيْضًا اِهْتِمَامًا كَامِلًا ، يَكُوْنُ خِرِيجُوْهَا مُخْلِصِينَ مُتَيَقِظِيْنَ نُشَطَاءَ وَ يَنْتَمُوْنَ إِلَى مَجَالَاتٍ مُخْتَلِفَةٍ. وَ يَنْشُرُوْنَ التَّعَالِيمَ الْإِسْلَامِيَّةَ نَشْرًا كَثِيرًا.", "urdu": "جامعہ اشرفیہ بر صغیر میں اہل سنت و جماعت کا علمی و دینی ادارہ ہے جو اسلامی علوم وفنون کے ساتھ عربی زبان وادب کی تعلیم پر بھی بھر پور توجہ دیتا ہے، یہاں کہ فارغین مخلص، بیدار مغز متحرک اور فعال ہوتے ہیں جو مختلف میدانوں سے تعلق رکھتے ہیں اور اسلامی تعلیمات کی خوب خوب نشر و اشاعت کرتے ہیں۔", "keywords": ["جامعہ اشرفیہ", "اہل سنت", "علمی ادارہ", "عربی زبان"], "difficulty": "hard"}]}, {"tamreen_no": 21, "title": "التَّمْرِينُ (٢١)", "type": "ترجمہ اور مفعول فیہ", "instruction": "آنے والے جملوں کا اردو میں ترجمہ کرو اور رسم الخط لگا گر مفعول فیہ کی تعیین کرو۔", "total_questions": 7, "questions": [{"id": 1, "arabic": "تَعَطَّلَ مُحَرِّكُ السَّيَّارَةِ عِنْدَ مُنْحَنَى الطَّرِيقِ.", "urdu": "راستے کے موڑ پر گاڑی کا انجن خراب ہو گیا۔", "keywords": ["گاڑی", "انجن", "راستہ", "موڑ"], "difficulty": "easy"}, {"id": 2, "arabic": "يَسْتَعِينُ الْفَلَّاحُ فِي حَقْلِهِ بِالشَّادُوْفِ وَالفَأْسِ وَالْمُنْجَلِ وَالْمِحْرَاثِ وَالنَّوْرَجِ وَالسَّاقِيَةِ.", "urdu": "کسان اپنے کھیت میں ڈول، کلہاڑی، درانتی، ہل، غلہ گاہنے کی مشین اور رہٹ کی مدد لیتا ہے۔", "keywords": ["کسان", "کھیت", "ہل", "مشین"], "difficulty": "medium"}, {"id": 3, "arabic": "اتَّجَهْتُ نَحْوَ الْحَدِيقَةِ لِلاسْتِمْتَاعِ بِمَبَاهِجِهَا.", "urdu": "باغ کی خوب صورتی سے لطف اندوز ہونے کے لیے میں اس کی طرف گیا۔", "keywords": ["باغ", "خوبصورتی", "لطف"], "difficulty": "easy"}, {"id": 4, "arabic": "يَسْتَعْمِلُ الْمُهَنْدِسُ حِيْنَ عَمَلِهِ الْمِسْطَرَةَ وَالْمِنْقَلَةَ وَالْمُثَلَّثَ وَالْقَلَمَ وَالْوَرَقَةَ.", "urdu": "انجینئر اپنے کام کے وقت اسکیل ، آلہ ، مثلث، قلم اور کاغذ استعمال کرتا ہے۔", "keywords": ["انجینئر", "کام", "اسکیل", "قلم"], "difficulty": "medium"}, {"id": 5, "arabic": "يَسْتَخْدِمُ الْجَرَّاحُ أَثْنَاءَ عَمَلِيَّتِهِ الْمُشْرَطَ وَالْإِبْرَةَ وَالْمُقَصَّ وَالْمِنْظَارَ.", "urdu": "سرجن اپنے آپریشن کے دوران نشتر، انجکشن، قینچی اور دور بین کا استعمال کرتا ہے۔", "keywords": ["سرجن", "آپریشن", "نشتر", "قینچی"], "difficulty": "medium"}, {"id": 6, "arabic": "يَذْهَبُ الْقَادِرُ عَلَى أَدَاءِ فَرِيضَةِ الْحَقِّ إِلَى الْأَرَاضِي الْحِجَازِيَّةِ مُتَحَمِلًا الْمَتَاعِبَ وَالصِّعَابَ لَا يَثْنِيهِ عَنْ عَزِيمَتِهِ حَرٌّ يُلَاقِيْهِ زَمَنَ الصَّفِ ، أَوْ بَرْدٌ يُصِيبُهُ أَيَّامَ الشَّتَاءِ ، حَتَّى إِذَا وَصَلَ إِلَى مَكَّةَ بِسَلَامَةِ اللَّهِ طَافَ حَوْلَ الْكَعْبَهِ ، وَسَعَى بَيْنَ الصَّفَا وَالْمَرْوَةِ ، وَأَتَمَّ جَمِيعَ الْمَنَاسِكِ رَاضِيًا صَابِرًا . ( تيسير النحو، ص : ٢١٦)", "urdu": "تندرست آدمی مشکلوں اور دشواریوں کو برداشت کر کے حجاز کی زمین پر فریضہ حج ادا کرنے جاتا ہے، گرمی کے زمانے کی گرمی یا سردی کے دنوں کی سردی اس کو اس کے ارادے سے باز نہیں رکھتی ہے یہاں تک کہ وہ اللہ کی سلامتی کے ساتھ مکہ مکرمہ جاتا ہے کعبہ کے ارد گرد طواف کرتا ہے ، صفا مروہ کے درمیان سعی کرتا ہے اور راضی برضا و صابر رہ کر تمام ارکان حج پورے کرتا ہے۔", "keywords": ["حج", "حجاز", "مکہ", "کعبہ"], "difficulty": "hard"}, {"id": 7, "arabic": "اجْتَمَعَ مَجْلِسُ الْمُدَرِّسِينَ ظُهْرَ السَّيْتِ الْمَاضِي لِلنَّظْرِ فِي أَحْوَالِ الطُّلابِ ، وَقَدْ اسْتَمَرَّ اجْتِمَاعُهُمْ سَاعَةً ، انْصَرَ فُوْا بَعْدَهَا إِلَى بُيُؤْتِهِمْ ، ثُمَّ عَادُوْا فَاجْتَمَعُوْا مَسَاءً، وَقَدْ قَرَّرُوْا إِجْرَاءَ اِمْتِحَانِ مُسَابَقَةٍ بَيْنَ الْفَتْرَتَيْنِ الثَّالِثَةِ وَالرَّابِعَةِ، يُمْنَحُ الْفَائِرُ فِيْهَا جَائِزةً ثَمِيْنَةٌ، وَبَيْنَمَا كَانَ الطَّلَابُ يَقِفُوْنَ فِي صُفُوفِهِمْ صَبَاحًا وَقَفَ الْمُشْرِفُ أَمَامَهُمْ وَأَعْلَمَهُمْ ذَلِكَ النَّبَاءَ ، وَ حَنَّهُمْ عَلَى الاجْتِهَادِ فِي دُرُوسِهِمْ ، حَتَّى يَكُوْنُوْا عِنْدَ حُسْنٍ ظَنْ أَسَاتِذَتِهِمْ (قواعد اللغة العربية ، الثاني المتوسط ، ص : ۱۰۰)", "urdu": "گزشتہ ہفتہ دو پہر کے وقت طلبہ کے حالات کا جائزہ لینے کے لیے مدرسین کی نشست ہوئی اور ان کی یہ نشست ایک گھنٹہ جاری رہی اس کے بعد وہ اپنے گھروں کو چلے گیے پھر لوٹے اور شام کو اکٹھا ہوئے ، انہوں نے تیسرے اور چوتھے وقفہ کے درمیان مقابلہ کا امتحان کرانے کا فیصلہ کیا جس میں کامیاب ہونے والے کو قیمتی انعام دیا جائے گا جس وقت طلبہ صبح کے وقت اپنی درسگاہوں میں بیٹھے تھے ، نگراں ان کے سامنے کھڑا ہوا اور انھیں یہ خبر سنائی، انھیں اسباق میں محنت کرنے پر ابھارا تا کہ وہ حُسن ظن کے مطابق ہو جائیں۔", "keywords": ["مدرسین", "نشست", "امتحان", "انعام"], "difficulty": "hard"}]}, {"tamreen_no": 22, "title": "التَّمْرِينُ (٢٢)", "type": "عربی میں ترجمہ", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 6, "questions": [{"id": 1, "arabic": "تُغْلَقُ الْمَدَارِسُ الرَّسْمِيَّةُ فِي فَصْلِ الصَّيْفِ لِأَنَّ الْحَرَّ يُرْعِجُ الْحِسْمَ وَالذَّهْنَ ، وَ يُقْلِقُ الطَّلَبَةَ وَالْأَسَاتِذَةَ لَيْلًا وَنَهَارًا، فَهُمْ لَا يَفْعَلُوْنَ الدَّرْسَ وَ الْمُطَالَعَةَ عَلَى الْوَجْهِ الصَّحِيحِ .", "urdu": "سرکاری اسکول موسم گرما میں بند کر دیے جاتے ہیں ، کیوں کہ گرمی جسم اور ذہن کو جھنجھوڑ دیتی ہے ، شب و روز طلبہ اور اساتذہ کو پریشان رکھتی ہے تو وہ صحیح طریقے پر درس اور مطالعہ کا کام نہیں کر پاتے ہیں۔", "keywords": ["اسکول", "گرمی", "طالب علم", "استاذ"], "difficulty": "hard"}, {"id": 2, "arabic": "تَنْعَقِدُ نَدْوَهُ عِلْمِيَّةٌ مَسَاءَ الْغَدِ فِي دِهْلِي عَلَى عُنْوَانِ مَشَاكِلِ الْمُسْلِمِينَ الرَّاهِنَةِ وَعِلَاجِهَا يَخْطُبُ فِيْهَا أَوَّلًا وَزِيْرُ الدَّاخِلِيَّةِ ، يُشَارِكُ فِيْهَا الزُّعَمَاءُ الْمُسْلِمُوْنَ مِنَ الْأَقَالِيمِ الْمُخْتَلِفَةِ لِلدَّوْلَةِ.", "urdu": "کل شام کو دہلی میں موجود مسلم مسائل ور ان کا حل “ کے موضوع پر ایک سیمینار منعقد ہوگا، جس میں سب سے پہلا خطبہ وزیر داخلہ کا ہوگا ، اس میں ملک کے مختلف صوبوں کے مسلم نمائندے شریک ہوں گے۔", "keywords": ["دہلی", "سیمینار", "مسلم", "وزیر داخلہ"], "difficulty": "hard"}, {"id": 3, "arabic": "زَارَ وَقْدْ مِنَ الْأَسَائِدَةِ الْمُمَثْلِينَ لِلْمَدَارِسِ الْعَرَبِيَّةِ الْمُسَاعَدَةَ كَبِيرَ الْوُزَرَاءِ فِي أَتْرَا بِرادِيش عَقِيْبَ الظُّهْرِ الثَّامِنَ وَ الْعِشْرِينَ مِنْ ابْرِيل وَأَطْلَعَهُ عَلَى أَزْمَاتِهِمْ سَمِعَ أَحَادِيثَهُمْ بِعِنَايَةٍ كَامِلَةٍ وَأَكَدَ لَهُمْ حَلَّ مَشَاكِلِهِمْ الْمُتَنَوِعَةِ سَرِيعًا جَدًّا.", "urdu": "۲۸ اپریل کو دو پہر کے بعد امداد یافتہ عربی مدارس کے نمائندہ اساتذہ کا ایک وفد وزیر اعلی اتر پردیش سے ملا اور انھیں اپنی گوناگوں پریشانیوں سے واقف کرایا، وزیر اعلی نے پوری توجہ کے ساتھ ان کی باتیں سنیں اور ان کی مشکلات بہت جلد حل کرنے کا یقین دلایا۔", "keywords": ["وفد", "مدارس", "وزیر اعلی", "اتر پردیش"], "difficulty": "hard"}, {"id": 4, "arabic": "عِنْدَ بَيْتِي مُتَنَزَّةٌ كَبِيرٌ ، يَأْتِيْهَا النَّاسُ مِنَ الْمَنَاطِقِ الْبَعِيدَةِ لِلنُّرْهَةِ وَالرِّيَاضَةِ الْبَدَنِيَّةِ صَبَاحًا وَمَسَاءً ، لِمُرَاقَبَةِ أَغْرَاسِهَا وَأَزْهَارِهَا بُسْتَانِيُّوْنَ وَحُرَّاسٌ يَقُوْمُوْنَ بِوَاجِبِهِمْ بِكُلِّ جُهْدٍ وَنَشَاطٍ فِي الْمَوْعِدِ الْمَحَدَّدِ .", "urdu": "میرے گھر کے نزدیک ایک بہت بڑا پارک ہے ، جس میں صبح و شام دور دراز علاقوں کے لوگ تفریح اور جسمانی ورزش کرنے کے لیے آتے ہیں ، اس کے پودوں اور پھولوں کی دیکھ دیکھ اور حفاظت کے لیے کئی مالی اور چوکی دار ہیں، جو مقرر وقت میں اپنی ڈیوٹی پوری تن دہی اور مستعدی کے ساتھ انجام دیتے ہیں۔", "keywords": ["پارک", "تفریح", "ورزش", "مالی"], "difficulty": "hard"}, {"id": 5, "arabic": "يَجْرِي النَّهْرُ كَومتى عَلَى بُعْدِ ١٥ كلو مترًا جِهَةَ الْجُنُوبِ مِنْ قَرْيَتِي تُوجَدُ فِيهِ الأَسْمَاكُ الْمُتَنَوَّعَةُ ، يَصِيْدَهَا الصَّيَّادُوْنَ بِالْأَشْرَاكِ وَ يَبِيْعُوْنَهَا بِثَمَنٍ غَالٍ ، يَكُونُ أَسْمَاكُ هَذَا النَّهْرِ لَذِيْنَةً جِدًّا وَمُقَوِيَةً.", "urdu": "میرے قصبے سے دکھن جانب تقریباً ۱۵ار کلومیٹر کی دوری پر گومتی ندی بہتی ہے ، جس میں قسم قسم کی مچھلیاں پائی جاتی ہیں ، شکاری جالوں سے ان کا شکار کرتے ہیں اور انھیں مہنگے داموں میں فروخت کرتے ہیں۔ اس ندی کی مچھلیاں بڑی لذیذ اور مقوی ہوتی ہیں۔", "keywords": ["ندی", "گومتی", "مچھلی", "شکاری"], "difficulty": "hard"}, {"id": 6, "arabic": "لَا تَزَالُ الرِّيَاحُ الْبَارِدَةُ وَالرَّائِقَةُ تَهُبُّ مِنْ ثَلَثَةِ أَيَّامٍ ، وَ يَنْزِلُ المَطَرُ رَشَاشًا، أَمْسِ ذَهَبْتُ بِأَصْدِقَائِي إِلَى الْحَدِيقَةِ الْمُتَلَا صِفَةِ عَلَى شَاطِئِ النَّهْرِ ، وَلَبِثْتُ أَتَمَتَّعُ هُنَاكَ بِالْحَقِّ سَاعَتَيْنِ وَعُدْتُ إِلَى الْبَيْتِ قُبَيْلَ أَذَانِ الْمَغْرِبِ ، وَطَالَعْتُ الْكُتُبَ الدِّرَاسِيَّةَ مُدَّةً بَعْدَ صَلَاةِ الْمَغْرِبِ ، بَعْدَ أَكْلِ الطَّعَامِ صَلَّيْتُ الْعِشَاءَ بِالْجَمَاعَةِ فِي مَسْجِدِ الْحَيِّ ، ثُمَّ نِمْتُ قَبْلَ السَّاعَةِ الْعَاشِرَةِ.", "urdu": "مسلسل تین دن سے ٹھنڈی اور خوش گوار ہوائیں چل رہی ہیں ، ہلکی ہلکی بارش بھی ہورہی ہے ، کل میں اپنے دوستوں کے ساتھ نہر کے کنارے گھنے باغ میں گیا اور دو گھنٹے وہیں رہ کر موسم کا لطف اٹھایا اور مغرب کی اذان سے کچھ پہلے گھر واپس آیا۔ نماز مغرب کے بعد کچھ دیر در سی کتابوں کا مطالعہ کیا، کھانا کھانے کے بعد محلے کی مسجد میں عشا کی نماز جماعت کے ساتھ پڑھی، پھر دس بجے سے پہلے ہی سو گیا۔", "keywords": ["بارش", "باغ", "نہر", "مسجد"], "difficulty": "hard"}]}, {"tamreen_no": 23, "title": "التَّمْرِينُ (٢٣)", "type": "ترجمہ", "instruction": "اردو میں ترجمہ کرو۔", "total_questions": 2, "questions": [{"id": 1, "arabic": "مِنْ طَرِيْفِ مَا يُرْوِي أَنَّ صَيَّادًا جَلَسَ تَحْتَ ظِلَّ شَجَرَةٍ، لِيَسْتَرِيحَ سَاعَةً مِنْ عَنَاءِ التَّجْوَالِ ، لَكِنَّهُ مَالَبِثَ أَنْ سَمِعَ زَثِيْرًا خَلْفَ الرَّابِيَةِ ، فَتَلَفَّتَ يَمِينًا وَ يَسَارًا، وَإِذَا أَسَدٌ يَظْهَرُ أَمَامَهُ ، وَيَمَدُّ قَدَمَهُ مُتَأَلَّا.", "urdu": "ایک انوکھی بات جس کو بیان کیا جاتا ہے کہ ایک شکاری دھوڑ دھوپ کی تکان سے کچھ دیر آرام کرنے کے لیے ایک درخت کے سائے کے نیچے بیٹھا، لیکن فورا ٹیلہ کے پیچھے اس نے ایک دہاڑ سنی تو وہ دائیں بائیں پھرا، اچانک ایک شیر اس کے سامنے ظاہر ہوتا ہے وہ تکلیف اور درد محسوس کرتے ہوئے اپنا قدم آگے بڑھاتا ہے۔", "keywords": ["شکاری", "درخت", "شیر", "ٹیلہ"], "difficulty": "hard"}, {"id": 2, "arabic": "لَقَدْ حَبَا اللهُ مِصْرَ مَوْقِعًا فَرِيدًا مُتَمَيِّرًا ، فَجَؤُهَا مُعْتَدِلْ لَيْلًا وَنَهَارٌ ، لَا تَشْتَدُّ حَرَارَتُهُ صَيْفًا، وَلَا تَلْسَعُ بُرُودَتُهُ شِتَاءًا ، كَمَا مَنَحَ اللَّهُ مِصْرَ نِيْلًا عَظِيمًا ، يُعَدُّ شَرَيَانَ الْحَيَاةِ فِيهَا ، فَقَدْ نَشَأْتِ الْحَضَارَةُ الْمُصْرِيَّةُ الْقَدِيمَّةُ مُنْذُ آلَافِ السِّنِينَ عَلَى جَانِبَيْهِ يَمِينًا وَشِمَالًا ، وَفَوْقَ أَرْضِ مِصْرَ نَجِدُ الْمَعَالِمَ السَّيَاحِيَّةَ الْقَدِيمَةَ وَالْحَدِيثَةَ الَّتِي جَعَلَتِ السُّيَّاحَ يَفِدُوْنَ إِلَيْهَا ، وَ يَقِفُوْنَ أَمَا مَهَا مَبْهُوْرِيْنَ ، وَإِقْبَالُهُمْ كَسْبٌ كَبِيرٌ لَاقْتِصَادِ مصر.", "urdu": "اللہ تعالی نے مصر کو یکتا انو بھی جگہ بنایا ہے اس کی فضارات و دن معتدل رہتی ہے، اس کی گرمی موسم گرما میں شدید نہیں ہوتی ہے اور اس کی ٹھنڈک موسم سرما میں نہیں کاٹتی ہے، جس طرح اللہ تعالی نے مصر کو ایسا عظیم دریائے نیل عطا کیا ہے جس کو مصر میں زندگی کی شہ رگ شمار کیا جاتا ہے ، پرانی مصری تہذیب و ثقافت نے ہزاروں سال تک اس کے دائیں بائیں دونوں طرف نشو و نما پائی، اور مصر کی زمین پر ہم ان پرانی اور نئی سیاحتی نشانیوں کو پاتے ہیں جن کی وجہ سے سیاح اس کی طرف آتے ہیں اور ان کے سامنے حیران ہو کر کھڑے رہتے ہیں اور ان سیاحوں کا آنا مصر کی معیشت کے لیے بڑی کمائی ہے۔", "keywords": ["مصر", "دریائے نیل", "تہذیب", "سیاح"], "difficulty": "hard"}]}, {"tamreen_no": 24, "title": "التَّمْرِينُ (٢٤)", "type": "عربی میں ترجمہ", "instruction": "عربی میں ترجمہ کرو۔", "total_questions": 4, "questions": [{"id": 1, "arabic": "ذَهَبْتُ مَعَ فِرْقَةٍ مِنْ أَصْدِقَائِي إِلَى مُبَائِي لِمُشَاهَدَةِ مَنْظَرٍ بَهِيْجٍ لِغُرُوْبِ الشَّمْسِ عَلَى سَاحِلِ الْبَحْرِ مَسَاءً ، وَصَلْنَا وَقْتَ الْعَصْرِ عَلَى سَاحِلِ الْبَحْرِ تَفَرَّجْنَا عَلَى الأَمْوَاجِ الْمُتَلَاطِمَةِ بُرْهَةٌ ، وَلَا جَعَلَتِ الشَّمْسُ تَغْرُبُ يَشْعُرُ بِهِ أَنَّ اللَّوْنَ الْأَحْمَرَ قَدْ مُزَجَ بِالْمَاءِ ، تَوَارَتِ الشَّمْسُ عَنْ أَعْيُنِنَا رُوَيْدًا رُوَيْدًا، ثُمَّ بَدَءَ الظَّلَامُ يَنْشُرُ أَجْنِحَتَهِ ، وَغَشِيَ سَطْحَ الْبَحْرِ كُلَّهُ بِرِدَائِهِ الْأَسْوَدِ.", "urdu": "میں شام کے وقت ساحل سمندر پر غروب آفتاب کا پرکیف منظر دیکھنے کے لیے اپنے دوستوں کی ایک ٹیم کے ساتھ ممبئی گیا، ہم لوگ عصر کے وقت ہی ساحل سمندر پر پہنچ گیے ، کچھ دیر تک باہم ٹکراتی ہوئی موجوں کا تماشا دیکھا، پھر سورج ڈوبنے لگا تو ایسا محسوس ہورتا تھا کہ پانی میں سرخ رنگ گھول دیا گیا ہے ، دھیرے دھیرے سورج ہماری نگاہوں سے روپوش ہو گیا. پھر تاریکی نے اپنے بازو پھیلانے شروع کیے اور پوری سطح سمندر کو اپنی سیاہ چادر میں ڈھانپ لیا۔", "keywords": ["ممبئی", "ساحل سمندر", "غروب آفتاب", "موج"], "difficulty": "hard"}, {"id": 2, "arabic": "يَخْسِفُ الْقَمَرُ أَحْيَانًا فَيَنْطَفَى ضَوْءُهُ وَيَحْمَرُ قُرْصُهُ ، وَ يَسُودُ الظَّلَامُ كُلَّ جِهَةٍ، وَتَعْبِسُ الدُّنْيَا، وَيُبَقَى هَذَا الْمَنْظَرُ بَعْضَ الْأَحْيَانِ سَاعَاتٍ، إِنَّ خَسْفَ الْقَمَرِ وَالشَّمْسِ مِنْ شَعَائِرِ قُدْرَةِ اللَّهِ تَعَالَى التَّامَّةِ.", "urdu": "کبھی کبھی چاند کو گہن لگ جاتا ہے ، تو اس کی روشنی بجھ جاتی ہے ، اور اس کی ٹکیہ سرخ ہو جاتی ہے، ہر طرف اندھیرا چھا جاتا ہے اور دنیا بے رونق و جاتی ہے، بعض اوقات یہ منظر گھنٹوں باقی رہتا ہے ، یقینا چاند اور سورج کا گہن اللہ تعالی کی قدرت کاملہ کی نشانیوں میں سے ہے۔", "keywords": ["چاند", "گہن", "اندھیرا", "سورج"], "difficulty": "medium"}, {"id": 3, "arabic": "ذَهَبْتُ أَمْسِ مَعَ أَخِي الْكَبِيْرِ بَعْدَ الظُّهْرِ لِلتَّفَرُّجِ عَلَى الْحُقُوْلِ وَلَمْ نَزَلْ تَنْظُرُ الْقَمْحَ الْمُخْضَرَّ وَأَغْرَاسَ الْخَرْدَلِ الْأَصْفَرِ ، ثُمَّ جَلَسَنَا تَحْتَ شَجَرَةٍ مُرْتَفِعَةٍ عَلَى شَاطِئِ النَّهْرِ ، كُنَّا نَسْمَعُ عِنْدَ أَرْجُلِنَا خَرِيْرَ الْمَاءِ، وَكَانَتِ الطُّيُورُ الْجَمِيْلَةُ تَشِبُ قَافِرَةٌ عَلَى أَغْصَانِ الْأَشْجَارِ الْخَضْرَاءِ ، وَ يُغَرِدُ الْبُلْبُلُ عَلَى غُصْنٍ، وَقَدْ رَاقَنَا كَثِيرًا هَذَا الْمَنْظَرُ الرَّائِعُ، وَ مَا زِلْنَا نَسْتَمْتِعُ بِرُؤيَةِ هَذَا الْمَنْظَرِ الْخَلَابِ وَقْتًا يَسِيرًا، وَنُشَاهِدُ رَوْعَةَ فَصْلِ الرَّبِيعِ وَجَمَالِهِ مُشَاهَدَةً بَالِغَةً، ثُمَّ قُمْنَا مِنْ هُنَاكَ ، وَتَوَضَّأْنَا وَصَلَّيْنَا الْعَصْرَ ، وَعُدْنَا إِلَى بَيْتِنَا قُبَيْلَ غُرُوبِ الشَّمْسِ بَعْدَ تَفَرُّجٍ هُنَا وَهُنَاكَ زَمَنًا يَسِيرًا.", "urdu": "میں کل اپنے بڑے بھائی کے ساتھ ظہر کے بعد کھیتوں کی سیر کو گیا، ہم لوگ کچھ دیر ہرے بھرے گیہوں اور سرسوں کے پودے دیکھتے رہے، پھر نہر کے کنارے ایک بلند و بالا درخت کے نیچے بیٹھ گیے ، ہم اپنے پیروں کے پاس پانی بہنے کی آواز سن رہے تھے ، خوب صورت پرندے درخت کی ہری بھری شاخوں پر پھوک رہے تھے، بلبل ایک شاخ کے اوپر نغمہ سنجی کر رہی تھی، یہ دل کش منظر ہمیں بہت بھلا معلوم ہوا اور ہم تھوڑی دیر اس سحر انگیز منظر کے مشاہدہ سے لطف اندوز ہوتے رہے اور موسم بہار کے حسن اور دل کشی کا خوب خوب نظارہ کرتے رہے ، پھر ہم وہاں سے اٹھے ، وضو کیا اور عصر کی نماز ادا کی ، اور تھوڑی دیر ادھر اُدھر ٹہلنے کے بعد غروب آفتاب سے کچھ پہلے اپنے گھر لوٹ آئے۔", "keywords": ["کھیت", "نہر", "درخت", "موسم بہار"], "difficulty": "hard"}, {"id": 4, "arabic": "عِبَادُ اللهِ الصَّالِحُوْنَ الَّذِيْنَ يَطْلُبُوْنَ الْيَوْمَ الْآخَرَ وَيَخَافُوْنَ اللَّهَ لَا يُرِيدُونَ فِي الْأَرْضِ عُلُوًّا ، وَلَا يَبْتَغُوْنَ فَسَادًا ، يُؤْمِنُوْنَ بِأَنَّهُ يُسْتَلُ عِنْدَ اللَّهِ عَنْ كُلِّ صَغِيرٍ وَكَبِيرٍ .", "urdu": "اللہ کے نیک بندے جو یوم آخرت کے طلب گار اور خدا سے ڈرنے والے ہیں ، وہ زمین میں نہ اپنی بڑائی کے خواہاں ہوتے ہیں اور نہ فساد چاہتے ہیں ، وہ اس بات پر ایمان رکھتے ہیں کہ اللہ تعالیٰ کی یہاں ہر چھوٹی ، بڑی چیز کے بارے میں سوال ہوگا۔", "keywords": ["بندے", "آخرت", "زمین", "فساد"], "difficulty": "medium"}]}];
+
+const BLOCKS = [[1,5],[6,10],[11,15],[16,20],[21,24]];
+const STORAGE_KEY = 'arabic_urdu_exam_progress_v1';
+const TARGET_SOFT = new Date('2026-08-08T23:59:59');
+const TARGET_EXAM = new Date('2026-08-12T09:00:00');
+
+let state = null;
+
+function byNo(no){ return APP_DATA.find(t => t.tamreen_no === no); }
+
+function getDirection(instr){
+  if(instr.indexOf('عربی') > -1) return 'ur2ar';
+  if(instr.indexOf('اردو') > -1) return 'ar2ur';
+  return 'ar2ur';
+}
+
+function batchSizeFor(t){
+  const lens = t.questions.map(q => q.arabic.length);
+  const avg = lens.reduce((a,b)=>a+b,0) / lens.length;
+  if(avg < 80) return 5;
+  if(avg < 150) return 4;
+  if(avg < 250) return 3;
+  if(avg < 400) return 2;
+  return 1;
+}
+
+function chunkText(text){
+  if(text.length <= 140) return [text];
+  let parts = text.split('،').map(p => p.trim()).filter(Boolean);
+  if(parts.length <= 1){
+    let words = text.split(' ');
+    let chunks = []; let cur = '';
+    words.forEach(w => {
+      if((cur + ' ' + w).trim().length > 140 && cur.length > 0){ chunks.push(cur.trim()); cur = w; }
+      else { cur = (cur + ' ' + w).trim(); }
+    });
+    if(cur) chunks.push(cur.trim());
+    return chunks;
+  }
+  let chunks = []; let cur = '';
+  parts.forEach((p, i) => {
+    let piece = p + (i < parts.length - 1 ? '،' : '۔');
+    if((cur + ' ' + piece).trim().length > 140 && cur.length > 0){ chunks.push(cur.trim()); cur = piece; }
+    else { cur = (cur + ' ' + piece).trim(); }
+  });
+  if(cur) chunks.push(cur.trim());
+  return chunks;
+}
+
+function blockIndexForTamreen(no){
+  for(let i=0;i<BLOCKS.length;i++){ if(no >= BLOCKS[i][0] && no <= BLOCKS[i][1]) return i; }
+  return -1;
+}
+
+function defaultState(){
+  let t = {};
+  APP_DATA.forEach(ex => {
+    t[ex.tamreen_no] = { learnBatch:0, learnDone:false, testIndex:0, testDone:false, results:{}, score:null };
+  });
+  let blocks = {};
+  BLOCKS.forEach((b,i) => { blocks[i] = { done:false, order:null, index:0, results:{}, score:null }; });
+  return { tamreens:t, blocks:blocks, screen:'dashboard', current:null };
+}
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* first run, no saved state */ }
+  return defaultState();
+}
+async function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ console.error('save failed', e); }
+}
+
+function tamreenStatus(no){
+  const s = state.tamreens[no];
+  if(s.testDone) return 'done';
+  if(s.learnDone) return s.testIndex > 0 ? 'testing' : 'ready_test';
+  if(s.learnBatch > 0) return 'learning';
+  return 'new';
+}
+
+function daysLeft(target){
+  const now = new Date();
+  return Math.max(0, Math.ceil((target - now) / 86400000));
+}
+
+async function go(screen, current){
+  state.screen = screen;
+  if(current !== undefined) state.current = current;
+  await saveState();
+  render();
+}
+
+function esc(s){ return (s||'').toString(); }
+
+/* ================= RENDER ================= */
+function render(){
+  const app = document.getElementById('app');
+  if(state.screen === 'dashboard') app.innerHTML = renderDashboard();
+  else if(state.screen === 'learn') app.innerHTML = renderLearn();
+  else if(state.screen === 'test') app.innerHTML = renderTest();
+  else if(state.screen === 'revision') app.innerHTML = renderRevisionScreen();
+  else if(state.screen === 'summary') app.innerHTML = renderSummary();
+  else if(state.screen === 'review') app.innerHTML = renderReview();
+  else if(state.screen === 'examIntro') app.innerHTML = renderExamIntro();
+  window.scrollTo(0,0);
+}
+
+function renderDashboard(){
+  const totalDone = APP_DATA.filter(t => state.tamreens[t.tamreen_no].testDone).length;
+  const pct = Math.round((totalDone / APP_DATA.length) * 100);
+  const dSoft = daysLeft(TARGET_SOFT);
+  const dExam = daysLeft(TARGET_EXAM);
+
+  let beads = '';
+  APP_DATA.forEach((t, i) => {
+    const st = tamreenStatus(t.tamreen_no);
+    const isMarker = t.tamreen_no % 5 === 0;
+    const cls = st === 'done' ? 'done' : (st === 'learning' || st === 'ready_test' || st === 'testing' ? 'progress' : '');
+    beads += `<div class="bead ${isMarker?'marker':''} ${cls}" onclick="scrollToCard(${t.tamreen_no})" title="تمرین ${t.tamreen_no}"></div>`;
+    if(i < APP_DATA.length - 1) beads += `<div class="thread"></div>`;
+  });
+
+  let continueHtml = '';
+  if(state.lastActive){
+    const t = byNo(state.lastActive);
+    if(t && !state.tamreens[state.lastActive].testDone){
+      continueHtml = `<div class="continue-card" onclick="resumeLast()">
+        <div class="cc-title">↩ جہاں سے چھوڑا تھا وہیں سے جاری رکھیں</div>
+        <div class="cc-sub">تمرین ${t.tamreen_no} — ${esc(t.title)}</div>
+      </div>`;
+    }
+  }
+
+  let listHtml = '';
+  BLOCKS.forEach((b, bi) => {
+    listHtml += `<div class="section-label">تمرین ${b[0]} تا ${b[1]}</div><div class="list">`;
+    for(let no = b[0]; no <= b[1]; no++){
+      const t = byNo(no);
+      if(!t) continue;
+      const st = tamreenStatus(no);
+      const badgeMap = { new:['نیا','new'], learning:['پڑھائی جاری','learning'], ready_test:['امتحان دو','test'], testing:['امتحان جاری','test'], done:['مکمل ✓','done'] };
+      const sc = state.tamreens[no].score;
+      const badgeText = st === 'done' && sc !== null ? `مکمل ✓ ${sc}%` : badgeMap[st][0];
+      listHtml += `<div class="card" id="t-${no}" onclick="openTamreen(${no})">
+        <div class="idx"><bdi class="num">${no}</bdi></div>
+        <div class="body">
+          <div class="title">${esc(t.title)}</div>
+          <div class="meta">${esc(t.instruction)}</div>
+        </div>
+        <div class="badge ${badgeMap[st][1]}">${badgeText}</div>
+      </div>`;
+    }
+    listHtml += `</div>`;
+
+    const blk = state.blocks[bi];
+    const tamreensInBlock = [];
+    for(let no = b[0]; no <= b[1]; no++) tamreensInBlock.push(no);
+    const allDone = tamreensInBlock.every(no => state.tamreens[no].testDone);
+    const locked = !allDone;
+    listHtml += `<div class="list" style="margin-top:8px;">
+      <div class="card revision-card ${locked?'locked':''}" onclick="${locked?'':'openRevision('+bi+')'}">
+        <div class="idx">↺</div>
+        <div class="body">
+          <div class="title">پانچوں تمرینوں کا ریویژن</div>
+          <div class="meta">${locked ? 'پہلے اوپر کی تمرینیں مکمل کرو' : (blk.done ? 'مکمل ✓ ' + blk.score + '%' : 'شروع کرنے کے لیے تیار')}</div>
+        </div>
+        ${blk.done ? '<div class="badge done">مکمل ✓</div>' : (locked ? '' : '<div class="badge test">شروع کرو</div>')}
+      </div>
+    </div>`;
+  });
+
+  return `
+  <div class="topbar">
+    <div class="brand-row">
+      <div class="brand">
+        <h1>ترجمہ مشق</h1>
+        <p>عربی ⇄ اردو — امتحان کی تیاری</p>
+      </div>
+      <div class="countdown">
+        <div class="n"><bdi class="num">${dSoft}</bdi></div>
+        <div class="l">دن (٨ اگست)</div>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="tasbih">${beads}</div>
+  </div>
+  ${continueHtml}
+  ${listHtml}
+  <div class="settings-row"><span onclick="resetProgress()">تمام پیش رفت صاف کریں</span></div>
+  `;
+}
+
+function scrollToCard(no){
+  const el = document.getElementById('t-' + no);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function resumeLast(){
+  const no = state.lastActive;
+  openTamreen(no);
+}
+
+async function openTamreen(no){
+  const st = tamreenStatus(no);
+  state.lastActive = no;
+  state.chunkShown = 1;
+  state.revealedNow = false;
+  if(st === 'new' || st === 'learning') await go('learn', no);
+  else if(st === 'ready_test' || st === 'testing') await go('test', no);
+  else await go('review', no);
+}
+
+async function openRevision(blockIndex){
+  const blk = state.blocks[blockIndex];
+  if(!blk.order){
+    let pool = [];
+    for(let no = BLOCKS[blockIndex][0]; no <= BLOCKS[blockIndex][1]; no++){
+      const t = byNo(no);
+      if(!t) continue;
+      t.questions.forEach(q => pool.push({tamreen_no:no, id:q.id}));
+    }
+    for(let i = pool.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i+1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    blk.order = pool;
+    blk.index = 0;
+    blk.results = {};
+  }
+  state.chunkShown = 1;
+  state.revealedNow = false;
+  await go('revision', blockIndex);
+}
+
+async function redoRevision(bi){
+  const blk = state.blocks[bi];
+  blk.order = null;
+  blk.index = 0;
+  blk.results = {};
+  await openRevision(bi);
+}
+
+function browsePractice(no){
+  state.current = no;
+  state.practiceMode = true;
+  state.practiceBatch = 0;
+  go('learn', no);
+}
+
+/* ---------------- LEARN ---------------- */
+function renderLearn(){
+  const t = byNo(state.current);
+  const dir = getDirection(t.instruction);
+  const bs = batchSizeFor(t);
+  const s = state.tamreens[t.tamreen_no];
+  const practicing = !!state.practiceMode;
+  const totalBatches = Math.ceil(t.questions.length / bs);
+  const batchIdx = practicing ? (state.practiceBatch || 0) : s.learnBatch;
+  const startI = batchIdx * bs;
+  const items = t.questions.slice(startI, startI + bs);
+  const isLast = batchIdx >= totalBatches - 1;
+
+  let cards = '';
+  items.forEach(q => {
+    const srcText = dir === 'ar2ur' ? q.arabic : q.urdu;
+    const tgtText = dir === 'ar2ur' ? q.urdu : q.arabic;
+    const srcCls = dir === 'ar2ur' ? 'arabic' : 'urdu';
+    const tgtCls = dir === 'ar2ur' ? 'urdu' : 'arabic';
+    const chunks = chunkText(srcText);
+    const diffCls = 'diff-' + (q.difficulty || 'medium');
+    const kw = (q.keywords || []).map(k => `<span class="kw">${esc(k)}</span>`).join('');
+
+    if(chunks.length > 1){
+      cards += `<div class="qcard" data-qid="${q.id}" data-chunks='${JSON.stringify(chunks).replace(/'/g,"&#39;")}' data-shown="1">
+        <div class="src ${srcCls}" id="src-${q.id}">${esc(chunks[0])}</div>
+        <div class="chunk-btn" onclick="revealChunk(${q.id})" id="cbtn-${q.id}">اگلا حصہ دیکھیں (${chunks.length - 1} باقی)</div>
+        <div class="divider" style="display:none" id="div-${q.id}"></div>
+        <div class="tgt ${tgtCls}" style="display:none" id="tgt-${q.id}">${esc(tgtText)}</div>
+        <div class="kw-row"><span class="diff-dot ${diffCls}"></span>${kw}</div>
+      </div>`;
+    } else {
+      cards += `<div class="qcard">
+        <div class="src ${srcCls}">${esc(srcText)}</div>
+        <div class="divider"></div>
+        <div class="tgt ${tgtCls}">${esc(tgtText)}</div>
+        <div class="kw-row"><span class="diff-dot ${diffCls}"></span>${kw}</div>
+      </div>`;
+    }
+  });
+
+  return `
+  <div class="screen-head">
+    <div class="back-btn" onclick="backToDash()">‹</div>
+    <div class="screen-title">
+      <h2>تمرین ${t.tamreen_no} — ${practicing ? 'دوبارہ پڑھائی' : 'پڑھائی'}</h2>
+      <p>${dir === 'ar2ur' ? 'عربی → اردو' : 'اردو → عربی'} · بیچ <bdi class="num">${batchIdx+1}/${totalBatches}</bdi></p>
+    </div>
+  </div>
+  ${cards}
+  <div class="footer-bar">
+    <div class="btn btn-primary" onclick="nextBatch(${isLast})">${isLast ? (practicing ? 'بند کرو' : 'امتحان شروع کرو') : 'اگلا بیچ'}</div>
+  </div>
+  `;
+}
+
+function revealChunk(qid){
+  const el = document.getElementById('src-' + qid);
+  const card = el.closest('.qcard');
+  const chunks = JSON.parse(card.getAttribute('data-chunks'));
+  let shown = parseInt(card.getAttribute('data-shown'));
+  shown += 1;
+  card.setAttribute('data-shown', shown);
+  el.textContent = chunks.slice(0, shown).join(' ');
+  const btn = document.getElementById('cbtn-' + qid);
+  if(shown >= chunks.length){
+    btn.style.display = 'none';
+    document.getElementById('div-' + qid).style.display = 'block';
+    document.getElementById('tgt-' + qid).style.display = 'block';
+  } else {
+    btn.textContent = 'اگلا حصہ دیکھیں (' + (chunks.length - shown) + ' باقی)';
+  }
+}
+
+async function nextBatch(isLast){
+  if(state.practiceMode){
+    if(isLast){
+      state.practiceMode = false;
+      await go('review', state.current);
+    } else {
+      state.practiceBatch = (state.practiceBatch || 0) + 1;
+      await saveState();
+      render();
+    }
+    return;
+  }
+  const t = byNo(state.current);
+  const s = state.tamreens[t.tamreen_no];
+  if(isLast){
+    s.learnDone = true;
+    state.chunkShown = 1;
+    state.revealedNow = false;
+    await go('examIntro', t.tamreen_no);
+  } else {
+    s.learnBatch += 1;
+    await saveState();
+    render();
+  }
+}
+
+function renderExamIntro(){
+  const t = byNo(state.current);
+  return `
+  <div class="screen-head">
+    <div class="back-btn" onclick="backToDash()">‹</div>
+    <div class="screen-title"><h2>تمرین ${t.tamreen_no}</h2></div>
+  </div>
+  <div class="intro-wrap">
+    <div class="intro-card">
+      <div class="intro-icon">📝</div>
+      <h2>امتحان شروع ہونے والا ہے</h2>
+      <p class="intro-sub">تمرین ${t.tamreen_no} — ${esc(t.title)}</p>
+      <div class="intro-rules">
+        <div class="rule">① ہر سوال ترجمے کے بغیر آئے گا — تھوڑا سوچو</div>
+        <div class="rule">② لمبے جملے حصوں میں آئیں گے، ایک ایک حصہ دیکھو</div>
+        <div class="rule">③ پھر "جواب دیکھو" دبا کر درست ترجمہ دیکھو</div>
+        <div class="rule">④ خود بتاؤ: تمہارا جواب صحیح تھا یا غلط</div>
+        <div class="rule">⑤ آخر میں سکور اور کمزور سوال نظر آئیں گے</div>
+      </div>
+      <div class="btn btn-primary" onclick="startExam()">ٹھیک ہے، شروع کرو</div>
+    </div>
+  </div>
+  `;
+}
+
+async function startExam(){
+  await go('test', state.current);
+}
+
+async function backToDash(){
+  if(state.practiceMode){
+    state.practiceMode = false;
+    await go('review', state.current);
+  } else {
+    await go('dashboard');
+  }
+}
+
+/* ---------------- TEST (single tamreen) ---------------- */
+function renderTest(){
+  const t = byNo(state.current);
+  const dir = getDirection(t.instruction);
+  const s = state.tamreens[t.tamreen_no];
+  const total = t.questions.length;
+
+  if(s.testIndex >= total){
+    return buildSummaryFor('tamreen', t.tamreen_no);
+  }
+
+  const q = t.questions[s.testIndex];
+  const srcText = dir === 'ar2ur' ? q.arabic : q.urdu;
+  const tgtText = dir === 'ar2ur' ? q.urdu : q.arabic;
+  const srcCls = dir === 'ar2ur' ? 'arabic' : 'urdu';
+  const tgtCls = dir === 'ar2ur' ? 'urdu' : 'arabic';
+
+  const chunks = chunkText(srcText);
+  const shown = state.chunkShown || 1;
+  const fullyShown = shown >= chunks.length;
+  const displaySrc = chunks.slice(0, shown).join(' ');
+
+  let footer;
+  if(!fullyShown){
+    footer = `<div class="btn btn-primary" onclick="revealTestChunk()">اگلا حصہ دیکھیں (${chunks.length - shown} باقی)</div>`;
+  } else if(state.revealedNow){
+    footer = `<div class="btn-row-3">
+        <div class="btn btn-wrong" onclick="rateAnswer(${q.id}, 'wrong')">❌ غلط ہوا</div>
+        <div class="btn btn-partial" onclick="rateAnswer(${q.id}, 'partial')">🟡 تھوڑا سا غلط</div>
+        <div class="btn btn-correct" onclick="rateAnswer(${q.id}, 'correct')">✅ صحیح تھا</div>
+      </div>`;
+  } else {
+    footer = `<div class="btn btn-primary" onclick="revealAnswer()">جواب دیکھو</div>`;
+  }
+
+  return `
+  <div class="screen-head">
+    <div class="back-btn" onclick="backToDash()">‹</div>
+    <div class="screen-title">
+      <h2>تمرین ${t.tamreen_no} — امتحان</h2>
+      <p>${dir === 'ar2ur' ? 'عربی → اردو' : 'اردو → عربی'}</p>
+    </div>
+    <div class="qcounter"><bdi class="num">${s.testIndex+1}/${total}</bdi></div>
+  </div>
+  <div class="test-card"><div class="src ${srcCls}">${esc(displaySrc)}</div></div>
+  <div id="reveal-zone">
+  ${state.revealedNow ? `<div class="reveal"><div class="lbl">درست ترجمہ</div><div class="tgt ${tgtCls}">${esc(tgtText)}</div></div>` : ''}
+  </div>
+  <div class="footer-bar">${footer}</div>
+  `;
+}
+
+function revealTestChunk(){
+  state.chunkShown = (state.chunkShown || 1) + 1;
+  render();
+}
+
+function revealAnswer(){
+  state.revealedNow = true;
+  render();
+}
+
+function statusWeight(v){
+  if(v === true || v === 'correct') return 1;
+  if(v === 'partial') return 0.5;
+  return 0;
+}
+function statusOf(v){
+  if(v === true) return 'correct';
+  if(v === false) return 'wrong';
+  return v;
+}
+
+async function rateAnswer(qid, status){
+  const t = byNo(state.current);
+  const s = state.tamreens[t.tamreen_no];
+  s.results[qid] = status;
+  s.testIndex += 1;
+  state.revealedNow = false;
+  state.chunkShown = 1;
+  if(s.testIndex >= t.questions.length){
+    const totalWeight = Object.values(s.results).reduce((sum, v) => sum + statusWeight(v), 0);
+    s.score = Math.round((totalWeight / t.questions.length) * 100);
+    s.testDone = true;
+  }
+  await saveState();
+  render();
+}
+
+function buildSummaryFor(kind, key){
+  if(kind === 'tamreen'){
+    const t = byNo(key);
+    const s = state.tamreens[key];
+    const wrongIds = Object.keys(s.results).filter(id => statusOf(s.results[id]) !== 'correct');
+    let wrongHtml = wrongIds.map(id => {
+      const q = t.questions.find(qq => qq.id == id);
+      const dir = getDirection(t.instruction);
+      const srcText = dir === 'ar2ur' ? q.arabic : q.urdu;
+      const tgtText = dir === 'ar2ur' ? q.urdu : q.arabic;
+      const srcCls = dir === 'ar2ur' ? 'arabic' : 'urdu';
+      const tgtCls = dir === 'ar2ur' ? 'urdu' : 'arabic';
+      const st = statusOf(s.results[id]);
+      const isPartial = st === 'partial';
+      const badge = isPartial ? '<div class="status-badge partial">🟡 تھوڑا سا غلط</div>' : '<div class="status-badge wrong">❌ غلط</div>';
+      return `<div class="wrong-item${isPartial ? ' partial-item' : ''}">${badge}<div class="src ${srcCls}">${esc(srcText)}</div><div class="tgt ${tgtCls}">${esc(tgtText)}</div></div>`;
+    }).join('');
+    return `
+    <div class="screen-head"><div class="back-btn" onclick="backToDash()">‹</div><div class="screen-title"><h2>نتیجہ</h2></div></div>
+    <div class="summary-hero">
+      <div class="score-ring"><div class="pct"><bdi class="num">${s.score}%</bdi></div></div>
+      <h3>تمرین ${t.tamreen_no} مکمل ہو گئی</h3>
+    </div>
+    ${wrongHtml ? `<div class="section-label">دوبارہ دیکھو</div><div class="wrong-list">${wrongHtml}</div>` : `<div class="empty">ماشاءاللہ، سب صحیح!</div>`}
+    <div class="footer-bar">
+      ${byNo(t.tamreen_no + 1) ? `<div class="btn btn-primary" onclick="openTamreen(${t.tamreen_no + 1})">اگلی تمرین شروع کرو ›</div>` : ''}
+      <div class="btn ${byNo(t.tamreen_no + 1) ? 'btn-secondary' : 'btn-primary'}" onclick="finishTamreen()">واپس ڈیش بورڈ پر جاؤ</div>
+      <div class="btn btn-secondary" onclick="browsePractice(${t.tamreen_no})">اسباق دوبارہ پڑھو</div>
+      <div class="btn btn-secondary" onclick="retestTamreen()">دوبارہ امتحان دو</div>
+    </div>`;
+  } else {
+    const blk = state.blocks[key];
+    const wrongEntries = blk.order.filter(o => statusOf(blk.results[o.tamreen_no + '-' + o.id]) !== 'correct');
+    let wrongHtml = wrongEntries.map(o => {
+      const t = byNo(o.tamreen_no);
+      const q = t.questions.find(qq => qq.id === o.id);
+      const dir = getDirection(t.instruction);
+      const srcText = dir === 'ar2ur' ? q.arabic : q.urdu;
+      const tgtText = dir === 'ar2ur' ? q.urdu : q.arabic;
+      const srcCls = dir === 'ar2ur' ? 'arabic' : 'urdu';
+      const tgtCls = dir === 'ar2ur' ? 'urdu' : 'arabic';
+      const st = statusOf(blk.results[o.tamreen_no + '-' + o.id]);
+      const isPartial = st === 'partial';
+      const badge = isPartial ? '<div class="status-badge partial">🟡 تھوڑا سا غلط</div>' : '<div class="status-badge wrong">❌ غلط</div>';
+      return `<div class="wrong-item${isPartial ? ' partial-item' : ''}">${badge}<div class="meta" style="margin-bottom:4px; font-size:11px; color:var(--text-faint);">تمرین ${o.tamreen_no}</div><div class="src ${srcCls}">${esc(srcText)}</div><div class="tgt ${tgtCls}">${esc(tgtText)}</div></div>`;
+    }).join('');
+    return `
+    <div class="screen-head"><div class="back-btn" onclick="backToDash()">‹</div><div class="screen-title"><h2>ریویژن کا نتیجہ</h2></div></div>
+    <div class="summary-hero">
+      <div class="score-ring"><div class="pct"><bdi class="num">${blk.score}%</bdi></div></div>
+      <h3>تمرین ${BLOCKS[key][0]}-${BLOCKS[key][1]} کا ریویژن مکمل</h3>
+    </div>
+    ${wrongHtml ? `<div class="section-label">کمزور جگہیں</div><div class="wrong-list">${wrongHtml}</div>` : `<div class="empty">زبردست، سب یاد ہے!</div>`}
+    <div class="footer-bar">
+      <div class="btn btn-primary" onclick="finishRevision()">واپس ڈیش بورڈ پر جاؤ</div>
+      <div class="btn btn-secondary" onclick="redoRevision(${key})">دوبارہ ریویژن کرو</div>
+    </div>`;
+  }
+}
+
+async function finishTamreen(){
+  if(state.lastActive === state.current) state.lastActive = null;
+  await go('dashboard');
+}
+async function retestTamreen(){
+  const s = state.tamreens[state.current];
+  s.testIndex = 0; s.results = {}; s.testDone = false; s.score = null;
+  state.revealedNow = false;
+  state.chunkShown = 1;
+  await saveState();
+  await go('test', state.current);
+}
+
+/* ---------------- REVISION ---------------- */
+function renderRevisionScreen(){
+  const bi = state.current;
+  const blk = state.blocks[bi];
+  const total = blk.order.length;
+
+  if(blk.index >= total){
+    const totalWeight = Object.values(blk.results).reduce((sum, v) => sum + statusWeight(v), 0);
+    blk.done = true;
+    blk.score = Math.round((totalWeight / total) * 100);
+    saveState();
+    return buildSummaryFor('block', bi);
+  }
+
+  const entry = blk.order[blk.index];
+  const t = byNo(entry.tamreen_no);
+  const q = t.questions.find(qq => qq.id === entry.id);
+  const dir = getDirection(t.instruction);
+  const srcText = dir === 'ar2ur' ? q.arabic : q.urdu;
+  const tgtText = dir === 'ar2ur' ? q.urdu : q.arabic;
+  const srcCls = dir === 'ar2ur' ? 'arabic' : 'urdu';
+  const tgtCls = dir === 'ar2ur' ? 'urdu' : 'arabic';
+
+  const chunks = chunkText(srcText);
+  const shown = state.chunkShown || 1;
+  const fullyShown = shown >= chunks.length;
+  const displaySrc = chunks.slice(0, shown).join(' ');
+
+  let footer;
+  if(!fullyShown){
+    footer = `<div class="btn btn-primary" onclick="revealTestChunk()">اگلا حصہ دیکھیں (${chunks.length - shown} باقی)</div>`;
+  } else if(state.revealedNow){
+    footer = `<div class="btn-row-3">
+        <div class="btn btn-wrong" onclick="rateRevision('${entry.tamreen_no}-${entry.id}', 'wrong')">❌ غلط ہوا</div>
+        <div class="btn btn-partial" onclick="rateRevision('${entry.tamreen_no}-${entry.id}', 'partial')">🟡 تھوڑا سا غلط</div>
+        <div class="btn btn-correct" onclick="rateRevision('${entry.tamreen_no}-${entry.id}', 'correct')">✅ صحیح تھا</div>
+      </div>`;
+  } else {
+    footer = `<div class="btn btn-primary" onclick="revealAnswer()">جواب دیکھو</div>`;
+  }
+
+  return `
+  <div class="screen-head">
+    <div class="back-btn" onclick="backToDash()">‹</div>
+    <div class="screen-title">
+      <h2>ریویژن — تمرین ${BLOCKS[bi][0]}-${BLOCKS[bi][1]}</h2>
+      <p>تمرین ${entry.tamreen_no} سے سوال</p>
+    </div>
+    <div class="qcounter"><bdi class="num">${blk.index+1}/${total}</bdi></div>
+  </div>
+  <div class="test-card"><div class="src ${srcCls}">${esc(displaySrc)}</div></div>
+  <div id="reveal-zone">
+  ${state.revealedNow ? `<div class="reveal"><div class="lbl">درست ترجمہ</div><div class="tgt ${tgtCls}">${esc(tgtText)}</div></div>` : ''}
+  </div>
+  <div class="footer-bar">${footer}</div>
+  `;
+}
+
+async function rateRevision(key, status){
+  const bi = state.current;
+  const blk = state.blocks[bi];
+  blk.results[key] = status;
+  blk.index += 1;
+  state.revealedNow = false;
+  state.chunkShown = 1;
+  await saveState();
+  render();
+}
+
+async function finishRevision(){ await go('dashboard'); }
+
+/* ---------------- REVIEW (already done tamreen) ---------------- */
+function renderReview(){
+  const t = byNo(state.current);
+  const s = state.tamreens[t.tamreen_no];
+  const dir = getDirection(t.instruction);
+  let items = t.questions.map(q => {
+    const srcText = dir === 'ar2ur' ? q.arabic : q.urdu;
+    const tgtText = dir === 'ar2ur' ? q.urdu : q.arabic;
+    const srcCls = dir === 'ar2ur' ? 'arabic' : 'urdu';
+    const tgtCls = dir === 'ar2ur' ? 'urdu' : 'arabic';
+    const st = statusOf(s.results[q.id]);
+    const borderColor = st === 'correct' ? 'var(--sage)' : (st === 'partial' ? 'var(--gold)' : 'var(--terracotta)');
+    return `<div class="qcard" style="border-right:3px solid ${borderColor}">
+      <div class="src ${srcCls}">${esc(srcText)}</div>
+      <div class="divider"></div>
+      <div class="tgt ${tgtCls}">${esc(tgtText)}</div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="screen-head">
+    <div class="back-btn" onclick="backToDash()">‹</div>
+    <div class="screen-title"><h2>تمرین ${t.tamreen_no} — جائزہ</h2><p>سکور: ${s.score}%</p></div>
+  </div>
+  ${items}
+  <div class="footer-bar">
+    <div class="btn btn-primary" onclick="backToDash()">ڈیش بورڈ پر واپس جاؤ</div>
+    <div class="btn btn-secondary" onclick="browsePractice(${t.tamreen_no})">اسباق دوبارہ پڑھو</div>
+    <div class="btn btn-secondary" onclick="retestTamreen()">دوبارہ امتحان دو</div>
+  </div>
+  `;
+}
+
+async function resetProgress(){
+  if(!confirm('کیا واقعی تمام پیش رفت صاف کر دی جائے؟ یہ واپس نہیں ہو سکتا۔')) return;
+  state = defaultState();
+  await saveState();
+  render();
+}
+
+/* ---------------- init ---------------- */
+(async function init(){
+  document.getElementById('app').innerHTML = '<div class="empty">لوڈ ہو رہا ہے…</div>';
+  state = await loadState();
+  state.revealedNow = false;
+  state.chunkShown = state.chunkShown || 1;
+  render();
+})();
+</script>
+</body>
+</html>
